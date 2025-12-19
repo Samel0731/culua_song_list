@@ -8,7 +8,6 @@ import YouTubePlayer from '@/app/components/YouTubePlayer';
 /* ========= 工具：從 URL 取 YouTube ID (支援 Shorts) ========= */
 function extractYouTubeId(url: string) {
   if (!url) return '';
-  // 增加對 shorts/ 的支援
   const match = url.match(/(?:v=|youtu\.be\/|shorts\/)([^&?/]+)/);
   return match ? match[1] : '';
 }
@@ -123,11 +122,10 @@ export default function SongListPage() {
             <>
               {/* ==== YouTube Player ==== */}
               <div className="aspect-video bg-black shrink-0">
+                {/* 修正：移除不被接受的 playing 和 setIsPlaying 屬性 */}
                 <YouTubePlayer
                   url={selectedVersion.streamUrl}
                   startTime={selectedVersion.timestampSeconds}
-                  playing={true} // 預設為播放意圖，但實際由 YouTubePlayer 的按鈕控制
-                  setIsPlaying={() => {}} // 首頁簡易版可以不用處理反向狀態
                 />
               </div>
 
@@ -152,7 +150,6 @@ export default function SongListPage() {
                     {selectedVersion.streamTitle}
                   </div>
 
-                  {/* 修正後的原始連結按鈕 */}
                   <a
                     href={`https://www.youtube.com/watch?v=${extractYouTubeId(selectedVersion.streamUrl)}&t=${selectedVersion.timestampSeconds}s`}
                     target="_blank"
