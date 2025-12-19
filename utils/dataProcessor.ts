@@ -28,7 +28,7 @@ const fetchCsvWithHeaderSearch = async <T>(csvUrl: string, keyColumn: string): P
         header: true,
         skipEmptyLines: true,
         complete: (results) => resolve(results.data as T[]),
-        error: (err) => reject(err),
+        error: (err: any) => reject(err),
       });
     });
   } catch (error) {
