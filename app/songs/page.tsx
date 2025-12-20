@@ -2,9 +2,8 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { fetchAndProcessSongs, GroupedSong, SongVersion } from '@/utils/dataProcessor';
-import { Music, Search, SortAsc, SortDesc, User, Play, Calendar, ExternalLink } from 'lucide-react';
+import { Music, Search, SortAsc, SortDesc, User, Play, Calendar, ExternalLink, X } from 'lucide-react';
 import YouTubePlayer from '@/app/components/YouTubePlayer';
-// 1. 引入語言 Hook
 import { useLanguage } from '@/context/LanguageContext';
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTQdBtem90otSSCpAHO7Al5fz2F0dx-ReDDpgbEfuioiOlkbT5uyfdWbDqPNZvG6YXI0PSab_ge6nE1/pub?gid=0&single=true&output=csv';
@@ -16,7 +15,6 @@ function extractYouTubeId(url: string) {
 }
 
 export default function SongsPage() {
-  // 2. 使用語言 Hook
   const { t } = useLanguage();
 
   const [songs, setSongs] = useState<GroupedSong[]>([]);
@@ -125,7 +123,6 @@ export default function SongsPage() {
                   </div>
                   <div className="text-right shrink-0">
                     <span className="text-xs bg-slate-900 text-slate-400 px-2 py-1 rounded-full border border-slate-700">
-                      {/* 這裡簡單處理，或者你可以在翻譯檔加一個 unit_times */}
                       {song.versions.length}
                     </span>
                   </div>
@@ -145,10 +142,19 @@ export default function SongsPage() {
         w-full lg:w-[480px]
         order-1 lg:order-2
         ${selectedSong ? 'h-[45vh] lg:h-full' : 'hidden lg:flex'}
-        transition-all duration-300
+        transition-all duration-300 relative
       `}>
         {selectedSong && selectedVersion ? (
           <>
+            {/* 關閉按鈕 (手機/電腦皆顯示) */}
+            <button 
+              onClick={() => setSelectedSong(null)}
+              className="absolute top-2 right-2 z-50 bg-black/60 text-white p-2 rounded-full backdrop-blur-sm hover:bg-black/80 transition-colors shadow-lg"
+              title="關閉播放器"
+            >
+              <X size={16} />
+            </button>
+
             <div className="aspect-video bg-black w-full shrink-0">
               <YouTubePlayer 
                 url={selectedVersion.streamUrl}

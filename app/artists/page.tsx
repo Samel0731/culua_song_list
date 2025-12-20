@@ -2,9 +2,8 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { fetchAndProcessSongs, GroupedSong, SongVersion } from '@/utils/dataProcessor';
-import { Mic2, Search, ChevronRight, Play, ExternalLink, Music2 } from 'lucide-react';
+import { Mic2, Search, ChevronRight, Play, ExternalLink, Music2, X } from 'lucide-react';
 import YouTubePlayer from '@/app/components/YouTubePlayer';
-// 1. 引入語言 Hook
 import { useLanguage } from '@/context/LanguageContext';
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTQdBtem90otSSCpAHO7Al5fz2F0dx-ReDDpgbEfuioiOlkbT5uyfdWbDqPNZvG6YXI0PSab_ge6nE1/pub?gid=0&single=true&output=csv';
@@ -21,7 +20,6 @@ interface ArtistGroup {
 }
 
 export default function ArtistsPage() {
-  // 2. 使用語言 Hook
   const { t } = useLanguage();
 
   const [allSongs, setAllSongs] = useState<GroupedSong[]>([]);
@@ -134,7 +132,6 @@ export default function ArtistsPage() {
              </button>
              <div>
                <h2 className="text-2xl font-bold text-white">{selectedArtist.name}</h2>
-               {/* 替換字串中的變數 */}
                <p className="text-sm text-slate-400">{t.total_songs.replace('{count}', String(selectedArtist.songs.length))}</p>
              </div>
           </div>
@@ -166,14 +163,18 @@ export default function ArtistsPage() {
 
              {/* 欄位 3: 播放器 */}
              {selectedSong && selectedVersion && (
-               <div className="w-[350px] border-l border-slate-800 bg-slate-950 flex flex-col shadow-2xl z-20 absolute lg:static inset-0 lg:inset-auto">
-                  <div className="lg:hidden p-2 absolute top-2 left-2 z-50">
-                    <button onClick={() => setSelectedSong(null)} className="bg-black/50 text-white px-3 py-1 rounded-full text-xs backdrop-blur">
-                      ✕ Close
-                    </button>
-                  </div>
+               <div className="w-[350px] border-l border-slate-800 bg-slate-950 flex flex-col shadow-2xl z-20 absolute lg:relative inset-0 lg:inset-auto">
+                  
+                  {/* 統一的關閉按鈕 (新增/修改) */}
+                  <button 
+                    onClick={() => setSelectedSong(null)} 
+                    className="absolute top-2 right-2 z-50 bg-black/60 text-white p-2 rounded-full backdrop-blur-sm hover:bg-black/80 transition-colors shadow-lg"
+                    title="關閉播放器"
+                  >
+                    <X size={16} />
+                  </button>
 
-                  <div className="aspect-video bg-black shrink-0">
+                  <div className="aspect-video bg-black shrink-0 relative">
                     <YouTubePlayer 
                       url={selectedVersion.streamUrl}
                       startTime={selectedVersion.timestampSeconds}

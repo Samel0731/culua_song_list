@@ -11,7 +11,8 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
+// 修改：加上 default 關鍵字
+export default function LanguageProvider({ children }: { children: React.ReactNode }) {
   // 預設語言：繁體中文 ('zh')
   const [lang, setLang] = useState<Language>('zh');
 
@@ -39,6 +40,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+// 保持原樣：Named export
 export function useLanguage() {
   const context = useContext(LanguageContext);
   if (context === undefined) {
