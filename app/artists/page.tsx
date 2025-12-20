@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { GroupedSong } from '@/utils/dataProcessor';
 import { Mic2, Search, ChevronRight } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
@@ -17,6 +17,12 @@ export default function ArtistsPage() {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedArtist, setSelectedArtist] = useState<ArtistGroup | null>(null);
+
+  const [visibleArtistCount, setVisibleArtistCount] = useState(30);
+  const artistLoaderRef = useRef<HTMLDivElement>(null);
+
+  const [visibleSongCount, setVisibleSongCount] = useState(20);
+  const songLoaderRef = useRef<HTMLDivElement>(null);
 
   const artistGroups = useMemo(() => {
     const groups: Record<string, GroupedSong[]> = {};
@@ -39,6 +45,39 @@ export default function ArtistsPage() {
     );
   }, [artistGroups, searchTerm]);
 
+  useEffect(() => {
+    setVisibleArtistCount(30);
+  }, [searchTerm, allSongs]);
+
+  useEffect(() => {
+    setVisibleSongCount(20);
+  }, [selectedArtist]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        setVisibleArtistCount((prev) => Math.min(prev + 30, filteredArtists.length));
+      }
+    }, { root: null, rootMargin: '100px', threshold: 0 }); // ✨ 修正：threshold 0
+
+    if (artistLoaderRef.current) observer.observe(artistLoaderRef.current);
+    return () => { if (artistLoaderRef.current) observer.unobserve(artistLoaderRef.current); };
+  }, [filteredArtists.length]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && selectedArtist) {
+        setVisibleSongCount((prev) => Math.min(prev + 20, selectedArtist.songs.length));
+      }
+    }, { root: null, rootMargin: '100px', threshold: 0 }); // ✨ 修正：threshold 0
+
+    if (songLoaderRef.current) observer.observe(songLoaderRef.current);
+    return () => { if (songLoaderRef.current) observer.unobserve(songLoaderRef.current); };
+  }, [selectedArtist]);
+
+  const displayedArtists = filteredArtists.slice(0, visibleArtistCount);
+  const displayedSongs = selectedArtist ? selectedArtist.songs.slice(0, visibleSongCount) : [];
+
   return (
     <div className="flex h-full w-full bg-slate-900 text-slate-100 overflow-hidden">
       
@@ -60,10 +99,11 @@ export default function ArtistsPage() {
            </div>
         </div>
         
-        <div className="flex-1 overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-slate-700">
+        {/* ✨ 修正：pb-24 */}
+        <div className="flex-1 overflow-y-auto p-2 pb-24 scrollbar-thin scrollbar-thumb-slate-700">
            {loading ? <div className="p-4 text-center text-slate-500">{t.loading}</div> : (
              <div className="space-y-1">
-               {filteredArtists.map(group => (
+               {displayedArtists.map(group => (
                  <button
                    key={group.name}
                    onClick={() => setSelectedArtist(group)}
@@ -79,6 +119,12 @@ export default function ArtistsPage() {
                    </span>
                  </button>
                ))}
+               
+               {visibleArtistCount < filteredArtists.length && (
+                  <div ref={artistLoaderRef} className="py-6 flex justify-center">
+                    <div className="w-4 h-4 border-2 border-slate-600 border-t-pink-500 rounded-full animate-spin" />
+                  </div>
+               )}
              </div>
            )}
         </div>
@@ -100,9 +146,10 @@ export default function ArtistsPage() {
              </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-slate-700">
+          {/* ✨ 修正：pb-24 */}
+          <div className="flex-1 overflow-y-auto p-4 pb-24 scrollbar-thin scrollbar-thumb-slate-700">
             <div className="grid grid-cols-1 gap-2">
-                {selectedArtist.songs.map(song => (
+                {displayedSongs.map(song => (
                 <div
                     key={song.songName}
                     onClick={() => playSong(song)}
@@ -121,6 +168,12 @@ export default function ArtistsPage() {
                     <ChevronRight size={16} className={`text-slate-500 ${currentSong?.songName === song.songName ? 'text-pink-400' : ''}`} />
                 </div>
                 ))}
+
+                {visibleSongCount < selectedArtist.songs.length && (
+                   <div ref={songLoaderRef} className="py-6 flex justify-center">
+                     <div className="w-5 h-5 border-2 border-slate-600 border-t-pink-500 rounded-full animate-spin" />
+                   </div>
+                )}
             </div>
           </div>
         </div>

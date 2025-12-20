@@ -1,17 +1,17 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { GroupedSong } from '@/utils/dataProcessor';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { Music2, User, RefreshCw, Search } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { usePlayer } from '@/context/PlayerContext';
 
 export default function SongListPage() {
   const { t } = useLanguage();
-  // 直接從 Context 拿資料和播放方法
   const { allSongs, loading, playSong, currentSong } = usePlayer();
   
   const [searchTerm, setSearchTerm] = useState('');
+  const [visibleCount, setVisibleCount] = useState(20);
+  const loaderRef = useRef<HTMLDivElement>(null);
 
   const filteredSongs = useMemo(() => {
     return allSongs.filter(song => {
@@ -21,9 +21,37 @@ export default function SongListPage() {
     });
   }, [allSongs, searchTerm]);
 
+  useEffect(() => {
+    setVisibleCount(20);
+  }, [searchTerm, allSongs]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      const target = entries[0];
+      if (target.isIntersecting) {
+        setVisibleCount((prev) => Math.min(prev + 20, filteredSongs.length));
+      }
+    }, {
+      root: null,
+      rootMargin: '100px',
+      threshold: 0, // ✨ 修正：設為 0，只要碰到就觸發，比較靈敏
+    });
+
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current);
+    }
+
+    return () => {
+      if (loaderRef.current) {
+        observer.unobserve(loaderRef.current);
+      }
+    };
+  }, [filteredSongs.length]);
+
+  const displayedSongs = filteredSongs.slice(0, visibleCount);
+
   return (
     <div className="flex flex-col h-full w-full bg-slate-900 text-slate-100">
-      {/* Header */}
       <header className="px-4 py-3 border-b border-slate-800 flex items-center justify-between shrink-0 bg-slate-900/95 backdrop-blur z-10">
         <h2 className="text-lg lg:text-xl font-bold flex items-center gap-2 text-white">
           <Music2 className="text-blue-400" size={24} />
@@ -36,7 +64,6 @@ export default function SongListPage() {
         </div>
       </header>
 
-      {/* Search */}
       <div className="p-3 border-b border-slate-800 space-y-3">
           <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
@@ -50,15 +77,15 @@ export default function SongListPage() {
           </div>
       </div>
 
-      {/* List */}
-      <div className="flex-1 overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-slate-700">
+      {/* ✨ 修正：增加 pb-24 確保底部有足夠空間讓 loader 露出來 */}
+      <div className="flex-1 overflow-y-auto p-2 pb-24 scrollbar-thin scrollbar-thumb-slate-700">
           {loading ? (
               <div className="text-slate-500 text-center py-10 text-sm animate-pulse">
               {t.loading}
               </div>
           ) : (
               <div className="space-y-2">
-              {filteredSongs.map((song) => (
+              {displayedSongs.map((song) => (
                   <div
                   key={song.songName}
                   onClick={() => playSong(song)}
@@ -85,6 +112,12 @@ export default function SongListPage() {
                   </div>
                   </div>
               ))}
+              
+              {visibleCount < filteredSongs.length && (
+                 <div ref={loaderRef} className="py-6 flex justify-center w-full">
+                   <div className="w-6 h-6 border-2 border-slate-600 border-t-blue-500 rounded-full animate-spin" />
+                 </div>
+              )}
               </div>
           )}
       </div>
