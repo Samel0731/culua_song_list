@@ -18,7 +18,8 @@ export const metadata: Metadata = {
   keywords: [
     "CULUA", "クルア", "くるあ", "VSinger", "Vtuber", 
     "歌回", "歌枠", "歌ってみた", "Song List", "Setlist", 
-    "資料庫", "Database", "非官方", "Fan made", "歌詞"
+    "資料庫", "Database", "非官方", "Fan made", "歌詞",
+    "RK Music", "翻唱", "Cover", "原創曲", "Original Song"
   ],
   authors: [{ name: "Samel" }],
   openGraph: {

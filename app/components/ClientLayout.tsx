@@ -1,81 +1,61 @@
 'use client';
 
-import Link from "next/link";
-import { Music, Mic2, Home, Globe } from "lucide-react";
-import { useLanguage } from "@/context/LanguageContext";
-import { usePathname } from "next/navigation";
+import React from 'react';
+import { PlayerProvider, usePlayer } from '@/context/PlayerContext';
+import { usePathname } from 'next/navigation';
+import RightPanel from './RightPanel';
+import Sidebar from './Sidebar';
 
-export default function ClientLayout({ children }: { children: React.ReactNode }) {
-  const { lang, setLang, t } = useLanguage();
+function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  // 引入 isExpanded
+  const { currentSong, isExpanded } = usePlayer();
 
-  // 判斷連結是否啟用 (用於高亮顯示)
-  const isActive = (path: string) => pathname === path;
+  let rightPanelClass = "hidden lg:block border-l border-slate-800 bg-slate-900";
+  
+  if (currentSong) {
+    // 手機: 全螢幕
+    // 電腦: 根據 isExpanded 判斷
+    // 若 expanded: w-1/2 (50%) 或是 min-w-[50%] flex-1
+    // 若 normal: w-[450px]
+    const desktopWidthClass = isExpanded ? 'lg:w-[50%] xl:w-[55%]' : 'lg:w-[450px]';
+    
+    rightPanelClass = `fixed inset-0 z-50 lg:static ${desktopWidthClass} lg:block bg-slate-900 transition-all duration-300 ease-in-out`;
+  } else {
+    // 沒播歌時 (Hero 模式)
+    if (pathname === '/') {
+       rightPanelClass = "hidden lg:block flex-1";
+    } else {
+       rightPanelClass = "hidden lg:block w-[350px] lg:w-[450px]";
+    }
+  }
 
   return (
-    <div className="flex h-screen bg-slate-900 text-slate-100 overflow-hidden">
+    <div className="flex h-[100dvh] w-screen overflow-hidden bg-slate-900 text-slate-100">
       
-      {/* --- 左側導覽列 --- */}
-      <aside className="w-16 lg:w-64 bg-slate-950 border-r border-slate-800 flex flex-col shrink-0 transition-all duration-300 z-50">
-        
-        {/* Logo */}
-        <div className="h-16 flex items-center justify-center lg:justify-start lg:px-6 border-b border-slate-800 bg-slate-950">
-          <span className="font-bold text-xl tracking-wider hidden lg:block text-blue-400">CULUA DB</span>
-          <span className="font-bold text-xl lg:hidden text-blue-400">DB</span>
-        </div>
+      <Sidebar />
 
-        {/* 選單連結 */}
-        <nav className="flex-1 overflow-y-auto p-2 lg:p-4 space-y-2">
-          
-          <Link href="/" className={`flex items-center justify-center lg:justify-start gap-3 p-3 rounded-lg transition-colors group ${isActive('/') ? 'bg-slate-800 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}>
-            <Home size={24} className={isActive('/') ? "text-blue-400" : "group-hover:text-blue-400"} />
-            <span className="hidden lg:block font-medium">{t.nav_home}</span>
-          </Link>
-
-          <Link href="/songs" className={`flex items-center justify-center lg:justify-start gap-3 p-3 rounded-lg transition-colors group ${isActive('/songs') ? 'bg-slate-800 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}>
-            <Music size={24} className={isActive('/songs') ? "text-purple-400" : "group-hover:text-purple-400"} />
-            <span className="hidden lg:block font-medium">{t.nav_songs}</span>
-          </Link>
-
-          <Link href="/artists" className={`flex items-center justify-center lg:justify-start gap-3 p-3 rounded-lg transition-colors group ${isActive('/artists') ? 'bg-slate-800 text-white' : 'hover:bg-slate-800 text-slate-400 hover:text-white'}`}>
-            <Mic2 size={24} className={isActive('/artists') ? "text-pink-400" : "group-hover:text-pink-400"} />
-            <span className="hidden lg:block font-medium">{t.nav_artists}</span>
-          </Link>
-        </nav>
-
-        {/* --- 語言切換區 --- */}
-        <div className="p-2 lg:p-4 border-t border-slate-800">
-          <div className="flex flex-col lg:flex-row items-center justify-center gap-2">
-            <button 
-              onClick={() => setLang('ja')} 
-              className={`text-xs px-2 py-1 rounded border ${lang === 'ja' ? 'bg-blue-600 border-blue-500 text-white' : 'border-slate-700 text-slate-400 hover:bg-slate-800'}`}
-            >
-              JP
-            </button>
-            <button 
-              onClick={() => setLang('zh')} 
-              className={`text-xs px-2 py-1 rounded border ${lang === 'zh' ? 'bg-blue-600 border-blue-500 text-white' : 'border-slate-700 text-slate-400 hover:bg-slate-800'}`}
-            >
-              繁
-            </button>
-            <button 
-              onClick={() => setLang('en')} 
-              className={`text-xs px-2 py-1 rounded border ${lang === 'en' ? 'bg-blue-600 border-blue-500 text-white' : 'border-slate-700 text-slate-400 hover:bg-slate-800'}`}
-            >
-              EN
-            </button>
-          </div>
-          <div className="mt-2 text-[10px] text-slate-600 text-center hidden lg:block">
-            {t.footer}
-          </div>
-        </div>
-      </aside>
-
-      {/* --- 右側主內容區 --- */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+      {/* 中間列表：
+          當右側變大 (50%) 時，左側自然會被擠小。
+          flex-1 會自動處理剩餘空間。
+      */}
+      <div className={`flex flex-col min-w-0 h-full border-r border-slate-800 mb-16 lg:mb-0
+        ${pathname === '/' && !currentSong ? 'w-full lg:w-96' : 'flex-1'}
+      `}>
         {children}
-      </main>
-      
+      </div>
+
+      <div className={rightPanelClass}>
+        <RightPanel />
+      </div>
     </div>
+  );
+}
+
+export default function ClientLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <PlayerProvider>
+      <LayoutContent>{children}</LayoutContent>
+    </PlayerProvider>
   );
 }
