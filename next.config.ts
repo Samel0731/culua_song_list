@@ -10,7 +10,7 @@ const withPWA = require('next-pwa')({
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
-  // 注意：這裡不需要再加 turbopack 的設定，因為我們已經在 package.json 強制使用 webpack 了
+  // 這裡不需要任何 experimental 或 turbopack 設定
 };
 
 // 使用 withPWA 包裹設定
