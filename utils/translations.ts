@@ -22,6 +22,9 @@ export const translations = {
     artist: '歌手',
     total_songs: '共 {count} 首歌曲',
     footer: '非官方粉絲資料庫',
+    mode_list_loop: '換歌',      // 列表循環
+    mode_version_loop: '換直播',  // 版本循環
+    mode_shuffle: '隨機',        // 隨機播放
 
     // Hero Section
     hero_welcome_title: "Welcome to <span class='text-blue-400'>CULUA's</span> World",
@@ -64,6 +67,9 @@ export const translations = {
     artist: 'アーティスト',
     total_songs: '全 {count} 曲',
     footer: '非公式ファンデータベース',
+    mode_list_loop: '曲切替',    // 或 "次の曲"
+    mode_version_loop: 'Ver.切替', // 或 "ライブ切替"
+    mode_shuffle: 'シャッフル',
 
     // Hero Section (JA)
     hero_welcome_title: "<span class='text-blue-400'>CULUA</span> の世界へようこそ",
@@ -106,6 +112,9 @@ export const translations = {
     artist: 'Artist',
     total_songs: '{count} Songs',
     footer: 'Fan Made Database',
+    mode_list_loop: 'Next Song',
+    mode_version_loop: 'Next Ver.',
+    mode_shuffle: 'Shuffle',
 
     // Hero Section (EN)
     hero_welcome_title: "Welcome to <span class='text-blue-400'>CULUA's</span> World",
