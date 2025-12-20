@@ -11,14 +11,11 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-// 修改：加上 default 關鍵字
-export default function LanguageProvider({ children }: { children: React.ReactNode }) {
-  // 預設語言：繁體中文 ('zh')
+// 修改重點：請使用 "export function" (沒有 default)
+export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLang] = useState<Language>('zh');
 
-  // 初始化時讀取 LocalStorage (記住使用者上次的選擇)
   useEffect(() => {
-    // 只有在客戶端才執行
     if (typeof window !== 'undefined') {
         const savedLang = localStorage.getItem('app-language') as Language;
         if (savedLang && ['zh', 'ja', 'en'].includes(savedLang)) {
@@ -27,7 +24,6 @@ export default function LanguageProvider({ children }: { children: React.ReactNo
     }
   }, []);
 
-  // 當語言改變時，存入 LocalStorage
   const handleSetLang = (newLang: Language) => {
     setLang(newLang);
     localStorage.setItem('app-language', newLang);
@@ -40,7 +36,6 @@ export default function LanguageProvider({ children }: { children: React.ReactNo
   );
 }
 
-// 保持原樣：Named export
 export function useLanguage() {
   const context = useContext(LanguageContext);
   if (context === undefined) {

@@ -1,14 +1,46 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import LanguageProvider from "@/context/LanguageContext";
+// 修改重點：加上大括號 { }
+import { LanguageProvider } from "@/context/LanguageContext";
 import ClientLayout from "@/app/components/ClientLayout";
 
 const inter = Inter({ subsets: ["latin"] });
 
+// ... metadata 保持不變 ...
 export const metadata: Metadata = {
-  title: "CULUA SONG LIST",
-  description: "CULUA Fan Database",
+  metadataBase: new URL('https://culuasonglist.netlify.app'),
+  title: {
+    default: "CULUA Song Database | CULUA 歌回資料庫 | 歌枠データベース",
+    template: "%s | CULUA Song Database"
+  },
+  description: "非官方 CULUA 粉絲歌回資料庫。收錄 CULUA 的歷年歌回、翻唱曲目、原創曲與直播紀錄。搜尋 CULUA 唱過的歌最方便的工具。Fan-made database for VSinger CULUA.",
+  keywords: [
+    "CULUA", "クルア", "くるあ", "VSinger", "Vtuber", 
+    "歌回", "歌枠", "歌ってみた", "Song List", "Setlist", 
+    "資料庫", "Database", "非官方", "Fan made", "歌詞"
+  ],
+  authors: [{ name: "Samel" }],
+  openGraph: {
+    title: "CULUA Song Database | 歌枠データベース",
+    description: "搜尋 CULUA 唱過的每一首歌。非官方粉絲維護資料庫。",
+    url: 'https://culuasonglist.netlify.app',
+    siteName: 'CULUA Song Database',
+    locale: 'zh_TW',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "CULUA Song Database",
+    description: "非官方 CULUA 歌回資料庫",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  verification: {
+    google: 'Gv7DxhuBS5FN2xja8A-QkxfbIzpeUaQfAqagRu4cZSs',
+  },
 };
 
 export default function RootLayout({
