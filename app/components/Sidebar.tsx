@@ -28,15 +28,26 @@ export default function Sidebar({ onOpenHero }: SidebarProps) {
   useEffect(() => {
     const checkLiveStatus = async () => {
       try {
-        const channelUrl = 'https://www.youtube.com/@CULUA/live';
+        // ✨ 修正重點：確保這裡的 Handle 與您的 YouTube 連結一致 (@CULUAvsinger)
+        const channelUrl = 'https://www.youtube.com/@CULUAvsinger/live';
+        
         const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(channelUrl);
-        const response = await fetch(proxyUrl);
+        const response = await fetch(proxyUrl, { cache: 'no-store' }); // 建議加入 no-store 避免快取
         const text = await response.text();
-        setIsLive(text.includes('"isLive":true'));
-      } catch (error) { console.error(error); }
+        
+        // 檢查兩種可能的直播標記
+        if (text.includes('"isLive":true') || text.includes('hqdefault_live.jpg')) {
+            setIsLive(true);
+        } else {
+            setIsLive(false);
+        }
+      } catch (error) {
+        console.error('Live status check failed:', error);
+      }
     };
+    
     checkLiveStatus();
-    const interval = setInterval(checkLiveStatus, 300000);
+    const interval = setInterval(checkLiveStatus, 300000); // 每 5 分鐘檢查一次
     return () => clearInterval(interval);
   }, []);
 
@@ -59,7 +70,7 @@ export default function Sidebar({ onOpenHero }: SidebarProps) {
 
   return (
     <>
-      {/* === 1. 手機版頂部 Header (Logo + 社群 + 語言) === */}
+      {/* === 手機版 Header === */}
       <header className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-slate-950/95 backdrop-blur border-b border-slate-800 z-50 flex items-center justify-between px-3">
         <div className="flex items-center gap-2">
            <div className="w-6 h-6 bg-gradient-to-tr from-blue-500 to-purple-500 rounded-md shrink-0" />
@@ -68,7 +79,7 @@ export default function Sidebar({ onOpenHero }: SidebarProps) {
         
         <div className="flex items-center gap-3">
            {isLive && (
-              <a href="https://www.youtube.com/@CULUA/live" target="_blank" className="flex items-center gap-1 bg-red-900/30 px-2 py-0.5 rounded-full border border-red-800">
+              <a href="https://www.youtube.com/@CULUAvsinger/live" target="_blank" className="flex items-center gap-1 bg-red-900/30 px-2 py-0.5 rounded-full border border-red-800">
                 <span className="relative flex h-1.5 w-1.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"></span></span>
                 <span className="text-[9px] font-bold text-red-500">LIVE</span>
               </a>
@@ -85,7 +96,7 @@ export default function Sidebar({ onOpenHero }: SidebarProps) {
         </div>
       </header>
 
-      {/* === 2. 電腦版側邊欄 (Desktop Sidebar) - 保持不變 === */}
+      {/* === 電腦版 Sidebar === */}
       <aside className="hidden lg:flex flex-col w-20 xl:w-64 border-r border-slate-800 bg-slate-950/50 shrink-0 z-30">
         <div className="p-4 flex flex-col items-center xl:items-start justify-center border-b border-slate-800 h-[80px] relative">
           <div className="flex items-center gap-3">
@@ -93,7 +104,7 @@ export default function Sidebar({ onOpenHero }: SidebarProps) {
             <span className="font-bold text-xl tracking-tight hidden xl:block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">CULUA DB</span>
           </div>
           {isLive && (
-            <a href="https://www.youtube.com/@CULUA/live" target="_blank" className="mt-1 xl:ml-11 flex items-center gap-2 group cursor-pointer">
+            <a href="https://www.youtube.com/@CULUAvsinger/live" target="_blank" className="mt-1 xl:ml-11 flex items-center gap-2 group cursor-pointer">
               <span className="relative flex h-2.5 w-2.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span></span>
               <span className="hidden xl:block text-[10px] font-bold text-red-500 tracking-wider">ON AIR</span>
             </a>
@@ -130,7 +141,7 @@ export default function Sidebar({ onOpenHero }: SidebarProps) {
         </div>
       </aside>
 
-      {/* === 3. 手機版底部導覽 (Mobile Bottom Nav) === */}
+      {/* === 手機版 Bottom Nav === */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur border-t border-slate-800 z-50 pb-safe">
         <div className="flex justify-around items-center h-16 px-2">
           {navItems.map((item) => {
@@ -143,7 +154,6 @@ export default function Sidebar({ onOpenHero }: SidebarProps) {
             );
           })}
           
-          {/* ✨ 推薦按鈕：開啟彈窗 */}
           {pathname === '/' && (
             <button onClick={onOpenHero} className="flex flex-col items-center justify-center w-full h-full gap-1 text-yellow-400 hover:text-yellow-200">
               <Sparkles size={24} className="fill-current" />
