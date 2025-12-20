@@ -7,7 +7,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { Language } from '@/utils/translations';
 import { useState, useEffect } from 'react';
 
-// 自定義圖示
+// 自定义图示
 const TikTokIcon = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
 );
@@ -15,7 +15,6 @@ const XIcon = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" /></svg>
 );
 
-// 定義 Props
 interface SidebarProps {
   onOpenHero?: () => void;
 }
@@ -28,14 +27,11 @@ export default function Sidebar({ onOpenHero }: SidebarProps) {
   useEffect(() => {
     const checkLiveStatus = async () => {
       try {
-        // ✨ 修正重點：確保這裡的 Handle 與您的 YouTube 連結一致 (@CULUAvsinger)
         const channelUrl = 'https://www.youtube.com/@CULUAvsinger/live';
-        
         const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(channelUrl);
-        const response = await fetch(proxyUrl, { cache: 'no-store' }); // 建議加入 no-store 避免快取
+        const response = await fetch(proxyUrl, { cache: 'no-store' });
         const text = await response.text();
         
-        // 檢查兩種可能的直播標記
         if (text.includes('"isLive":true') || text.includes('hqdefault_live.jpg')) {
             setIsLive(true);
         } else {
@@ -45,9 +41,8 @@ export default function Sidebar({ onOpenHero }: SidebarProps) {
         console.error('Live status check failed:', error);
       }
     };
-    
     checkLiveStatus();
-    const interval = setInterval(checkLiveStatus, 300000); // 每 5 分鐘檢查一次
+    const interval = setInterval(checkLiveStatus, 300000);
     return () => clearInterval(interval);
   }, []);
 
@@ -78,17 +73,24 @@ export default function Sidebar({ onOpenHero }: SidebarProps) {
         </div>
         
         <div className="flex items-center gap-3">
-           {isLive && (
-              <a href="https://www.youtube.com/@CULUAvsinger/live" target="_blank" className="flex items-center gap-1 bg-red-900/30 px-2 py-0.5 rounded-full border border-red-800">
-                <span className="relative flex h-1.5 w-1.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"></span></span>
-                <span className="text-[9px] font-bold text-red-500">LIVE</span>
+           {/* 手機版正在直播时：显示 LIVE 标签，隐藏社群图标以节省空间 */}
+           {isLive ? (
+              <a href="https://www.youtube.com/@CULUAvsinger/live" target="_blank" className="flex items-center gap-1 bg-red-900/30 px-3 py-1 rounded-full border border-red-800 mr-1">
+                <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                </span>
+                <span className="text-[10px] font-bold text-red-500 ml-1">ON AIR</span>
               </a>
+           ) : (
+             // 没直播时才显示社群图标
+             <div className="flex items-center gap-3 pr-2 border-r border-slate-700">
+               {socialLinks.map((s) => (
+                 <a key={s.label} href={s.href} target="_blank" className="text-slate-400 hover:text-white shrink-0">{s.icon}</a>
+               ))}
+             </div>
            )}
-           <div className="flex items-center gap-3 pr-2 border-r border-slate-700">
-             {socialLinks.map((s) => (
-               <a key={s.label} href={s.href} target="_blank" className="text-slate-400 hover:text-white shrink-0">{s.icon}</a>
-             ))}
-           </div>
+
            <button onClick={handleLangClick} className="flex items-center gap-1 text-slate-300 shrink-0">
              <Globe size={18} />
              <span className="text-[10px] font-bold uppercase">{lang === 'zh' ? '繁' : lang === 'ja' ? 'JP' : 'EN'}</span>
@@ -96,7 +98,7 @@ export default function Sidebar({ onOpenHero }: SidebarProps) {
         </div>
       </header>
 
-      {/* === 電腦版 Sidebar === */}
+      {/* === 電腦版 Sidebar (保持不变) === */}
       <aside className="hidden lg:flex flex-col w-20 xl:w-64 border-r border-slate-800 bg-slate-950/50 shrink-0 z-30">
         <div className="p-4 flex flex-col items-center xl:items-start justify-center border-b border-slate-800 h-[80px] relative">
           <div className="flex items-center gap-3">
@@ -147,9 +149,17 @@ export default function Sidebar({ onOpenHero }: SidebarProps) {
           {navItems.map((item) => {
             const isActive = pathname === item.path;
             return (
-              <Link key={item.path} href={item.path} className={`flex flex-col items-center justify-center w-full h-full gap-1 ${isActive ? 'text-blue-400' : 'text-slate-500'}`}>
+              <Link key={item.path} href={item.path} className={`flex flex-col items-center justify-center w-full h-full gap-1 ${isActive ? 'text-blue-400' : 'text-slate-500'} relative`}>
                 <div className={isActive ? 'scale-110' : ''}>{item.icon}</div>
                 <span className="text-[10px] font-medium">{item.label}</span>
+                
+                {/* ✨ 修正：在底部导航的「歌回纪录」图标上也加回小红点，确保一定看得到 */}
+                {isLive && item.path === '/' && (
+                    <span className="absolute top-2 right-4 flex h-2.5 w-2.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 border border-slate-900"></span>
+                    </span>
+                )}
               </Link>
             );
           })}
