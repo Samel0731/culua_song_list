@@ -53,11 +53,13 @@ export default function SongListPage() {
 
   return (
     <div className="flex flex-col h-full w-full bg-slate-900 text-slate-100">
+      
       {/* ===== Header ===== */}
-      <header className="px-6 py-4 border-b border-slate-800 flex items-center justify-between shrink-0 bg-slate-900/95 backdrop-blur z-10">
-        <h2 className="text-xl font-bold flex items-center gap-2 text-white">
-          <Music2 className="text-blue-400" />
-          歌った曲一覧
+      <header className="px-4 py-3 lg:px-6 lg:py-4 border-b border-slate-800 flex items-center justify-between shrink-0 bg-slate-900/95 backdrop-blur z-10">
+        <h2 className="text-lg lg:text-xl font-bold flex items-center gap-2 text-white">
+          {/* Header icon 維持固定大小 */}
+          <Music2 className="text-blue-400" size={24} />
+          <span className="truncate">歌った曲一覧</span>
         </h2>
         <button
           onClick={loadData}
@@ -69,14 +71,16 @@ export default function SongListPage() {
       </header>
 
       {error && (
-        <div className="m-4 p-4 bg-red-900/40 border border-red-500 text-red-200 rounded">
+        <div className="m-4 p-4 bg-red-900/40 border border-red-500 text-red-200 rounded text-sm">
           {error}
         </div>
       )}
 
-      <div className="flex flex-1 overflow-hidden">
+      {/* ===== 主要內容區 (RWD 核心) ===== */}
+      <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+        
         {/* ===== 左側歌曲列表 ===== */}
-        <div className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-slate-700">
+        <div className="flex-1 overflow-y-auto p-2 lg:p-4 scrollbar-thin scrollbar-thumb-slate-700 order-2 lg:order-1 min-h-0 bg-slate-900">
           {loading ? (
             <div className="text-slate-500 text-center py-10">
               載入中...
@@ -94,18 +98,18 @@ export default function SongListPage() {
                         : 'bg-slate-800 border-slate-700 hover:bg-slate-750 hover:border-slate-600'
                     }`}
                 >
-                  <div className="min-w-0">
-                    <div className={`font-bold text-lg truncate ${selectedSong?.songName === song.songName ? 'text-blue-300' : 'text-slate-200'}`}>
+                  <div className="min-w-0 flex-1 mr-2">
+                    <div className={`font-bold text-base lg:text-lg truncate ${selectedSong?.songName === song.songName ? 'text-blue-300' : 'text-slate-200'}`}>
                       {song.songName}
                     </div>
-                    <div className="text-sm text-slate-400 flex items-center gap-1">
+                    <div className="text-xs lg:text-sm text-slate-400 flex items-center gap-1 truncate">
                       <User size={12} /> {song.artist}
                     </div>
                   </div>
-                  <div className="text-right pl-4 shrink-0">
-                    <div className="text-xs text-slate-500 mb-1">{song.versions[0].date}</div>
+                  <div className="text-right shrink-0">
+                    <div className="text-[10px] lg:text-xs text-slate-500 mb-1">{song.versions[0].date}</div>
                     {song.versions.length > 1 && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-700 text-slate-300">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-700 text-slate-300">
                           +{song.versions.length - 1}
                         </span>
                     )}
@@ -116,13 +120,18 @@ export default function SongListPage() {
           )}
         </div>
 
-        {/* ===== 右側播放器 ===== */}
-        <div className="w-[350px] lg:w-[480px] bg-slate-900 border-l border-slate-800 flex flex-col shrink-0 shadow-2xl z-20">
+        {/* ===== 右側播放器 (手機版上方) ===== */}
+        <div className={`
+            bg-slate-900 border-b lg:border-b-0 lg:border-l border-slate-800 flex flex-col shrink-0 shadow-2xl z-20 
+            w-full lg:w-[480px] 
+            order-1 lg:order-2
+            ${selectedSong ? 'h-[45vh] lg:h-full' : 'hidden lg:flex'} 
+            transition-all duration-300
+        `}>
           {selectedSong && selectedVersion ? (
             <>
               {/* ==== YouTube Player ==== */}
-              <div className="aspect-video bg-black shrink-0">
-                {/* 修正：移除不被接受的 playing 和 setIsPlaying 屬性 */}
+              <div className="aspect-video bg-black shrink-0 w-full">
                 <YouTubePlayer
                   url={selectedVersion.streamUrl}
                   startTime={selectedVersion.timestampSeconds}
@@ -130,15 +139,15 @@ export default function SongListPage() {
               </div>
 
               {/* ==== 資訊區 ==== */}
-              <div className="p-6 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-slate-700">
-                <h3 className="text-2xl font-bold mb-1 text-white break-words">
+              <div className="p-4 lg:p-6 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-slate-700">
+                <h3 className="text-xl lg:text-2xl font-bold mb-1 text-white break-words">
                   {selectedSong.songName}
                 </h3>
-                <p className="text-slate-400 mb-6 flex items-center gap-2">
+                <p className="text-slate-400 mb-4 flex items-center gap-2 text-sm">
                   <User size={16}/> {selectedSong.artist}
                 </p>
 
-                <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-700 mb-6 backdrop-blur-sm">
+                <div className="bg-slate-800/50 p-3 lg:p-4 rounded-lg border border-slate-700 mb-4 backdrop-blur-sm">
                   <div className="flex justify-between items-center text-xs mb-2">
                     <span className="font-bold text-blue-400 uppercase tracking-wider">NOW PLAYING</span>
                     <span className="bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -175,7 +184,7 @@ export default function SongListPage() {
                           <button
                             key={idx}
                             onClick={() => handleVersionClick(ver)}
-                            className={`w-full p-3 rounded-lg flex items-center gap-3 text-left border transition-all
+                            className={`w-full p-2 lg:p-3 rounded-lg flex items-center gap-3 text-left border transition-all
                               ${
                                 isSelected
                                   ? 'bg-blue-600/20 border-blue-500/50 text-blue-200'
@@ -204,9 +213,10 @@ export default function SongListPage() {
             </>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center text-slate-600 p-8 text-center">
-              <Music2 size={64} className="mb-4 opacity-20" />
-              <p className="text-lg font-medium mb-2">請從左側選擇一首歌曲</p>
-              <p className="text-sm">將會自動播放最新的歌回紀錄</p>
+              {/* 【修正重點】：使用 Tailwind Class 來處理響應式大小，解決 Build Error */}
+              <Music2 className="mb-4 opacity-20 w-12 h-12 lg:w-16 lg:h-16" />
+              <p className="text-base lg:text-lg font-medium mb-2">請從左側選擇一首歌曲</p>
+              <p className="text-xs lg:text-sm">將會自動播放最新的歌回紀錄</p>
             </div>
           )}
         </div>
