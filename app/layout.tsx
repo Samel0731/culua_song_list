@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   metadataBase: new URL('https://culuasonglist.netlify.app'),
   title: {
-    default: "CULUA Song Database | CULUA 歌回資料庫 | 歌枠データベース",
+    default: "CULUA Song Database",
     template: "%s | CULUA Song Database"
   },
   description: "非官方 CULUA 粉絲歌回資料庫。收錄 CULUA 的歷年歌回、翻唱曲目、原創曲與直播紀錄。搜尋 CULUA 唱過的歌最方便的工具。Fan-made database for VSinger CULUA.",

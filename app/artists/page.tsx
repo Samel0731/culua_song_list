@@ -128,7 +128,7 @@ export default function ArtistsPage() {
         <div className="hidden lg:flex flex-1 items-center justify-center text-slate-600 bg-slate-900">
            <div className="text-center">
              <Mic2 className="mx-auto mb-4 opacity-20 w-16 h-16" />
-             <p>{t.select_song_prompt}</p>
+             <p>{t.select_artist_prompt}</p>
            </div>
         </div>
       )}
