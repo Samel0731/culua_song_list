@@ -8,7 +8,7 @@ import YouTubePlayer from '@/app/components/YouTubePlayer';
 // 你的 CSV 連結
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTQdBtem90otSSCpAHO7Al5fz2F0dx-ReDDpgbEfuioiOlkbT5uyfdWbDqPNZvG6YXI0PSab_ge6nE1/pub?gid=0&single=true&output=csv';
 
-// 輔助工具：用於產生原始連結
+// 輔助工具：用於產生原始連結 (支援 Shorts)
 function extractYouTubeId(url: string) {
   if (!url) return '';
   const match = url.match(/(?:v=|youtu\.be\/|shorts\/)([^&?/]+)/);
@@ -72,15 +72,19 @@ export default function SongsPage() {
   };
 
   return (
-    <div className="flex h-full w-full bg-slate-900 text-slate-100 overflow-hidden">
+    // RWD: 手機上下排 (col)，電腦左右排 (row)
+    <div className="flex flex-col lg:flex-row h-full w-full bg-slate-900 text-slate-100 overflow-hidden">
       
-      {/* 左側：搜尋與列表 */}
-      <div className="flex-1 flex flex-col min-w-0 border-r border-slate-800">
+      {/* 左側區塊 (搜尋 + 列表) */}
+      {/* RWD: order-2 (手機排下面) */}
+      {/* overflow-hidden 是修復捲動問題的關鍵 */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden lg:border-r border-slate-800 order-2 lg:order-1">
         
-        {/* 頂部工具列 */}
-        <div className="p-4 border-b border-slate-800 bg-slate-950/50 backdrop-blur space-y-3 shrink-0">
-          <div className="flex items-center gap-2 text-xl font-bold text-purple-400">
-            <Music /> 曲名一覧
+        {/* 頂部搜尋列 */}
+        <div className="p-3 lg:p-4 border-b border-slate-800 bg-slate-950/50 backdrop-blur space-y-3 shrink-0">
+          <div className="flex items-center gap-2 text-lg lg:text-xl font-bold text-purple-400">
+            {/* 使用 Class 控制大小 */}
+            <Music className="w-6 h-6" /> 曲名一覧
           </div>
           
           <div className="flex gap-2">
@@ -99,7 +103,7 @@ export default function SongsPage() {
             {/* 排序按鈕 */}
             <button 
               onClick={() => setSortBy(prev => prev === 'name' ? 'count' : 'name')}
-              className="flex items-center gap-2 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm hover:bg-slate-700 transition-colors"
+              className="flex items-center gap-2 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm hover:bg-slate-700 transition-colors shrink-0"
               title={sortBy === 'name' ? "目前：按名稱排序" : "目前：按次數排序"}
             >
               {sortBy === 'name' ? <SortAsc size={16} /> : <SortDesc size={16} />}
@@ -109,7 +113,7 @@ export default function SongsPage() {
         </div>
 
         {/* 歌曲列表 */}
-        <div className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-slate-700">
+        <div className="flex-1 overflow-y-auto p-2 lg:p-4 scrollbar-thin scrollbar-thumb-slate-700">
           {loading ? (
              <div className="text-center p-10 text-slate-500">載入中...</div>
           ) : (
@@ -124,7 +128,7 @@ export default function SongsPage() {
                       : 'bg-slate-800 border-slate-700 hover:bg-slate-750'
                   }`}
                 >
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1 mr-2">
                     <div className="font-bold text-slate-200 truncate">{song.songName}</div>
                     <div className="text-xs text-slate-400 flex items-center gap-1">
                       <User size={10} /> {song.artist}
@@ -145,19 +149,29 @@ export default function SongsPage() {
         </div>
       </div>
 
-      {/* 右側：播放器 */}
-      <div className="w-[350px] lg:w-[480px] bg-slate-900 flex flex-col border-l border-slate-800 shrink-0 z-20 shadow-xl">
+      {/* 右側區塊 (播放器) */}
+      {/* RWD: 
+          - order-1 (手機排上面)
+          - h-[45vh] (手機高度佔比)
+          - hidden (手機未選歌時隱藏)
+      */}
+      <div className={`
+        bg-slate-900 border-b lg:border-b-0 lg:border-l border-slate-800 flex flex-col shrink-0 shadow-2xl z-20
+        w-full lg:w-[480px]
+        order-1 lg:order-2
+        ${selectedSong ? 'h-[45vh] lg:h-full' : 'hidden lg:flex'}
+        transition-all duration-300
+      `}>
         {selectedSong && selectedVersion ? (
           <>
             <div className="aspect-video bg-black w-full shrink-0">
-              {/* === 修正處：改用 url 屬性 === */}
               <YouTubePlayer 
                 url={selectedVersion.streamUrl}
                 startTime={selectedVersion.timestampSeconds}
               />
             </div>
-            <div className="flex-1 overflow-y-auto p-6">
-              <h2 className="text-xl font-bold mb-1 text-white">{selectedSong.songName}</h2>
+            <div className="flex-1 overflow-y-auto p-4 lg:p-6 scrollbar-thin scrollbar-thumb-slate-700">
+              <h2 className="text-xl lg:text-2xl font-bold mb-1 text-white">{selectedSong.songName}</h2>
               
               <div className="flex items-center gap-3 mb-4">
                 <div className="text-purple-400 text-sm font-medium">{selectedSong.artist}</div>
@@ -197,7 +211,8 @@ export default function SongsPage() {
           </>
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-slate-600">
-            <Music size={48} className="mb-4 opacity-20" />
+            {/* Icon 大小修正，避免 Build Error */}
+            <Music className="mb-4 opacity-20 w-12 h-12 lg:w-16 lg:h-16" />
             <p>請選擇歌曲以播放</p>
           </div>
         )}

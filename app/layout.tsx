@@ -28,8 +28,8 @@ export default function RootLayout({
             
             {/* Logo */}
             <div className="h-16 flex items-center justify-center lg:justify-start lg:px-6 border-b border-slate-800 bg-slate-950">
-              <span className="font-bold text-xl tracking-wider hidden lg:block text-blue-400">CULUA DB</span>
-              <span className="font-bold text-xl lg:hidden text-blue-400">DB</span>
+              <span className="font-bold text-xl tracking-wider hidden lg:block text-blue-400">CULUA PLAY LIST</span>
+              <span className="font-bold text-xl lg:hidden text-blue-400">CPL</span>
             </div>
 
             {/* 選單連結 */}
