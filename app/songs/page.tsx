@@ -5,9 +5,25 @@ import { Music, Search, SortAsc, SortDesc, User } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { usePlayer } from '@/context/PlayerContext';
 
+// ✨ 1. 定義骨架屏組件 (Skeleton Component)
+// 這是一個單純的 UI 組件，模仿真實歌曲卡片的形狀
+const SongSkeleton = () => (
+  <div className="flex items-center justify-between p-3 rounded-lg border border-slate-700/50 bg-slate-800/30">
+    <div className="flex-1 mr-2 space-y-2">
+      {/* 模擬歌名 (寬度 1/3) */}
+      <div className="h-4 bg-slate-700 rounded w-1/3 animate-pulse"></div>
+      {/* 模擬歌手名 (寬度 1/4) */}
+      <div className="h-3 bg-slate-700/50 rounded w-1/4 animate-pulse"></div>
+    </div>
+    <div className="shrink-0">
+      {/* 模擬版本數徽章 (圓形/橢圓) */}
+      <div className="h-5 w-8 bg-slate-700 rounded-full animate-pulse"></div>
+    </div>
+  </div>
+);
+
 export default function SongsPage() {
   const { t } = useLanguage();
-  // 1. 改用全域 Context 獲取資料與播放控制，移除本地 fetch 邏輯
   const { allSongs, loading, playSong, currentSong } = usePlayer();
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -33,7 +49,6 @@ export default function SongsPage() {
   }, [allSongs, searchTerm, sortBy]);
 
   return (
-    // 2. 移除 flex-row 與右側區塊，只保留單欄式佈局 (因為 Layout 已經處理了右側播放器)
     <div className="flex flex-col h-full w-full bg-slate-900 text-slate-100 overflow-hidden">
       
       {/* 頂部搜尋列 */}
@@ -67,14 +82,19 @@ export default function SongsPage() {
 
       {/* 列表內容 */}
       <div className="flex-1 overflow-y-auto p-2 lg:p-4 scrollbar-thin scrollbar-thumb-slate-700">
+        {/* ✨ 2. 使用骨架屏取代原本的 Loading 文字 */}
         {loading ? (
-           <div className="text-center p-10 text-slate-500">{t.loading}</div>
+           <div className="grid grid-cols-1 gap-2">
+             {/* 渲染 10 個骨架，填滿畫面，創造豐富感 */}
+             {[...Array(10)].map((_, i) => (
+               <SongSkeleton key={i} />
+             ))}
+           </div>
         ) : (
           <div className="grid grid-cols-1 gap-2">
             {filteredSongs.map((song) => (
               <div 
                 key={song.songName}
-                // 3. 點擊直接呼叫 Context 的 playSong
                 onClick={() => playSong(song)}
                 className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all border ${
                   currentSong?.songName === song.songName 

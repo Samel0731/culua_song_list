@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 declare global {
   interface Window {
@@ -32,11 +32,9 @@ export default function YouTubePlayer({
   const playerRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // ✨ 關鍵修正：使用 Ref 來追蹤最新的 onEnd 函式
-  // 這樣即使 YT.Player 沒有重新建立，也能呼叫到最新的 playNext 邏輯
+  // 使用 Ref 來追蹤最新的 onEnd 函式 (避免 Closure 問題)
   const onEndRef = useRef(onEnd);
 
-  // 當外部傳入的 onEnd 改變時 (例如切換了播放模式)，更新 Ref
   useEffect(() => {
     onEndRef.current = onEnd;
   }, [onEnd]);
@@ -57,7 +55,7 @@ export default function YouTubePlayer({
     if (!videoId) return;
 
     const initPlayer = () => {
-      // 換歌邏輯
+      // 如果播放器已存在，直接載入新影片 (換歌)
       if (playerRef.current && typeof playerRef.current.loadVideoById === 'function') {
         playerRef.current.loadVideoById({
           videoId: videoId,
@@ -67,7 +65,7 @@ export default function YouTubePlayer({
         return;
       }
 
-      // 建立播放器
+      // 建立新播放器
       if (window.YT && window.YT.Player && containerRef.current) {
         const playerDiv = document.createElement('div');
         containerRef.current.innerHTML = ''; 
@@ -77,6 +75,7 @@ export default function YouTubePlayer({
           height: '100%',
           width: '100%',
           videoId: videoId,
+          host: 'https://www.youtube.com', // 幫助減少 CORS 錯誤
           playerVars: {
             autoplay: 1,
             start: Math.floor(startTime),
@@ -85,6 +84,7 @@ export default function YouTubePlayer({
             rel: 0,
             controls: 1,
             playsinline: 1,
+            origin: window.location.origin, // 幫助減少 CORS 錯誤
           },
           events: {
             'onReady': (event: any) => {
@@ -94,12 +94,24 @@ export default function YouTubePlayer({
               }
             },
             'onStateChange': (event: any) => {
-              // 狀態 0 = 播放結束
+              // 狀態 0 = 播放結束 (Ended)
               if (event.data === 0) {
-                // ✨ 這裡改用 Ref 來呼叫，確保是「當下」最新的邏輯
                 if (onEndRef.current) {
                     onEndRef.current();
                 }
+              }
+            },
+            // ✨ 第四步重點：錯誤處理
+            'onError': (event: any) => {
+              console.warn('YouTube Player Error Code:', event.data);
+              // 錯誤代碼說明：
+              // 100: 影片找不到 (被刪除或設為私人)
+              // 101, 150: 影片擁有者禁止在嵌入播放器中播放
+              
+              // 遇到錯誤時，自動跳下一首，保持聆聽體驗不中斷
+              if (onEndRef.current) {
+                console.log('Video unavailable, skipping to next song...');
+                onEndRef.current();
               }
             }
           }
@@ -120,7 +132,7 @@ export default function YouTubePlayer({
     }
   }, [url]); 
 
-  // 3. 播放控制
+  // 3. 播放控制 (暫停/播放)
   useEffect(() => {
     if (playerRef.current && typeof playerRef.current.playVideo === 'function') {
       if (isPlaying) {
