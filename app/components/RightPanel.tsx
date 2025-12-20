@@ -158,7 +158,7 @@ export default function RightPanel() {
     const HERO_SONGS = {
         latest: {
             songName: "てんぺんちー", artist: "CULUA", date: "2025/12/19",
-            url: "https://youtu.be/kYJzXXq5y6g", timestamp: 0
+            url: "https://youtu.be/k8l_5e1MNqE?si=0MyfpZzsvEhqjQop", timestamp: 0
         },
         classic: {
             songName: "ベビ・デビ", artist: "CULUA", date: "2024/5/18",
