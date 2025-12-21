@@ -27,7 +27,10 @@ export const metadata: Metadata = {
   keywords: [
     "CULUA", "クルア", "くるあ", "VSinger", "Vtuber", 
     "歌回", "歌枠", "歌ってみた", "Song List", "Setlist", 
-    "Cover", "原創曲", "Original Song"
+    "Cover", "原創曲", "Original Song", "翻唱", "Fan Database", 
+    "非官方", "粉絲維護", "YouTube", "音樂資料庫", "Music Database",
+    "Culua Song Database", "CULUA Song Archive", "Wiki",
+    "CULUA 歌曲列表", "CULUA 歌曲資料庫"
   ],
   authors: [{ name: "Samel" }],
   openGraph: {
@@ -47,6 +50,7 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  category: 'music',
   verification: {
     google: 'axWifotevlNtJhso8FBSxrdqWEPxn_FUve9-5slsGMM',
   },
