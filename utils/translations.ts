@@ -1,139 +1,227 @@
+// utils/translations.ts
 export type Language = 'zh' | 'ja' | 'en';
 
-export const translations = {
+export interface Translation {
+  // 通用導航與列表
+  title: string;
+  search_placeholder: string;
+  loading: string;
+  no_results: string;
+  nav_home: string;
+  nav_songs: string;
+  nav_artists: string;
+  new_tag: string;
+  sort_name: string;
+  sort_count: string;
+  select_artist_prompt: string;
+  total_songs: string;
+
+  // Hero Section (首頁推薦區)
+  hero_welcome_title: string;
+  hero_welcome_desc: string;
+  hero_card_latest_title: string;
+  hero_card_latest_desc: string;
+  hero_card_classic_title: string;
+  hero_card_classic_desc: string;
+  hero_card_gap_title: string;
+  hero_card_gap_desc: string;
+  hero_play_now: string;
+  hero_surprise_title: string;
+  hero_surprise_desc: string;
+  hero_surprise_btn: string;
+
+  // Right Panel (播放器)
+  mode_version_loop: string;
+  mode_shuffle: string;
+  mode_list_loop: string;
+  original_link: string;
+  versions: string;
+  select_song_prompt: string;
+  
+  // 權威描述 (SEO)
+  home_authority_desc: string;
+  songs_authority_desc_prefix: string;
+  songs_authority_desc_suffix: string;
+  
+  // 關於頁面 (About)
+  about_title: string;
+  about_intro_title: string;
+  about_intro_content_1: string;
+  about_intro_content_2: string;
+  about_source_title: string;
+  about_source_1: string;
+  about_source_2: string;
+  about_source_3: string;
+  about_source_link: string;
+  about_disclaimer_title: string;
+  about_disclaimer_content: string;
+}
+
+export const translations: Record<Language, Translation> = {
   zh: {
-    title: 'CULUA 歌回資料庫',
-    nav_home: '歌回紀錄',
-    nav_songs: '曲名列表',
-    nav_artists: '歌手列表',
-    search_placeholder: '搜尋曲名或歌手...',
-    sort_name: '按名稱',
-    sort_count: '按次數',
-    sort_date: '按日期',
-    loading: '載入中...',
-    no_results: '找不到符合的歌曲',
-    original_link: '原始連結',
-    versions: '其他版本',
-    new_tag: '最新',
-    select_song_prompt: '請從左側選擇一首歌曲',
-    select_artist_prompt: '請從左側選擇一位歌手',
-    auto_play_hint: '將會自動播放最新的歌回紀錄',
-    now_playing: '正在播放',
-    artist: '歌手',
-    total_songs: '共 {count} 首歌曲',
-    footer: '非官方粉絲資料庫',
-    mode_list_loop: '換歌',      // 列表循環
-    mode_version_loop: '換直播',  // 版本循環
-    mode_shuffle: '隨機',        // 隨機播放
+    // 通用
+    title: "Culua 歌單",
+    search_placeholder: "搜尋歌名、歌手...",
+    loading: "載入中...",
+    no_results: "沒有找到相關歌曲",
+    nav_home: "首頁",
+    nav_songs: "所有歌曲",
+    nav_artists: "歌手列表",
+    new_tag: "最新",
+    sort_name: "依歌名",
+    sort_count: "依次數",
+    select_artist_prompt: "請選擇一位歌手查看詳細資訊",
+    total_songs: "共 {count} 首歌",
 
     // Hero Section
-    hero_welcome_title: "Welcome to <span class='text-blue-400'>CULUA's</span> World",
-    hero_welcome_desc: "這裡是粉絲維護的非官方推廣站。探索 CULUA 多變的聲線，從這裡開始。",
-    
-    hero_card_latest_title: "🆕 最新主打",
-    hero_card_latest_desc: "目前最新的作品，跟上最新進度。",
-    
-    hero_card_classic_title: "👑 入坑必聽",
-    hero_card_classic_desc: "傳唱度最高、最能代表 CULUA 聲線的經典之作。",
-    
-    // === 修改重點 (ZH) ===
-    hero_card_gap_title: "⚡ 風格反差",
-    hero_card_gap_desc: "駕馭截然不同的曲風，體驗帥氣與溫柔的強烈對比。",
-    
+    hero_welcome_title: "歡迎來到 <span class='text-blue-400'>CULUA</span><br/>非官方歌回資料庫",
+    hero_welcome_desc: "這裡整理了 VSinger CULUA 歷年的歌回錄影與翻唱作品。請從左側選單開始探索，或試試下方的推薦歌單。",
+    hero_card_latest_title: "最新原創",
+    hero_card_latest_desc: "收聽 CULUA 最新發布的原創曲目。",
+    hero_card_classic_title: "必聽經典",
+    hero_card_classic_desc: "剛認識 CULUA？先從這首開始。",
+    // ✨ 修改：移除「萌」，改為「反差風格」
+    hero_card_gap_title: "反差風格",
+    hero_card_gap_desc: "感受帥氣與可愛的強烈反差。",
     hero_play_now: "立即播放",
-    
     hero_surprise_title: "不知道聽什麼？",
-    hero_surprise_desc: "交給命運決定，挖掘寶藏歌曲！",
-    hero_surprise_btn: "Surprise Me!",
+    hero_surprise_desc: "讓系統為你隨機挑選一首好歌。",
+    hero_surprise_btn: "隨機播放",
+
+    // Right Panel
+    mode_version_loop: "換直播",
+    mode_shuffle: "隨機",
+    mode_list_loop: "換歌",
+    original_link: "原片連結",
+    versions: "版本紀錄",
+    select_song_prompt: "請選擇一首歌開始播放",
+    
+    // SEO 描述
+    home_authority_desc: "本網站整理 <strong>VTuber／VSinger CULUA</strong> 在 YouTube 上公開演唱過的所有歌曲，包含原創音樂與翻唱作品。資料來源為官方 YouTube 頻道，並以每小時自動更新方式維持完整性。",
+    songs_authority_desc_prefix: "以下為 CULUA 目前在 YouTube 上公開可查的完整演唱歌曲列表，此列表由伺服器端自動同步官方資料，並持續更新。目前已收錄",
+    songs_authority_desc_suffix: "首歌曲。",
+    
+    // About
+    about_title: "關於本站",
+    about_intro_title: "網站簡介",
+    about_intro_content_1: "本網站是專為 <strong>VSinger CULUA</strong> 建立的非官方歌回資料庫。",
+    about_intro_content_2: "我們的目標是整理 CULUA 歷年來在 YouTube 直播中演唱過的每一首歌、每一次翻唱 (Cover) 以及原創曲目。透過自動化的資料同步技術，提供粉絲最完整、最快速的搜尋與播放體驗。",
+    about_source_title: "資料來源",
+    about_source_1: "所有歌曲資料皆來自 <strong>CULUA Official Channel</strong> 及相關官方社群。",
+    about_source_2: "系統會定期（每小時）掃描官方公開的歌單資料表，確保資料的即時性與正確性。",
+    about_source_3: "影片播放使用 YouTube 官方嵌入播放器，觀看次數將計入官方影片數據。",
+    about_source_link: "前往 CULUA 官方 YouTube 頻道",
+    about_disclaimer_title: "免責聲明",
+    about_disclaimer_content: "本網站為粉絲自行開發的非官方專案 (Fan-made Project)，與 CULUA 本人及其所屬營運單位無直接關聯。所有影音內容之版權歸原創作者及官方所有。如需聯絡開發者或回報問題，請透過 GitHub 或社群平台聯繫。"
   },
   ja: {
-    title: 'CULUA 歌枠データベース',
-    nav_home: '歌った曲一覧',
-    nav_songs: '曲名一覧',
-    nav_artists: '歌手一覧',
-    search_placeholder: '曲名または歌手を検索...',
-    sort_name: '名前順',
-    sort_count: '回数順',
-    sort_date: '日付順',
-    loading: '読み込み中...',
-    no_results: '該当する曲が見つかりません',
-    original_link: '元動画',
-    versions: '他のバージョン',
-    new_tag: 'NEW',
-    select_song_prompt: '左側から曲を選択してください',
-    select_artist_prompt: '左側からアーティストを選択してください',
-    auto_play_hint: '最新の歌枠アーカイブが再生されます',
-    now_playing: '再生中',
-    artist: 'アーティスト',
-    total_songs: '全 {count} 曲',
-    footer: '非公式ファンデータベース',
-    mode_list_loop: '曲切替',    // 或 "次の曲"
-    mode_version_loop: 'Ver.切替', // 或 "ライブ切替"
-    mode_shuffle: 'シャッフル',
+    // 通用
+    title: "Culua ソングリスト",
+    search_placeholder: "曲名、歌手で検索...",
+    loading: "読み込み中...",
+    no_results: "該当する曲が見つかりません",
+    nav_home: "ホーム",
+    nav_songs: "全曲リスト",
+    nav_artists: "歌手リスト",
+    new_tag: "最新",
+    sort_name: "曲名順",
+    sort_count: "回数順",
+    select_artist_prompt: "歌手を選択して詳細を表示",
+    total_songs: "全 {count} 曲",
 
-    // Hero Section (JA)
-    hero_welcome_title: "<span class='text-blue-400'>CULUA</span> の世界へようこそ",
-    hero_welcome_desc: "ここはファンによる非公式の宣伝サイトです。CULUAの多彩な歌声をここから探索しましょう。",
-    
-    hero_card_latest_title: "🆕 最新の注目曲",
-    hero_card_latest_desc: "現在の最新作、活動の最前線をチェック。",
-    
-    hero_card_classic_title: "👑 定番・入門",
-    hero_card_classic_desc: "最も人気があり、CULUAの歌声を代表する名曲。",
-    
-    // === 修改重點 (JA) - 移除萌え ===
-    hero_card_gap_title: "⚡ 表現の幅",
-    hero_card_gap_desc: "クールさと美しさ、正反対のスタイルが生み出すコントラスト。",
-    
+    // Hero Section
+    hero_welcome_title: "<span class='text-blue-400'>CULUA</span><br/>非公式歌枠データベースへようこそ",
+    hero_welcome_desc: "VSinger CULUAの歴代の歌枠アーカイブとカバー曲をまとめました。左のメニューから探索するか、下のプレイリストをお試しください。",
+    hero_card_latest_title: "最新オリジナル",
+    hero_card_latest_desc: "CULUAの最新オリジナル曲を聴く。",
+    hero_card_classic_title: "定番の名曲",
+    hero_card_classic_desc: "CULUAを知るならまずはこの曲から。",
+    hero_card_gap_title: "ギャップ萌え", // 日文保留原文通常比較自然，若想改也可以改成 "ギャップの魅力"
+    hero_card_gap_desc: "かっこよさと可愛さのギャップを感じる。",
     hero_play_now: "今すぐ再生",
+    hero_surprise_title: "何を聴くか迷っていますか？",
+    hero_surprise_desc: "システムがランダムに1曲選びます。",
+    hero_surprise_btn: "おまかせ再生",
+
+    // Right Panel
+    mode_version_loop: "Ver.切替",
+    mode_shuffle: "シャッフル",
+    mode_list_loop: "曲切替",
+    original_link: "元の動画",
+    versions: "バージョン履歴",
+    select_song_prompt: "曲を選択して再生を開始",
     
-    hero_surprise_title: "何を聴くか迷ったら？",
-    hero_surprise_desc: "運命に任せて、隠れた名曲を発掘しよう！",
-    hero_surprise_btn: "おまかせ再生 (Surprise Me!)",
+    // SEO
+    home_authority_desc: "本サイトは <strong>VTuber／VSinger CULUA</strong> がYouTubeで公開したすべての歌唱曲（オリジナル曲およびカバー曲を含む）をまとめたものです。データは公式YouTubeチャンネルに基づき、1時間ごとの自動更新によって完全性を維持しています。",
+    songs_authority_desc_prefix: "以下は、現在YouTubeで公開されているCULUAの全歌唱曲リストです。このリストはサーバーサイドで公式データを自動同期し、継続的に更新されています。現在",
+    songs_authority_desc_suffix: "曲を収録しています。",
+    
+    // About
+    about_title: "このサイトについて",
+    about_intro_title: "サイト紹介",
+    about_intro_content_1: "本サイトは <strong>VSinger CULUA</strong> のために作られた非公式歌枠データベースです。",
+    about_intro_content_2: "CULUAがこれまでのYouTube配信で歌った全楽曲、カバー、およびオリジナル曲を整理することを目的としています。自動データ同期技術により、ファンに最も完全で高速な検索・再生体験を提供します。",
+    about_source_title: "情報源",
+    about_source_1: "すべての楽曲データは <strong>CULUA Official Channel</strong> および関連する公式コミュニティから取得しています。",
+    about_source_2: "システムは定期的に（1時間ごと）公式の公開セットリストをスキャンし、データの即時性と正確性を確保しています。",
+    about_source_3: "動画再生にはYouTube公式の埋め込みプレーヤーを使用しており、再生回数は公式動画のデータにカウントされます。",
+    about_source_link: "CULUA公式YouTubeチャンネルへ",
+    about_disclaimer_title: "免責事項",
+    about_disclaimer_content: "本サイトはファンによる非公式プロジェクト（Fan-made Project）であり、CULUA本人および所属運営元とは直接の関係はありません。すべての音声・映像コンテンツの著作権は原作者および公式に帰属します。開発者への連絡や問題の報告は、GitHubまたはSNSを通じてお願いします。"
   },
   en: {
-    title: 'CULUA Song Database',
-    nav_home: 'Song History',
-    nav_songs: 'Song List',
-    nav_artists: 'Artist List',
-    search_placeholder: 'Search song or artist...',
-    sort_name: 'By Name',
-    sort_count: 'By Count',
-    sort_date: 'By Date',
-    loading: 'Loading...',
-    no_results: 'No songs found',
-    original_link: 'Original Link',
-    versions: 'Other Versions',
-    new_tag: 'NEW',
-    select_song_prompt: 'Please select a song from the list',
-    select_artist_prompt: 'Please select an artist from the list',
-    auto_play_hint: 'Automatically plays the latest archive',
-    now_playing: 'NOW PLAYING',
-    artist: 'Artist',
-    total_songs: '{count} Songs',
-    footer: 'Fan Made Database',
-    mode_list_loop: 'Next Song',
-    mode_version_loop: 'Next Ver.',
-    mode_shuffle: 'Shuffle',
+    // 通用
+    title: "Culua Song List",
+    search_placeholder: "Search songs, artists...",
+    loading: "Loading...",
+    no_results: "No songs found",
+    nav_home: "Home",
+    nav_songs: "All Songs",
+    nav_artists: "Artists",
+    new_tag: "New",
+    sort_name: "By Name",
+    sort_count: "By Count",
+    select_artist_prompt: "Select an artist to view details",
+    total_songs: "{count} songs",
 
-    // Hero Section (EN)
-    hero_welcome_title: "Welcome to <span class='text-blue-400'>CULUA's</span> World",
-    hero_welcome_desc: "This is an unofficial fan-made site. Explore CULUA's versatile voice starting here.",
-    
-    hero_card_latest_title: "🆕 Latest Hit",
-    hero_card_latest_desc: "Check out the newest release and keep up to date.",
-    
-    hero_card_classic_title: "👑 Must Listen",
-    hero_card_classic_desc: "The most popular classics that represent CULUA's voice.",
-    
-    // === 修改重點 (EN) ===
-    hero_card_gap_title: "⚡ Style Contrast",
-    hero_card_gap_desc: "Experience the versatile range between cool and soft styles.",
-    
+    // Hero Section
+    hero_welcome_title: "Welcome to <span class='text-blue-400'>CULUA</span><br/>Unofficial Song Database",
+    hero_welcome_desc: "An archive of VSinger CULUA's karaoke streams and covers. Select a song from the menu or try the recommendations below.",
+    hero_card_latest_title: "Latest Original",
+    hero_card_latest_desc: "Listen to CULUA's latest original song.",
+    hero_card_classic_title: "Classic Hits",
+    hero_card_classic_desc: "New to CULUA? Start with this one.",
+    hero_card_gap_title: "Gap Appeal", // 英文對應改成 Gap Appeal 或保持 Gap Moe
+    hero_card_gap_desc: "Feel the gap between cool and cute.",
     hero_play_now: "Play Now",
+    hero_surprise_title: "Don't know what to listen to?",
+    hero_surprise_desc: "Let the system pick a random song for you.",
+    hero_surprise_btn: "Surprise Me",
+
+    // Right Panel
+    mode_version_loop: "Next Version",
+    mode_shuffle: "Shuffle",
+    mode_list_loop: "Next Song",
+    original_link: "Original Video",
+    versions: "Versions",
+    select_song_prompt: "Select a song to start playback",
     
-    hero_surprise_title: "Not sure what to listen to?",
-    hero_surprise_desc: "Let fate decide and discover hidden gems!",
-    hero_surprise_btn: "Surprise Me!",
+    // SEO
+    home_authority_desc: "This website compiles all songs performed by <strong>VTuber/VSinger CULUA</strong> on YouTube, including original music and cover works. Data is sourced from the official YouTube channel and maintained with hourly automated updates for completeness.",
+    songs_authority_desc_prefix: "Below is the complete list of songs performed by CULUA currently available on YouTube. This list is automatically synchronized server-side with official data and continuously updated. Currently contains",
+    songs_authority_desc_suffix: "songs.",
+    
+    // About
+    about_title: "About",
+    about_intro_title: "Introduction",
+    about_intro_content_1: "This website is an unofficial song database dedicated to <strong>VSinger CULUA</strong>.",
+    about_intro_content_2: "Our goal is to catalog every song, cover, and original track CULUA has performed in YouTube livestreams over the years. Through automated data synchronization, we provide fans with the most complete and fast search and playback experience.",
+    about_source_title: "Data Sources",
+    about_source_1: "All song data is sourced from the <strong>CULUA Official Channel</strong> and related official communities.",
+    about_source_2: "The system periodically (hourly) scans officially released setlists to ensure data timeliness and accuracy.",
+    about_source_3: "Video playback uses the official YouTube embedded player, and views are counted towards official video statistics.",
+    about_source_link: "Visit CULUA Official YouTube Channel",
+    about_disclaimer_title: "Disclaimer",
+    about_disclaimer_content: "This website is an unofficial fan-made project and is not directly affiliated with CULUA or her management. All copyright of audio and video content belongs to the original creators and officials. To contact the developer or report issues, please reach out via GitHub or social media."
   }
 };

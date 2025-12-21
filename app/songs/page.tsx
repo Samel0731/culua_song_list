@@ -34,14 +34,9 @@ export default function SongsPage() {
   
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'count'>('name');
-
-  // ✨ 新增：控制目前顯示的歌曲數量 (無限捲動用)
   const [visibleCount, setVisibleCount] = useState(20);
-  
-  // ✨ 新增：觀察底部的 Ref (當使用者看到這個元素時，載入更多)
   const loaderRef = useRef<HTMLDivElement>(null);
 
-  // 模糊搜尋邏輯 (保持不變)
   const filteredSongs = useMemo(() => {
     let result = allSongs;
 
@@ -64,22 +59,19 @@ export default function SongsPage() {
     return result;
   }, [allSongs, searchTerm, sortBy]);
 
-  // ✨ 當搜尋條件或排序改變時，重置顯示數量回 20
   useEffect(() => {
     setVisibleCount(20);
   }, [searchTerm, sortBy]);
 
-  // ✨ 無限捲動核心邏輯：IntersectionObserver
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
       const target = entries[0];
-      // 如果底部元素出現，且還有更多歌沒顯示，就多載入 20 首
       if (target.isIntersecting) {
         setVisibleCount((prev) => Math.min(prev + 20, filteredSongs.length));
       }
     }, {
-      root: null, // 視窗
-      rootMargin: '100px', // 提早 100px 觸發，讓體驗更順暢
+      root: null,
+      rootMargin: '100px',
       threshold: 0.1,
     });
 
@@ -92,20 +84,55 @@ export default function SongsPage() {
         observer.unobserve(loaderRef.current);
       }
     };
-  }, [filteredSongs.length]); // 當清單總長度改變時重新設定
+  }, [filteredSongs.length]);
 
-  // 計算目前要渲染的歌曲 (只取前 visibleCount 筆)
   const displayedSongs = filteredSongs.slice(0, visibleCount);
+
+  // 🔥 SEO 重點 1：生成 Schema.org JSON-LD 資料
+  // 這段 JSON 是給機器人看的，不會顯示在畫面上
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Culua YouTube 演唱歌曲完整列表",
+    "description": "Culua 歷年於 YouTube 直播與發布的所有歌曲清單，包含翻唱與原創曲。",
+    "numberOfItems": allSongs.length,
+    // 為了避免 JSON 太大，我們只列出前 100 首作為範例，這對 SEO 已經足夠
+    "itemListElement": allSongs.slice(0, 100).map((song, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "item": {
+        "@type": "MusicRecording",
+        "name": song.songName,
+        "byArtist": {
+          "@type": "MusicGroup",
+          "name": song.artist
+        }
+      }
+    }))
+  };
 
   return (
     <div className="flex flex-col h-full w-full bg-slate-900 text-slate-100 overflow-hidden">
       
-      {/* 頂部搜尋列 (保持不變) */}
+      {/* 注入 JSON-LD 結構化資料 */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       <div className="p-3 lg:p-4 border-b border-slate-800 bg-slate-950/50 backdrop-blur space-y-3 shrink-0 z-10">
         <div className="flex items-center gap-2 text-lg lg:text-xl font-bold text-purple-400">
           <Music className="w-6 h-6" /> {t.nav_songs}
         </div>
         
+        {/* 🔥 SEO 重點 2：加入頁面權威描述 (User 可見) */}
+        {/* 這段文字能建立「來源可信度」，告訴使用者和 AI 這是自動同步的完整資料 */}
+        <p className="text-xs text-slate-400 leading-relaxed">
+           以下為 Culua 目前在 YouTube 上公開可查的完整演唱歌曲列表，
+           此列表由伺服器端自動同步官方資料，並持續更新。
+           目前已收錄 <span className="text-slate-200 font-bold">{allSongs.length}</span> 首歌曲。
+        </p>
+
         <div className="flex gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
@@ -143,7 +170,6 @@ export default function SongsPage() {
                 <div 
                   key={song.songName}
                   onClick={() => playSong(song)}
-                  // 微互動：保留 active:scale-95
                   className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all active:scale-95 border ${
                     isPlaying
                       ? 'bg-purple-600/20 border-purple-500/50' 
@@ -171,7 +197,6 @@ export default function SongsPage() {
               );
             })}
             
-            {/* ✨ 底部偵測點：當滑到這裡時，觸發載入更多 */}
             {visibleCount < filteredSongs.length && (
                <div ref={loaderRef} className="py-4 flex justify-center w-full">
                  <div className="w-6 h-6 border-2 border-slate-600 border-t-purple-500 rounded-full animate-spin" />

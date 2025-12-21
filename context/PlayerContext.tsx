@@ -1,7 +1,7 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { fetchAndProcessSongs, GroupedSong, SongVersion } from '@/utils/dataProcessor';
+import React, { createContext, useContext, useState, useCallback } from 'react';
+import { GroupedSong, SongVersion } from '@/utils/dataProcessor';
 
 export type PlayMode = 'list-loop' | 'version-loop' | 'shuffle';
 
@@ -16,7 +16,7 @@ interface PlayerContextType {
   playSong: (song: GroupedSong, version?: SongVersion) => void;
   playRandom: () => void;
   playNext: () => void;
-  playPrev: () => void; // 新增上一首功能
+  playPrev: () => void;
   closePlayer: () => void;
   togglePlay: () => void;
   isExpanded: boolean;
@@ -25,9 +25,17 @@ interface PlayerContextType {
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
 
-export function PlayerProvider({ children }: { children: React.ReactNode }) {
-  const [allSongs, setAllSongs] = useState<GroupedSong[]>([]);
-  const [loading, setLoading] = useState(true);
+// ✨ 修改 1: 定義 Props 介面，加入 initialSongs
+interface PlayerProviderProps {
+  children: React.ReactNode;
+  initialSongs: GroupedSong[];
+}
+
+// ✨ 修改 2: 在參數中解構出 initialSongs
+export function PlayerProvider({ children, initialSongs }: PlayerProviderProps) {
+  // ✨ 修改 3: 直接使用傳入的資料初始化 state，並將 loading 設為 false
+  const [allSongs, setAllSongs] = useState<GroupedSong[]>(initialSongs);
+  const [loading, setLoading] = useState(false);
   
   const [currentSong, setCurrentSong] = useState<GroupedSong | null>(null);
   const [currentVersion, setCurrentVersion] = useState<SongVersion | null>(null);
@@ -35,21 +43,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [playMode, setPlayMode] = useState<PlayMode>('list-loop');
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const data = await fetchAndProcessSongs(
-          'https://docs.google.com/spreadsheets/d/e/2PACX-1vTQdBtem90otSSCpAHO7Al5fz2F0dx-ReDDpgbEfuioiOlkbT5uyfdWbDqPNZvG6YXI0PSab_ge6nE1/pub?gid=0&single=true&output=csv'
-        );
-        setAllSongs(data);
-      } catch (err) {
-        console.error("Failed to load songs", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadData();
-  }, []);
+  // ✨ 修改 4: 移除了原本的 useEffect (fetchAndProcessSongs)，因為資料已經由 Server 提供了
 
   const playSong = useCallback((song: GroupedSong, version?: SongVersion) => {
     setCurrentSong(song);
@@ -80,13 +74,12 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const playNext = useCallback(() => {
     if (!currentSong || !currentVersion || allSongs.length === 0) return;
 
-    // 1. 版本循環 (同首歌，換下一個 Live)
+    // 1. 版本循環
     if (playMode === 'version-loop') {
       const currentVerIndex = currentSong.versions.findIndex(v => v === currentVersion);
       if (currentVerIndex !== -1 && currentVerIndex < currentSong.versions.length - 1) {
         setCurrentVersion(currentSong.versions[currentVerIndex + 1]);
       } else {
-        // 到底了，回到第一個版本
         setCurrentVersion(currentSong.versions[0]);
       }
       return;
@@ -95,7 +88,6 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     // 2. 隨機播放
     if (playMode === 'shuffle') {
       let nextSong;
-      // 簡單防呆：確保隨機到的不是目前這首 (除非只有一首)
       do {
         nextSong = allSongs[Math.floor(Math.random() * allSongs.length)];
       } while (nextSong.songName === currentSong.songName && allSongs.length > 1);
@@ -114,10 +106,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
   }, [allSongs, currentSong, currentVersion, playMode, playSong]);
 
-  // 上一首
   const playPrev = useCallback(() => {
      if (!currentSong || allSongs.length === 0) return;
-     // 隨機模式的上一首通常比較複雜，這裡簡單處理：直接回列表上一首
      const currentIndex = allSongs.findIndex(s => s.songName === currentSong.songName);
      let prevIndex = currentIndex - 1;
      if (prevIndex < 0) prevIndex = allSongs.length - 1;
@@ -144,7 +134,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       playSong,
       playRandom,
       playNext,
-      playPrev, // 記得匯出
+      playPrev,
       closePlayer,
       togglePlay,
       isExpanded,

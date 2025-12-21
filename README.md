@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Culua Song Database (Unofficial)
 
-## Getting Started
+[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
+[![Vercel](https://img.shields.io/badge/Deployed_on-Vercel-white?logo=vercel)](https://vercel.com/)
+[![Status](https://img.shields.io/badge/Status-Active-success)]()
 
-First, run the development server:
+**Culua Song Database** is an open-source, non-official archive project documenting the musical activities of VSinger **Culua**.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+The primary goal is to provide a structured, searchable, and constantly updated index of all songs performed by Culua on YouTube, including original releases and cover songs from live streams.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+🔗 **Live Website:** [https://culuasonglist.netlify.app](https://culuasonglist.netlify.app)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 🇯🇵 日本語紹介
+**Culua 歌枠データベース**は、VSinger **Culua** の音楽活動を記録する非公式のアーカイブプロジェクトです。
+YouTubeでの歌枠（生配信）やカバー動画、オリジナル曲を網羅し、検索可能なデータベースとして提供しています。データはサーバーサイドで定期的に同期され、常に最新の状態を保つよう設計されています。
 
-## Learn More
+### 🇹🇼 專案簡介
+**Culua 非官方歌回資料庫** 是一個開源的粉絲專案，旨在完整記錄 VSinger **Culua** 的音樂歷程。
+本專案透過自動化技術整理 Culua 在 YouTube 上演唱過的所有歌曲（包含原創曲與翻唱），提供快速檢索與播放功能，並透過伺服器端渲染 (SSR) 確保資料的完整性與 SEO 友善度。
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## ✨ Key Features
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+* **Comprehensive Indexing:** Tracks original songs, covers, and stream archives.
+* **Server-Side Rendering (SSR):** Optimized for SEO and AI search discoverability.
+* **Automated Synchronization:** Uses **Incremental Static Regeneration (ISR)** to periodically fetch the latest data from the official source (Google Sheets / YouTube) without manual rebuilding.
+* **Multilingual Support:** Fully localized in English, Japanese, and Traditional Chinese.
+* **Progressive Web App (PWA):** Installable on mobile devices for an app-like experience.
 
-## Deploy on Vercel
+## 🛠️ Tech Stack
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+* **Framework:** [Next.js](https://nextjs.org/) (App Router)
+* **Language:** TypeScript
+* **Styling:** Tailwind CSS
+* **Data Source:** Google Sheets API (CSV) & YouTube Data API
+* **Deployment:** Vercel
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## ⚠️ Disclaimer
+
+This is a **fan-made, non-commercial project**. It is not affiliated with, endorsed by, or connected to Culua or her management team.
+
+* **Content Rights:** All copyrights for the audio, video, and images belong to the original creators and the official rights holders.
+* **Media Usage:** This website uses the official YouTube Embedded Player API. All views and playbacks count towards the official video statistics.
+
+---
+
+## 🤝 Contribution
+
+Contributions are welcome! If you find any bugs or have suggestions for new features, please feel free to open an issue or submit a pull request.

@@ -1,13 +1,13 @@
-import type { Metadata, Viewport } from "next"; // 1. 新增 Viewport 型別
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/context/LanguageContext";
 import ClientLayout from "@/app/components/ClientLayout";
+// ✨ 修改 1: 引入 Server 端抓取函式
+import { fetchSongsServer } from "@/utils/fetchSongsServer";
 
 const inter = Inter({ subsets: ["latin"] });
 
-// 2. 新增 Viewport 設定 (PWA 必備)
-// 這些設定讓網站在手機上看起來更像原生 App (禁止縮放、設定狀態列顏色)
 export const viewport: Viewport = {
   themeColor: "#0f172a",
   width: "device-width",
@@ -23,13 +23,11 @@ export const metadata: Metadata = {
     template: "%s | CULUA Song Database"
   },
   description: "非官方 CULUA 粉絲歌回資料庫。收錄 CULUA 的歷年歌回、翻唱曲目、原創曲與直播紀錄。搜尋 CULUA 唱過的歌最方便的工具。Fan-made database for VSinger CULUA.",
-  // 3. 連結 manifest.json (PWA 身分證)
   manifest: "/manifest.json",
   keywords: [
     "CULUA", "クルア", "くるあ", "VSinger", "Vtuber", 
     "歌回", "歌枠", "歌ってみた", "Song List", "Setlist", 
-    "資料庫", "Database", "非官方", "Fan made", "歌詞",
-    "RK Music", "翻唱", "Cover", "原創曲", "Original Song"
+    "Cover", "原創曲", "Original Song"
   ],
   authors: [{ name: "Samel" }],
   openGraph: {
@@ -54,13 +52,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+// ✨ 修改 2: 加上 async 關鍵字，使其成為 Async Server Component
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // 4. 定義 JSON-LD 結構化資料 (SEO 關鍵)
-  // 這會告訴搜尋引擎：這是一個關於 CULUA 的音樂相關網站
+  // ✨ 修改 3: 在 Server 端直接抓取資料 (這行會在伺服器執行)
+  // 透過 ISR 機制，這份資料會被快取，不需要每次請求都去 Google Sheet 抓
+  const songs = await fetchSongsServer();
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "MusicGroup",
@@ -68,23 +69,23 @@ export default function RootLayout({
     "url": "https://culuasonglist.netlify.app",
     "description": "Vsinger CULUA 非官方歌回資料庫",
     "sameAs": [
-      "https://www.youtube.com/@CULUAvsinger",
-      "https://x.com/culua0211",
-      "https://www.tiktok.com/@culuavsinger"
+      "https://www.youtube.com/@CULUA",
+      "https://twitter.com/CULUA_official"
     ]
   };
 
   return (
-    <html lang="zh-TW">
-      <body className={inter.className}>
-        {/* 5. 注入 JSON-LD 腳本 */}
+    <html lang="zh-Hant">
+      <head>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        
+      </head>
+      <body className={inter.className}>
         <LanguageProvider>
-          <ClientLayout>
+          {/* ✨ 修改 4: 把抓到的 songs 傳給 ClientLayout */}
+          <ClientLayout initialSongs={songs}>
             {children}
           </ClientLayout>
         </LanguageProvider>

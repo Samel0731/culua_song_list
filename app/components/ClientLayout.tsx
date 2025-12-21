@@ -5,8 +5,7 @@ import { usePathname } from 'next/navigation';
 import { PlayerProvider, usePlayer } from '@/context/PlayerContext';
 import Sidebar from './Sidebar';
 import RightPanel from './RightPanel';
-// 移除不必要的 X icon 引用，因為外層不再需要按鈕了
-import { X } from 'lucide-react'; 
+import { GroupedSong } from '@/utils/dataProcessor';
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -41,6 +40,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
     if (currentSong) setShowMobileHero(false);
   }, [currentSong]);
 
+  // 右側面板樣式邏輯
   let rightPanelClass = "hidden lg:block border-l border-slate-800 bg-slate-900 transition-all duration-300";
   if (currentSong) {
     const desktopWidthClass = isExpanded ? 'lg:w-[50%] xl:w-[55%]' : 'lg:w-[450px]';
@@ -54,7 +54,12 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
     <div className="flex h-[100dvh] w-screen overflow-hidden bg-slate-900 text-slate-100">
       <Sidebar onOpenHero={() => setShowMobileHero(true)} />
 
-      <div className="flex flex-col flex-1 min-w-0 h-full border-r border-slate-800 mb-16 lg:mb-0 mt-14 lg:mt-0 relative">
+      {/* ✨ 修正重點：
+          1. 移除 mt-14, mb-16 (Margin 容易導致版面溢出)
+          2. 改用 pt-14 (避開上方 Header), pb-16 (避開下方 Nav)
+          3. 保留 h-full 與 flex-1 確保佔滿剩餘空間
+      */}
+      <div className="flex flex-col flex-1 min-w-0 h-full border-r border-slate-800 pt-14 pb-16 lg:pt-0 lg:pb-0 relative">
         
         {/* 手機版 Hero 彈窗 */}
         {showMobileHero && (
@@ -64,10 +69,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            {/* ✨ 修正：完全移除外層 Header，解決「雙重叉叉」問題 */}
-            
             <div className="flex-1 overflow-hidden relative">
-               {/* RightPanel 內部會渲染它自己的關閉按鈕 */}
                <RightPanel onHeroClose={() => setShowMobileHero(false)} />
             </div>
           </div>
@@ -85,9 +87,15 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function ClientLayout({ children }: { children: React.ReactNode }) {
+export default function ClientLayout({ 
+  children, 
+  initialSongs 
+}: { 
+  children: React.ReactNode; 
+  initialSongs: GroupedSong[]; 
+}) {
   return (
-    <PlayerProvider>
+    <PlayerProvider initialSongs={initialSongs}>
       <LayoutContent>{children}</LayoutContent>
     </PlayerProvider>
   );

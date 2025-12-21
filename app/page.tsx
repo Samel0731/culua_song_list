@@ -1,126 +1,179 @@
 'use client';
 
-import { useMemo, useState, useEffect, useRef } from 'react';
-import { Music2, User, RefreshCw, Search } from 'lucide-react';
+import { useMemo, useRef, useState, useEffect } from 'react';
+import { Music2, User, ChevronRight, Play, Star, Clock, Sparkles, ChevronLeft } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { usePlayer } from '@/context/PlayerContext';
+import Link from 'next/link';
+import { GroupedSong } from '@/utils/dataProcessor';
 
-export default function SongListPage() {
-  const { t } = useLanguage();
-  const { allSongs, loading, playSong, currentSong } = usePlayer();
-  
-  const [searchTerm, setSearchTerm] = useState('');
-  const [visibleCount, setVisibleCount] = useState(20);
-  const loaderRef = useRef<HTMLDivElement>(null);
+// UI 元件：歌曲卡片 (保持不變)
+const SongCard = ({ song, onClick, label, labelColor }: { song: GroupedSong, onClick: () => void, label?: string, labelColor?: string }) => (
+  <button 
+    onClick={onClick}
+    className="flex-shrink-0 w-[160px] lg:w-[200px] min-h-[140px] p-4 rounded-2xl bg-slate-800 border border-slate-700/50 hover:bg-slate-750 hover:border-slate-500 transition-all group/card text-left flex flex-col justify-between relative overflow-hidden snap-start shadow-sm hover:shadow-md hover:-translate-y-1"
+  >
+    <Music2 className="absolute -right-4 -bottom-4 text-white/5 w-24 h-24 group-hover/card:scale-110 group-hover/card:rotate-12 transition-transform duration-500 pointer-events-none" />
 
-  const filteredSongs = useMemo(() => {
-    return allSongs.filter(song => {
-      const matchesSearch = song.songName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                            song.artist.toLowerCase().includes(searchTerm.toLowerCase());
-      return matchesSearch;
-    });
-  }, [allSongs, searchTerm]);
+    <div className="relative z-10 w-full">
+      {label && (
+        <div className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-md mb-2 ${labelColor || 'bg-blue-500/20 text-blue-300'}`}>
+          {label}
+        </div>
+      )}
+      
+      <h3 className="font-bold text-slate-100 text-sm lg:text-base line-clamp-2 leading-tight mb-1 group-hover/card:text-blue-300 transition-colors">
+        {song.songName}
+      </h3>
+      <p className="text-xs text-slate-400 flex items-center gap-1 truncate">
+        <User size={12} /> {song.artist}
+      </p>
+    </div>
 
-  useEffect(() => {
-    setVisibleCount(20);
-  }, [searchTerm, allSongs]);
+    <div className="relative z-10 pt-3 mt-2 border-t border-slate-700/50 flex items-center justify-between text-[10px] lg:text-xs text-slate-500 font-medium">
+       <span>{song.versions.length} versions</span>
+       
+       <div className="w-6 h-6 rounded-full bg-slate-700/50 flex items-center justify-center group-hover/card:bg-blue-500 group-hover/card:text-white transition-colors">
+         <Play size={10} className="fill-current ml-0.5" />
+       </div>
+    </div>
+  </button>
+);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      const target = entries[0];
-      if (target.isIntersecting) {
-        setVisibleCount((prev) => Math.min(prev + 20, filteredSongs.length));
-      }
-    }, {
-      root: null,
-      rootMargin: '100px',
-      threshold: 0, // ✨ 修正：設為 0，只要碰到就觸發，比較靈敏
-    });
+// 可捲動的區塊容器 (保持不變)
+const ScrollableSection = ({ title, icon, href, children }: { title: string, icon: React.ReactNode, href?: string, children: React.ReactNode }) => {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-    if (loaderRef.current) {
-      observer.observe(loaderRef.current);
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 300;
+      scrollContainerRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
     }
-
-    return () => {
-      if (loaderRef.current) {
-        observer.unobserve(loaderRef.current);
-      }
-    };
-  }, [filteredSongs.length]);
-
-  const displayedSongs = filteredSongs.slice(0, visibleCount);
+  };
 
   return (
-    <div className="flex flex-col h-full w-full bg-slate-900 text-slate-100">
-      <header className="px-4 py-3 border-b border-slate-800 flex items-center justify-between shrink-0 bg-slate-900/95 backdrop-blur z-10">
-        <h2 className="text-lg lg:text-xl font-bold flex items-center gap-2 text-white">
-          <Music2 className="text-blue-400" size={24} />
-          <span className="truncate">{t.nav_home}</span>
+    <div className="group/section relative mb-2"> 
+      <div className="flex items-center justify-between px-4 lg:px-8 mb-3 mt-8 first:mt-4">
+        <h2 className="text-lg lg:text-xl font-bold text-white flex items-center gap-2">
+          {icon} {title}
         </h2>
-        <div className="flex items-center gap-2">
-            <button onClick={() => window.location.reload()} className="p-2 rounded-full hover:bg-slate-800 text-slate-400 transition-colors">
-              <RefreshCw className={loading ? 'animate-spin' : ''} size={20} />
-            </button>
+        {href && (
+          <Link href={href} className="text-xs lg:text-sm text-slate-400 hover:text-white flex items-center gap-1 transition-colors px-2 py-1 rounded-full hover:bg-slate-800">
+            View All <ChevronRight size={14} />
+          </Link>
+        )}
+      </div>
+
+      <div className="relative">
+        <button 
+          onClick={() => scroll('left')}
+          className="hidden lg:flex absolute left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm border border-white/10 opacity-0 group-hover/section:opacity-100 transition-opacity duration-300 hover:bg-blue-600 hover:scale-110 disabled:opacity-0"
+        >
+          <ChevronLeft size={24} />
+        </button>
+
+        <div 
+          ref={scrollContainerRef}
+          className="flex overflow-x-auto px-4 lg:px-8 pb-6 gap-4 snap-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']"
+        >
+          {children}
         </div>
-      </header>
 
-      <div className="p-3 border-b border-slate-800 space-y-3">
-          <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
-              <input 
-                  type="text" 
-                  placeholder={t.search_placeholder}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-slate-800 text-slate-200 pl-9 pr-4 py-2 rounded-lg text-sm border border-slate-700 focus:outline-none focus:border-blue-500 transition-colors placeholder:text-slate-600"
-              />
-          </div>
+        <button 
+          onClick={() => scroll('right')}
+          className="hidden lg:flex absolute right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm border border-white/10 opacity-0 group-hover/section:opacity-100 transition-opacity duration-300 hover:bg-blue-600 hover:scale-110"
+        >
+          <ChevronRight size={24} />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default function HomePage() {
+  const { t } = useLanguage();
+  const { allSongs, loading, playSong } = usePlayer();
+  
+  // 1. 最新收錄 (固定排序，使用 useMemo 安全)
+  const latestSongs = useMemo(() => {
+    return [...allSongs]
+      .sort((a, b) => new Date(b.versions[0].date).getTime() - new Date(a.versions[0].date).getTime())
+      .slice(0, 10);
+  }, [allSongs]);
+
+  // 2. 熱門金曲 (固定排序，使用 useMemo 安全)
+  const popularSongs = useMemo(() => {
+    return [...allSongs].sort((a, b) => b.versions.length - a.versions.length).slice(0, 10);
+  }, [allSongs]);
+
+  // ✨ 修正重點：隨機探索改用 useState + useEffect
+  // 這樣能確保隨機邏輯只在客戶端執行，不會造成 SSR 不一致
+  const [randomPicks, setRandomPicks] = useState<GroupedSong[]>([]);
+
+  useEffect(() => {
+    if (allSongs.length > 0) {
+      // 在 useEffect 內部執行隨機排序
+      const shuffled = [...allSongs].sort(() => 0.5 - Math.random()).slice(0, 10);
+      setRandomPicks(shuffled);
+    }
+  }, [allSongs]);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col h-full w-full bg-slate-900 items-center justify-center text-slate-500 gap-2">
+        <div className="w-8 h-8 border-2 border-slate-600 border-t-blue-500 rounded-full animate-spin" />
+        <p className="text-sm">{t.loading}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col h-full w-full bg-slate-900 text-slate-100 overflow-y-auto pb-32">
+      
+      {/* 權威描述 */}
+      <div className="px-6 lg:px-8 pt-6 pb-2">
+        <p className="text-xs text-slate-500 leading-relaxed border-l-2 border-blue-500 pl-3" dangerouslySetInnerHTML={{ __html: t.home_authority_desc }} />
       </div>
 
-      {/* ✨ 修正：增加 pb-24 確保底部有足夠空間讓 loader 露出來 */}
-      <div className="flex-1 overflow-y-auto p-2 pb-24 scrollbar-thin scrollbar-thumb-slate-700">
-          {loading ? (
-              <div className="text-slate-500 text-center py-10 text-sm animate-pulse">
-              {t.loading}
-              </div>
-          ) : (
-              <div className="space-y-2">
-              {displayedSongs.map((song) => (
-                  <div
-                  key={song.songName}
-                  onClick={() => playSong(song)}
-                  className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all duration-200 group
-                      ${currentSong?.songName === song.songName
-                          ? 'bg-blue-600/20 border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.1)]'
-                          : 'bg-slate-800/50 border-slate-700/50 hover:bg-slate-750 hover:border-slate-600'
-                      }`}
-                  >
-                  <div className="min-w-0 flex-1 mr-2">
-                      <div className={`font-bold text-sm lg:text-base truncate transition-colors ${currentSong?.songName === song.songName ? 'text-blue-300' : 'text-slate-200 group-hover:text-white'}`}>
-                      {song.songName}
-                      </div>
-                      <div className="text-xs text-slate-500 flex items-center gap-1 truncate group-hover:text-slate-400">
-                      <User size={10} /> {song.artist}
-                      </div>
-                  </div>
-                  <div className="text-right shrink-0">
-                      {song.versions.length > 1 && (
-                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-700 text-slate-300">
-                          +{song.versions.length - 1}
-                          </span>
-                      )}
-                  </div>
-                  </div>
-              ))}
-              
-              {visibleCount < filteredSongs.length && (
-                 <div ref={loaderRef} className="py-6 flex justify-center w-full">
-                   <div className="w-6 h-6 border-2 border-slate-600 border-t-blue-500 rounded-full animate-spin" />
-                 </div>
-              )}
-              </div>
-          )}
+      {/* 1. 最新收錄 */}
+      <ScrollableSection title={t.new_tag || "Latest Updates"} icon={<Clock className="text-emerald-400" />} href="/songs">
+        {latestSongs.map(song => (
+          <SongCard key={song.songName} song={song} onClick={() => playSong(song)} label="NEW" labelColor="bg-emerald-500/20 text-emerald-300" />
+        ))}
+      </ScrollableSection>
+
+      {/* 2. 熱門金曲 */}
+      <ScrollableSection title="Most Performed" icon={<Star className="text-yellow-400" />} href="/songs">
+        {popularSongs.map(song => (
+          <SongCard key={song.songName} song={song} onClick={() => playSong(song)} label={`TOP ${song.versions.length}`} labelColor="bg-yellow-500/20 text-yellow-300" />
+        ))}
+      </ScrollableSection>
+
+      {/* 3. 隨機探索 */}
+      {/* 只有當 randomPicks 有資料時才顯示內容，避免空渲染 */}
+      {randomPicks.length > 0 && (
+        <ScrollableSection title="Discover" icon={<Sparkles className="text-purple-400" />}>
+          {randomPicks.map(song => (
+            <SongCard key={song.songName} song={song} onClick={() => playSong(song)} />
+          ))}
+        </ScrollableSection>
+      )}
+
+      {/* 底部行動呼籲 (CTA) */}
+      <div className="mx-4 lg:mx-8 mt-6 mb-8 p-6 lg:p-8 rounded-3xl bg-gradient-to-r from-blue-900/30 to-slate-800/50 border border-slate-700/50 text-center shadow-lg">
+        <h3 className="text-lg lg:text-xl font-bold text-white mb-2">Looking for something specific?</h3>
+        <p className="text-slate-400 text-sm mb-6">Search through the complete archive of <span className="text-blue-300 font-bold">{allSongs.length}</span> songs.</p>
+        <Link 
+          href="/songs" 
+          className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-full font-bold transition-all hover:scale-105 shadow-md active:scale-95"
+        >
+          <Music2 size={18} /> Browse Full Library
+        </Link>
       </div>
+
     </div>
   );
 }

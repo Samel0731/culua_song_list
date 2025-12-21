@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Music2, Mic2, ListMusic, Globe, Instagram, Youtube, Sparkles } from 'lucide-react';
+// ✨ 修改 1: 引入 Info 圖示
+import { Music2, Mic2, ListMusic, Globe, Instagram, Youtube, Sparkles, Info } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { Language } from '@/utils/translations';
 import { useState, useEffect } from 'react';
 
-// 自定义图示
+// 自定義圖示
 const TikTokIcon = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
 );
@@ -49,7 +50,9 @@ export default function Sidebar({ onOpenHero }: SidebarProps) {
   const navItems = [
     { label: t.nav_home, path: '/', icon: <Music2 size={24} /> },
     { label: t.nav_songs, path: '/songs', icon: <ListMusic size={24} /> },
-    { label: t.nav_artists, path: '/artists', icon: <Mic2 size={24} /> }
+    { label: t.nav_artists, path: '/artists', icon: <Mic2 size={24} /> },
+    // ✨ 修改 2: 加入「關於」頁面到導航選單 (電腦版/手機版都會自動出現)
+    { label: t.about_title, path: '/about', icon: <Info size={24} /> }
   ];
 
   const socialLinks = [
@@ -73,7 +76,7 @@ export default function Sidebar({ onOpenHero }: SidebarProps) {
         </div>
         
         <div className="flex items-center gap-3">
-           {/* 手機版正在直播时：显示 LIVE 标签，隐藏社群图标以节省空间 */}
+           {/* 手機版正在直播時：顯示 LIVE 標籤 */}
            {isLive ? (
               <a href="https://www.youtube.com/@CULUAvsinger/live" target="_blank" className="flex items-center gap-1 bg-red-900/30 px-3 py-1 rounded-full border border-red-800 mr-1">
                 <span className="relative flex h-2 w-2">
@@ -83,7 +86,6 @@ export default function Sidebar({ onOpenHero }: SidebarProps) {
                 <span className="text-[10px] font-bold text-red-500 ml-1">ON AIR</span>
               </a>
            ) : (
-             // 没直播时才显示社群图标
              <div className="flex items-center gap-3 pr-2 border-r border-slate-700">
                {socialLinks.map((s) => (
                  <a key={s.label} href={s.href} target="_blank" className="text-slate-400 hover:text-white shrink-0">{s.icon}</a>
@@ -98,7 +100,7 @@ export default function Sidebar({ onOpenHero }: SidebarProps) {
         </div>
       </header>
 
-      {/* === 電腦版 Sidebar (保持不变) === */}
+      {/* === 電腦版 Sidebar === */}
       <aside className="hidden lg:flex flex-col w-20 xl:w-64 border-r border-slate-800 bg-slate-950/50 shrink-0 z-30">
         <div className="p-4 flex flex-col items-center xl:items-start justify-center border-b border-slate-800 h-[80px] relative">
           <div className="flex items-center gap-3">
@@ -127,12 +129,13 @@ export default function Sidebar({ onOpenHero }: SidebarProps) {
         </nav>
 
         <div className="p-4 border-t border-slate-800 space-y-4">
-            <div className="flex flex-col xl:flex-row gap-4 items-center justify-center xl:justify-start">
+            <div className="flex flex-col xl:flex-row gap-4 items-center justify-center">
                {socialLinks.map((s) => (
                  <a key={s.label} href={s.href} target="_blank" className="text-slate-500 hover:text-white hover:scale-110">{s.icon}</a>
                ))}
             </div>
-            <div className="flex gap-1 bg-slate-900 p-1 rounded-lg justify-center xl:justify-start">
+            {/* ✨ 修改 3: 語言切換區塊強制置中 (移除 xl:justify-start，改用 justify-center) */}
+            <div className="flex gap-1 bg-slate-900 p-1 rounded-lg justify-center">
                 {(['zh', 'ja', 'en'] as Language[]).map((l) => (
                     <button key={l} onClick={() => setLang(l)} className={`px-2 py-1 text-xs rounded-md ${lang === l ? 'bg-slate-700 text-white font-bold' : 'text-slate-500'}`}>
                         {l === 'zh' ? '繁' : l === 'ja' ? 'JP' : 'EN'}
@@ -153,7 +156,7 @@ export default function Sidebar({ onOpenHero }: SidebarProps) {
                 <div className={isActive ? 'scale-110' : ''}>{item.icon}</div>
                 <span className="text-[10px] font-medium">{item.label}</span>
                 
-                {/* ✨ 修正：在底部导航的「歌回纪录」图标上也加回小红点，确保一定看得到 */}
+                {/* 底部導航的直播小紅點 (僅首頁顯示) */}
                 {isLive && item.path === '/' && (
                     <span className="absolute top-2 right-4 flex h-2.5 w-2.5">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
@@ -164,6 +167,7 @@ export default function Sidebar({ onOpenHero }: SidebarProps) {
             );
           })}
           
+          {/* 推薦按鈕 (僅首頁顯示) */}
           {pathname === '/' && (
             <button onClick={onOpenHero} className="flex flex-col items-center justify-center w-full h-full gap-1 text-yellow-400 hover:text-yellow-200">
               <Sparkles size={24} className="fill-current" />
