@@ -10,11 +10,24 @@ export interface Translation {
   nav_home: string;
   nav_songs: string;
   nav_artists: string;
+  nav_recommend: string; // ✨ 新增：推薦 (Mobile Nav)
+  on_air: string;        // ✨ 新增：ON AIR
   new_tag: string;
   sort_name: string;
   sort_count: string;
   select_artist_prompt: string;
   total_songs: string;
+
+  // 首頁區塊 (Home Sections)
+  section_most_performed: string; // ✨ 新增
+  section_discover: string;       // ✨ 新增
+  card_versions: string;          // ✨ 新增：卡片上的 versions 文字
+  
+  // 首頁底部 CTA
+  cta_title: string;       // ✨ 新增
+  cta_desc_prefix: string; // ✨ 新增
+  cta_desc_suffix: string; // ✨ 新增
+  cta_btn: string;         // ✨ 新增
 
   // Hero Section (首頁推薦區)
   hero_welcome_title: string;
@@ -37,6 +50,8 @@ export interface Translation {
   original_link: string;
   versions: string;
   select_song_prompt: string;
+  tag_latest: string;      // ✨ 新增：版本列表的 LATEST
+  stream_archive: string;  // ✨ 新增：Stream Archive
   
   // 權威描述 (SEO)
   home_authority_desc: string;
@@ -45,6 +60,7 @@ export interface Translation {
   
   // 關於頁面 (About)
   about_title: string;
+  about_subtitle: string; // ✨ 新增：副標題
   about_intro_title: string;
   about_intro_content_1: string;
   about_intro_content_2: string;
@@ -55,6 +71,9 @@ export interface Translation {
   about_source_link: string;
   about_disclaimer_title: string;
   about_disclaimer_content: string;
+
+  // Footer
+  footer: string;
 }
 
 export const translations: Record<Language, Translation> = {
@@ -67,11 +86,24 @@ export const translations: Record<Language, Translation> = {
     nav_home: "首頁",
     nav_songs: "所有歌曲",
     nav_artists: "歌手列表",
+    nav_recommend: "推薦",
+    on_air: "直播中",
     new_tag: "最新",
     sort_name: "依歌名",
     sort_count: "依次數",
     select_artist_prompt: "請選擇一位歌手查看詳細資訊",
     total_songs: "共 {count} 首歌",
+
+    // 首頁區塊
+    section_most_performed: "熱門金曲",
+    section_discover: "隨機探索",
+    card_versions: "個版本",
+    
+    // 首頁 CTA
+    cta_title: "想要找特定的歌？",
+    cta_desc_prefix: "搜尋完整的",
+    cta_desc_suffix: "首歌庫。",
+    cta_btn: "瀏覽完整歌單",
 
     // Hero Section
     hero_welcome_title: "歡迎來到 <span class='text-blue-400'>CULUA</span><br/>非官方歌回資料庫",
@@ -80,7 +112,6 @@ export const translations: Record<Language, Translation> = {
     hero_card_latest_desc: "收聽 CULUA 最新發布的原創曲目。",
     hero_card_classic_title: "必聽經典",
     hero_card_classic_desc: "剛認識 CULUA？先從這首開始。",
-    // ✨ 修改：移除「萌」，改為「反差風格」
     hero_card_gap_title: "反差風格",
     hero_card_gap_desc: "感受帥氣與可愛的強烈反差。",
     hero_play_now: "立即播放",
@@ -95,6 +126,8 @@ export const translations: Record<Language, Translation> = {
     original_link: "原片連結",
     versions: "版本紀錄",
     select_song_prompt: "請選擇一首歌開始播放",
+    tag_latest: "最新",
+    stream_archive: "直播存檔",
     
     // SEO 描述
     home_authority_desc: "本網站整理 <strong>VTuber／VSinger CULUA</strong> 在 YouTube 上公開演唱過的所有歌曲，包含原創音樂與翻唱作品。資料來源為官方 YouTube 頻道，並以每小時自動更新方式維持完整性。",
@@ -103,6 +136,7 @@ export const translations: Record<Language, Translation> = {
     
     // About
     about_title: "關於本站",
+    about_subtitle: "關於 CULUA 歌回資料庫",
     about_intro_title: "網站簡介",
     about_intro_content_1: "本網站是專為 <strong>VSinger CULUA</strong> 建立的非官方歌回資料庫。",
     about_intro_content_2: "我們的目標是整理 CULUA 歷年來在 YouTube 直播中演唱過的每一首歌、每一次翻唱 (Cover) 以及原創曲目。透過自動化的資料同步技術，提供粉絲最完整、最快速的搜尋與播放體驗。",
@@ -112,7 +146,10 @@ export const translations: Record<Language, Translation> = {
     about_source_3: "影片播放使用 YouTube 官方嵌入播放器，觀看次數將計入官方影片數據。",
     about_source_link: "前往 CULUA 官方 YouTube 頻道",
     about_disclaimer_title: "免責聲明",
-    about_disclaimer_content: "本網站為粉絲自行開發的非官方專案 (Fan-made Project)，與 CULUA 本人及其所屬營運單位無直接關聯。所有影音內容之版權歸原創作者及官方所有。如需聯絡開發者或回報問題，請透過 GitHub 或社群平台聯繫。"
+    about_disclaimer_content: "本網站為粉絲自行開發的非官方專案 (Fan-made Project)，與 CULUA 本人及其所屬營運單位無直接關聯。所有影音內容之版權歸原創作者及官方所有。如需聯絡開發者或回報問題，請透過 GitHub 或社群平台聯繫。",
+
+    // Footer
+    footer: "© 2025 CULUA DB | 非官方粉絲站"
   },
   ja: {
     // 通用
@@ -123,11 +160,24 @@ export const translations: Record<Language, Translation> = {
     nav_home: "ホーム",
     nav_songs: "全曲リスト",
     nav_artists: "歌手リスト",
+    nav_recommend: "おすすめ",
+    on_air: "配信中",
     new_tag: "最新",
     sort_name: "曲名順",
     sort_count: "回数順",
     select_artist_prompt: "歌手を選択して詳細を表示",
     total_songs: "全 {count} 曲",
+
+    // 首頁區塊
+    section_most_performed: "人気の曲",
+    section_discover: "ディスカバリー",
+    card_versions: "バージョン",
+
+    // 首頁 CTA
+    cta_title: "特定の曲をお探しですか？",
+    cta_desc_prefix: "全",
+    cta_desc_suffix: "曲のアーカイブから検索。",
+    cta_btn: "全曲リストを見る",
 
     // Hero Section
     hero_welcome_title: "<span class='text-blue-400'>CULUA</span><br/>非公式歌枠データベースへようこそ",
@@ -136,7 +186,7 @@ export const translations: Record<Language, Translation> = {
     hero_card_latest_desc: "CULUAの最新オリジナル曲を聴く。",
     hero_card_classic_title: "定番の名曲",
     hero_card_classic_desc: "CULUAを知るならまずはこの曲から。",
-    hero_card_gap_title: "ギャップ萌え", // 日文保留原文通常比較自然，若想改也可以改成 "ギャップの魅力"
+    hero_card_gap_title: "ギャップの魅力", 
     hero_card_gap_desc: "かっこよさと可愛さのギャップを感じる。",
     hero_play_now: "今すぐ再生",
     hero_surprise_title: "何を聴くか迷っていますか？",
@@ -150,6 +200,8 @@ export const translations: Record<Language, Translation> = {
     original_link: "元の動画",
     versions: "バージョン履歴",
     select_song_prompt: "曲を選択して再生を開始",
+    tag_latest: "最新",
+    stream_archive: "配信アーカイブ",
     
     // SEO
     home_authority_desc: "本サイトは <strong>VTuber／VSinger CULUA</strong> がYouTubeで公開したすべての歌唱曲（オリジナル曲およびカバー曲を含む）をまとめたものです。データは公式YouTubeチャンネルに基づき、1時間ごとの自動更新によって完全性を維持しています。",
@@ -158,6 +210,7 @@ export const translations: Record<Language, Translation> = {
     
     // About
     about_title: "このサイトについて",
+    about_subtitle: "CULUA 歌枠データベースについて",
     about_intro_title: "サイト紹介",
     about_intro_content_1: "本サイトは <strong>VSinger CULUA</strong> のために作られた非公式歌枠データベースです。",
     about_intro_content_2: "CULUAがこれまでのYouTube配信で歌った全楽曲、カバー、およびオリジナル曲を整理することを目的としています。自動データ同期技術により、ファンに最も完全で高速な検索・再生体験を提供します。",
@@ -167,7 +220,10 @@ export const translations: Record<Language, Translation> = {
     about_source_3: "動画再生にはYouTube公式の埋め込みプレーヤーを使用しており、再生回数は公式動画のデータにカウントされます。",
     about_source_link: "CULUA公式YouTubeチャンネルへ",
     about_disclaimer_title: "免責事項",
-    about_disclaimer_content: "本サイトはファンによる非公式プロジェクト（Fan-made Project）であり、CULUA本人および所属運営元とは直接の関係はありません。すべての音声・映像コンテンツの著作権は原作者および公式に帰属します。開発者への連絡や問題の報告は、GitHubまたはSNSを通じてお願いします。"
+    about_disclaimer_content: "本サイトはファンによる非公式プロジェクト（Fan-made Project）であり、CULUA本人および所属運営元とは直接の関係はありません。すべての音声・映像コンテンツの著作権は原作者および公式に帰属します。開発者への連絡や問題の報告は、GitHubまたはSNSを通じてお願いします。",
+
+    // Footer
+    footer: "© 2025 CULUA DB | 非公式ファンサイト"
   },
   en: {
     // 通用
@@ -178,11 +234,24 @@ export const translations: Record<Language, Translation> = {
     nav_home: "Home",
     nav_songs: "All Songs",
     nav_artists: "Artists",
+    nav_recommend: "Recommended",
+    on_air: "ON AIR",
     new_tag: "New",
     sort_name: "By Name",
     sort_count: "By Count",
     select_artist_prompt: "Select an artist to view details",
     total_songs: "{count} songs",
+
+    // 首頁區塊
+    section_most_performed: "Most Performed",
+    section_discover: "Discover",
+    card_versions: "versions",
+
+    // 首頁 CTA
+    cta_title: "Looking for something specific?",
+    cta_desc_prefix: "Search through the complete archive of",
+    cta_desc_suffix: "songs.",
+    cta_btn: "Browse Full Library",
 
     // Hero Section
     hero_welcome_title: "Welcome to <span class='text-blue-400'>CULUA</span><br/>Unofficial Song Database",
@@ -191,7 +260,7 @@ export const translations: Record<Language, Translation> = {
     hero_card_latest_desc: "Listen to CULUA's latest original song.",
     hero_card_classic_title: "Classic Hits",
     hero_card_classic_desc: "New to CULUA? Start with this one.",
-    hero_card_gap_title: "Gap Appeal", // 英文對應改成 Gap Appeal 或保持 Gap Moe
+    hero_card_gap_title: "Gap Appeal", 
     hero_card_gap_desc: "Feel the gap between cool and cute.",
     hero_play_now: "Play Now",
     hero_surprise_title: "Don't know what to listen to?",
@@ -205,6 +274,8 @@ export const translations: Record<Language, Translation> = {
     original_link: "Original Video",
     versions: "Versions",
     select_song_prompt: "Select a song to start playback",
+    tag_latest: "LATEST",
+    stream_archive: "Stream Archive",
     
     // SEO
     home_authority_desc: "This website compiles all songs performed by <strong>VTuber/VSinger CULUA</strong> on YouTube, including original music and cover works. Data is sourced from the official YouTube channel and maintained with hourly automated updates for completeness.",
@@ -213,6 +284,7 @@ export const translations: Record<Language, Translation> = {
     
     // About
     about_title: "About",
+    about_subtitle: "About CULUA Song Database",
     about_intro_title: "Introduction",
     about_intro_content_1: "This website is an unofficial song database dedicated to <strong>VSinger CULUA</strong>.",
     about_intro_content_2: "Our goal is to catalog every song, cover, and original track CULUA has performed in YouTube livestreams over the years. Through automated data synchronization, we provide fans with the most complete and fast search and playback experience.",
@@ -222,6 +294,9 @@ export const translations: Record<Language, Translation> = {
     about_source_3: "Video playback uses the official YouTube embedded player, and views are counted towards official video statistics.",
     about_source_link: "Visit CULUA Official YouTube Channel",
     about_disclaimer_title: "Disclaimer",
-    about_disclaimer_content: "This website is an unofficial fan-made project and is not directly affiliated with CULUA or her management. All copyright of audio and video content belongs to the original creators and officials. To contact the developer or report issues, please reach out via GitHub or social media."
+    about_disclaimer_content: "This website is an unofficial fan-made project and is not directly affiliated with CULUA or her management. All copyright of audio and video content belongs to the original creators and officials. To contact the developer or report issues, please reach out via GitHub or social media.",
+
+    // Footer
+    footer: "© 2025 CULUA DB | Fan-made Project"
   }
 };

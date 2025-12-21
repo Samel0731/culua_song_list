@@ -7,40 +7,46 @@ import { usePlayer } from '@/context/PlayerContext';
 import Link from 'next/link';
 import { GroupedSong } from '@/utils/dataProcessor';
 
-// UI 元件：歌曲卡片 (保持不變)
-const SongCard = ({ song, onClick, label, labelColor }: { song: GroupedSong, onClick: () => void, label?: string, labelColor?: string }) => (
-  <button 
-    onClick={onClick}
-    className="flex-shrink-0 w-[160px] lg:w-[200px] min-h-[140px] p-4 rounded-2xl bg-slate-800 border border-slate-700/50 hover:bg-slate-750 hover:border-slate-500 transition-all group/card text-left flex flex-col justify-between relative overflow-hidden snap-start shadow-sm hover:shadow-md hover:-translate-y-1"
-  >
-    <Music2 className="absolute -right-4 -bottom-4 text-white/5 w-24 h-24 group-hover/card:scale-110 group-hover/card:rotate-12 transition-transform duration-500 pointer-events-none" />
+// ✨ UI 元件：歌曲卡片
+// 修改重點：在內部使用 useLanguage() 來翻譯 "versions"
+const SongCard = ({ song, onClick, label, labelColor }: { song: GroupedSong, onClick: () => void, label?: string, labelColor?: string }) => {
+  const { t } = useLanguage(); // ✨ 取得翻譯 hook
 
-    <div className="relative z-10 w-full">
-      {label && (
-        <div className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-md mb-2 ${labelColor || 'bg-blue-500/20 text-blue-300'}`}>
-          {label}
+  return (
+    <button 
+      onClick={onClick}
+      className="flex-shrink-0 w-[160px] lg:w-[200px] min-h-[140px] p-4 rounded-2xl bg-slate-800 border border-slate-700/50 hover:bg-slate-750 hover:border-slate-500 transition-all group/card text-left flex flex-col justify-between relative overflow-hidden snap-start shadow-sm hover:shadow-md hover:-translate-y-1"
+    >
+      <Music2 className="absolute -right-4 -bottom-4 text-white/5 w-24 h-24 group-hover/card:scale-110 group-hover/card:rotate-12 transition-transform duration-500 pointer-events-none" />
+
+      <div className="relative z-10 w-full">
+        {label && (
+          <div className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-md mb-2 ${labelColor || 'bg-blue-500/20 text-blue-300'}`}>
+            {label}
+          </div>
+        )}
+        
+        <h3 className="font-bold text-slate-100 text-sm lg:text-base line-clamp-2 leading-tight mb-1 group-hover/card:text-blue-300 transition-colors">
+          {song.songName}
+        </h3>
+        <p className="text-xs text-slate-400 flex items-center gap-1 truncate">
+          <User size={12} /> {song.artist}
+        </p>
+      </div>
+
+      <div className="relative z-10 pt-3 mt-2 border-t border-slate-700/50 flex items-center justify-between text-[10px] lg:text-xs text-slate-500 font-medium">
+        {/* ✨ 修改：使用翻譯變數 card_versions */}
+        <span>{song.versions.length} {t.card_versions}</span>
+        
+        <div className="w-6 h-6 rounded-full bg-slate-700/50 flex items-center justify-center group-hover/card:bg-blue-500 group-hover/card:text-white transition-colors">
+          <Play size={10} className="fill-current ml-0.5" />
         </div>
-      )}
-      
-      <h3 className="font-bold text-slate-100 text-sm lg:text-base line-clamp-2 leading-tight mb-1 group-hover/card:text-blue-300 transition-colors">
-        {song.songName}
-      </h3>
-      <p className="text-xs text-slate-400 flex items-center gap-1 truncate">
-        <User size={12} /> {song.artist}
-      </p>
-    </div>
+      </div>
+    </button>
+  );
+};
 
-    <div className="relative z-10 pt-3 mt-2 border-t border-slate-700/50 flex items-center justify-between text-[10px] lg:text-xs text-slate-500 font-medium">
-       <span>{song.versions.length} versions</span>
-       
-       <div className="w-6 h-6 rounded-full bg-slate-700/50 flex items-center justify-center group-hover/card:bg-blue-500 group-hover/card:text-white transition-colors">
-         <Play size={10} className="fill-current ml-0.5" />
-       </div>
-    </div>
-  </button>
-);
-
-// 可捲動的區塊容器 (保持不變)
+// 可捲動的區塊容器 (邏輯保持不變)
 const ScrollableSection = ({ title, icon, href, children }: { title: string, icon: React.ReactNode, href?: string, children: React.ReactNode }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -97,25 +103,20 @@ export default function HomePage() {
   const { t } = useLanguage();
   const { allSongs, loading, playSong } = usePlayer();
   
-  // 1. 最新收錄 (固定排序，使用 useMemo 安全)
   const latestSongs = useMemo(() => {
     return [...allSongs]
       .sort((a, b) => new Date(b.versions[0].date).getTime() - new Date(a.versions[0].date).getTime())
       .slice(0, 10);
   }, [allSongs]);
 
-  // 2. 熱門金曲 (固定排序，使用 useMemo 安全)
   const popularSongs = useMemo(() => {
     return [...allSongs].sort((a, b) => b.versions.length - a.versions.length).slice(0, 10);
   }, [allSongs]);
 
-  // ✨ 修正重點：隨機探索改用 useState + useEffect
-  // 這樣能確保隨機邏輯只在客戶端執行，不會造成 SSR 不一致
   const [randomPicks, setRandomPicks] = useState<GroupedSong[]>([]);
 
   useEffect(() => {
     if (allSongs.length > 0) {
-      // 在 useEffect 內部執行隨機排序
       const shuffled = [...allSongs].sort(() => 0.5 - Math.random()).slice(0, 10);
       setRandomPicks(shuffled);
     }
@@ -139,23 +140,25 @@ export default function HomePage() {
       </div>
 
       {/* 1. 最新收錄 */}
-      <ScrollableSection title={t.new_tag || "Latest Updates"} icon={<Clock className="text-emerald-400" />} href="/songs">
+      {/* ✨ 修改：使用 t.new_tag */}
+      <ScrollableSection title={t.new_tag} icon={<Clock className="text-emerald-400" />} href="/songs">
         {latestSongs.map(song => (
           <SongCard key={song.songName} song={song} onClick={() => playSong(song)} label="NEW" labelColor="bg-emerald-500/20 text-emerald-300" />
         ))}
       </ScrollableSection>
 
       {/* 2. 熱門金曲 */}
-      <ScrollableSection title="Most Performed" icon={<Star className="text-yellow-400" />} href="/songs">
+      {/* ✨ 修改：使用 t.section_most_performed */}
+      <ScrollableSection title={t.section_most_performed} icon={<Star className="text-yellow-400" />} href="/songs">
         {popularSongs.map(song => (
           <SongCard key={song.songName} song={song} onClick={() => playSong(song)} label={`TOP ${song.versions.length}`} labelColor="bg-yellow-500/20 text-yellow-300" />
         ))}
       </ScrollableSection>
 
       {/* 3. 隨機探索 */}
-      {/* 只有當 randomPicks 有資料時才顯示內容，避免空渲染 */}
       {randomPicks.length > 0 && (
-        <ScrollableSection title="Discover" icon={<Sparkles className="text-purple-400" />}>
+        // ✨ 修改：使用 t.section_discover
+        <ScrollableSection title={t.section_discover} icon={<Sparkles className="text-purple-400" />}>
           {randomPicks.map(song => (
             <SongCard key={song.songName} song={song} onClick={() => playSong(song)} />
           ))}
@@ -164,13 +167,16 @@ export default function HomePage() {
 
       {/* 底部行動呼籲 (CTA) */}
       <div className="mx-4 lg:mx-8 mt-6 mb-8 p-6 lg:p-8 rounded-3xl bg-gradient-to-r from-blue-900/30 to-slate-800/50 border border-slate-700/50 text-center shadow-lg">
-        <h3 className="text-lg lg:text-xl font-bold text-white mb-2">Looking for something specific?</h3>
-        <p className="text-slate-400 text-sm mb-6">Search through the complete archive of <span className="text-blue-300 font-bold">{allSongs.length}</span> songs.</p>
+        {/* ✨ 修改：使用一系列 cta 翻譯變數 */}
+        <h3 className="text-lg lg:text-xl font-bold text-white mb-2">{t.cta_title}</h3>
+        <p className="text-slate-400 text-sm mb-6">
+          {t.cta_desc_prefix} <span className="text-blue-300 font-bold">{allSongs.length}</span> {t.cta_desc_suffix}
+        </p>
         <Link 
           href="/songs" 
           className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-full font-bold transition-all hover:scale-105 shadow-md active:scale-95"
         >
-          <Music2 size={18} /> Browse Full Library
+          <Music2 size={18} /> {t.cta_btn}
         </Link>
       </div>
 

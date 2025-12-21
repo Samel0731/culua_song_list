@@ -16,8 +16,7 @@ export default function AboutPage() {
           <h1 className="text-2xl lg:text-3xl font-bold flex items-center gap-3 text-white mb-2">
             <Info className="text-blue-400" /> {t.about_title}
           </h1>
-          <p className="text-slate-400">About CULUA Song Database – a structured archive of songs performed on YouTube
-</p>
+          <p className="text-slate-400">{t.about_subtitle}</p>
         </div>
 
         {/* 1. 網站目的 */}

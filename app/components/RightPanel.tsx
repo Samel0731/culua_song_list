@@ -98,7 +98,7 @@ const getModeDisplay = () => {
                         <div className={`p-1.5 rounded-full shrink-0 ${isSelected ? 'bg-purple-500 text-white' : 'bg-slate-700 text-slate-400'}`}><Play size={10} className={isSelected ? "fill-current" : ""} /></div>
                         <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2 mb-0.5"><span className={`text-xs font-bold ${isSelected ? 'text-white' : 'text-slate-300'}`}>{ver.date}</span>{idx === 0 && (<span className="text-[9px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/30">LATEST</span>)}</div>
-                            <div className="text-xs text-slate-500 truncate flex items-center gap-1"><Calendar size={10} />{ver.streamTitle || 'Stream Archive'}</div>
+                            <div className="text-xs text-slate-500 truncate flex items-center gap-1"><Calendar size={10} />{ver.streamTitle || t.stream_archive}</div>
                         </div>
                         </button>
                     );

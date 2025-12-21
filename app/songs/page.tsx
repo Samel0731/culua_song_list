@@ -6,7 +6,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { usePlayer } from '@/context/PlayerContext';
 import Fuse from 'fuse.js';
 
-// 骨架屏組件 (保留 UI 優化)
+// 骨架屏組件
 const SongSkeleton = () => (
   <div className="flex items-center justify-between p-3 rounded-lg border border-slate-700/50 bg-slate-800/30 mb-2">
     <div className="flex-1 mr-2 space-y-2">
@@ -19,7 +19,7 @@ const SongSkeleton = () => (
   </div>
 );
 
-// 音頻跳動條組件 (保留微互動)
+// 音頻跳動條組件
 const AudioEqualizer = () => (
   <div className="flex gap-0.5 items-end h-4 w-4 justify-center pb-1">
     <div className="equalizer-bar"></div>
@@ -88,15 +88,13 @@ export default function SongsPage() {
 
   const displayedSongs = filteredSongs.slice(0, visibleCount);
 
-  // 🔥 SEO 重點 1：生成 Schema.org JSON-LD 資料
-  // 這段 JSON 是給機器人看的，不會顯示在畫面上
+  // Schema.org JSON-LD 資料
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
     "name": "Culua YouTube 演唱歌曲完整列表",
     "description": "Culua 歷年於 YouTube 直播與發布的所有歌曲清單，包含翻唱與原創曲。",
     "numberOfItems": allSongs.length,
-    // 為了避免 JSON 太大，我們只列出前 100 首作為範例，這對 SEO 已經足夠
     "itemListElement": allSongs.slice(0, 100).map((song, index) => ({
       "@type": "ListItem",
       "position": index + 1,
@@ -114,7 +112,7 @@ export default function SongsPage() {
   return (
     <div className="flex flex-col h-full w-full bg-slate-900 text-slate-100 overflow-hidden">
       
-      {/* 注入 JSON-LD 結構化資料 */}
+      {/* 注入 JSON-LD */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -125,12 +123,9 @@ export default function SongsPage() {
           <Music className="w-6 h-6" /> {t.nav_songs}
         </div>
         
-        {/* 🔥 SEO 重點 2：加入頁面權威描述 (User 可見) */}
-        {/* 這段文字能建立「來源可信度」，告訴使用者和 AI 這是自動同步的完整資料 */}
+        {/* ✨ 修改：將寫死的中文替換為翻譯變數 */}
         <p className="text-xs text-slate-400 leading-relaxed">
-           以下為 Culua 目前在 YouTube 上公開可查的完整演唱歌曲列表，
-           此列表由伺服器端自動同步官方資料，並持續更新。
-           目前已收錄 <span className="text-slate-200 font-bold">{allSongs.length}</span> 首歌曲。
+           {t.songs_authority_desc_prefix} <span className="text-slate-200 font-bold">{allSongs.length}</span> {t.songs_authority_desc_suffix}
         </p>
 
         <div className="flex gap-2">

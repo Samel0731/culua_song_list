@@ -83,7 +83,7 @@ export default function Sidebar({ onOpenHero }: SidebarProps) {
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
                 </span>
-                <span className="text-[10px] font-bold text-red-500 ml-1">ON AIR</span>
+                <span className="text-[10px] font-bold text-red-500 ml-1">{t.on_air}</span>
               </a>
            ) : (
              <div className="flex items-center gap-3 pr-2 border-r border-slate-700">
@@ -110,7 +110,7 @@ export default function Sidebar({ onOpenHero }: SidebarProps) {
           {isLive && (
             <a href="https://www.youtube.com/@CULUAvsinger/live" target="_blank" className="mt-1 xl:ml-11 flex items-center gap-2 group cursor-pointer">
               <span className="relative flex h-2.5 w-2.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span></span>
-              <span className="hidden xl:block text-[10px] font-bold text-red-500 tracking-wider">ON AIR</span>
+              <span className="hidden xl:block text-[10px] font-bold text-red-500 tracking-wider">{t.on_air}</span>
             </a>
           )}
         </div>
