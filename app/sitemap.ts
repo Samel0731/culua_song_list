@@ -2,32 +2,42 @@ import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://culuasonglist.netlify.app';
-  
+  const currentDate = new Date();
+
   return [
+    // 1. 首頁 (入口)
     {
       url: baseUrl,
-      lastModified: new Date(),
+      lastModified: currentDate,
       changeFrequency: 'daily',
       priority: 1,
     },
+    // 2. 歌曲列表 (核心內容，變動頻繁)
     {
       url: `${baseUrl}/songs`,
-      lastModified: new Date(),
+      lastModified: currentDate,
       changeFrequency: 'daily',
-      priority: 0.9, // 提升一點權重，因為這是核心內容
+      priority: 0.9,
     },
+    // 3. 歌手列表 (核心分類)
     {
       url: `${baseUrl}/artists`,
-      lastModified: new Date(),
+      lastModified: currentDate,
       changeFrequency: 'weekly',
       priority: 0.8,
     },
-    // 🔥 新增 About 頁面
-    // 這頁對建立 E-E-A-T (信任度) 很重要
+    // 4. 專注模式 (功能頁面)
+    {
+      url: `${baseUrl}/focus`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    // 5. 關於頁面 (靜態資訊，信任感來源)
     {
       url: `${baseUrl}/about`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly', // 這頁不會常改，設 monthly 即可
+      lastModified: currentDate,
+      changeFrequency: 'monthly',
       priority: 0.7,
     },
   ];
