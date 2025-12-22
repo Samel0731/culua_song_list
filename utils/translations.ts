@@ -82,6 +82,13 @@ export interface Translation {
 
   // Footer
   footer: string;
+
+  // ✨ 新增：分享功能
+  share_btn: string;
+  share_modal_title: string;
+  share_card_desc: string;
+  share_download: string;
+  share_downloading: string;
 }
 
 export const translations: Record<Language, Translation> = {
@@ -165,7 +172,13 @@ export const translations: Record<Language, Translation> = {
     about_disclaimer_content: "本網站為粉絲自行開發的非官方專案 (Fan-made Project)，與 CULUA 本人及其所屬營運單位無直接關聯。所有影音內容之版權歸原創作者及官方所有。如需聯絡開發者或回報問題，請透過 GitHub 或社群平台聯繫。",
 
     // Footer
-    footer: "© 2025 CULUA DB | 非官方粉絲站"
+    footer: "© 2025 CULUA DB | 非官方粉絲站",
+
+    share_btn: "分享",
+    share_modal_title: "分享這首神曲",
+    share_card_desc: "我在聽這首神曲，你也來聽！",
+    share_download: "下載推坑圖",
+    share_downloading: "生成中...",
   },
   ja: {
     // 通用
@@ -247,7 +260,13 @@ export const translations: Record<Language, Translation> = {
     about_disclaimer_content: "本サイトはファンによる非公式プロジェクト（Fan-made Project）であり、CULUA本人および所属運営元とは直接の関係はありません。すべての音声・映像コンテンツの著作権は原作者および公式に帰属します。開発者への連絡や問題の報告は、GitHubまたはSNSを通じてお願いします。",
 
     // Footer
-    footer: "© 2025 CULUA DB | 非公式ファンサイト"
+    footer: "© 2025 CULUA DB | 非公式ファンサイト",
+
+    share_btn: "共有",
+    share_modal_title: "この神曲を共有",
+    share_card_desc: "この曲めっちゃいい！聴いてみて！",
+    share_download: "画像を保存",
+    share_downloading: "生成中...",
   },
   en: {
     // 通用
@@ -329,6 +348,12 @@ export const translations: Record<Language, Translation> = {
     about_disclaimer_content: "This website is an unofficial fan-made project and is not directly affiliated with CULUA or her management. All copyright of audio and video content belongs to the original creators and officials. To contact the developer or report issues, please reach out via GitHub or social media.",
 
     // Footer
-    footer: "© 2025 CULUA DB | Fan-made Project"
+    footer: "© 2025 CULUA DB | Fan-made Project",
+
+    share_btn: "Share",
+    share_modal_title: "Share this song",
+    share_card_desc: "Listening to this masterpiece!",
+    share_download: "Download Image",
+    share_downloading: "Generating...",
   }
 };

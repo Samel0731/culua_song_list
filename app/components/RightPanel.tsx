@@ -1,15 +1,16 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { usePlayer } from '@/context/PlayerContext';
 import { useLanguage } from '@/context/LanguageContext';
 import HeroSection from './HeroSection';
 import YouTubePlayer from './YouTubePlayer';
 import { 
   User, ExternalLink, X, Music2, Maximize2, Minimize2, 
-  Repeat, Repeat1, Shuffle, Play, Calendar
+  Repeat, Repeat1, Shuffle, Play, Calendar, Share2
 } from 'lucide-react';
+import ShareModal from './ShareModal';
 
 function extractYouTubeId(url: string) {
   if (!url) return '';
@@ -29,6 +30,7 @@ export default function RightPanel({ onHeroClose }: { onHeroClose?: () => void }
   } = usePlayer();
 
   const playerRef = useRef<any>(null);
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   // 全域鍵盤快捷鍵監聽
   useEffect(() => {
@@ -247,13 +249,25 @@ export default function RightPanel({ onHeroClose }: { onHeroClose?: () => void }
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-xl bg-slate-800/40 border border-slate-700/30">
-               <button 
-                 onClick={toggleMode}
-                 className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:bg-slate-700/50 ${modeDisplay.color}`}
-               >
-                 {modeDisplay.icon}
-                 <span>{modeDisplay.text}</span>
-               </button>
+               <div className="flex items-center gap-2">
+                 <button 
+                   onClick={toggleMode}
+                   className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:bg-slate-700/50 ${modeDisplay.color}`}
+                 >
+                   {modeDisplay.icon}
+                   <span>{modeDisplay.text}</span>
+                 </button>
+                 
+                 {/* ✨ 新增：分享按鈕 */}
+                 <button 
+                    onClick={() => setIsShareOpen(true)}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-blue-300 hover:bg-blue-500/10 hover:text-blue-200 transition-all"
+                    title={t.share_btn}
+                 >
+                    <Share2 size={14} />
+                    <span>{t.share_btn}</span>
+                 </button>
+               </div>
 
                {currentVersion && (
                  <a 
@@ -320,6 +334,16 @@ export default function RightPanel({ onHeroClose }: { onHeroClose?: () => void }
                  })}
                </div>
             </div>
+
+            {/* ✨ 渲染 ShareModal */}
+            {currentSong && currentVersion && (
+              <ShareModal 
+                isOpen={isShareOpen}
+                onClose={() => setIsShareOpen(false)}
+                song={currentSong}
+                version={currentVersion}
+              />
+            )}
          </div>
       </div>
     </div>
