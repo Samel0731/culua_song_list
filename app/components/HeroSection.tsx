@@ -1,9 +1,10 @@
 'use client';
 
-// 1. 修正：確保引入了 'X' 圖示
 import { Play, Sparkles, Flame, Star, ChevronUp, X } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { GroupedSong } from '@/utils/dataProcessor';
 
+// 1. 定義 HeroCard (小元件)
 interface HeroCardProps {
   title: string;
   desc: string;
@@ -26,64 +27,61 @@ function HeroCard({ title, desc, icon, color, playText, onClick }: HeroCardProps
         <h3 className={`font-bold text-lg mb-1 ${color}`}>{title}</h3>
         <p className="text-slate-400 text-xs lg:text-sm mb-3 line-clamp-2">{desc}</p>
       </div>
-      <div className="relative z-10 mt-auto">
-        <div className="flex items-center gap-2 text-xs font-medium text-slate-300 group-hover:text-white">
-            <div className="bg-slate-700 p-1.5 rounded-full group-hover:bg-blue-600 transition-colors">
-                <Play size={12} className="fill-current" />
-            </div>
-            <span>{playText}</span>
+      <div className="relative z-10 mt-auto flex items-center gap-2 text-xs font-bold text-slate-500 group-hover:text-white transition-colors">
+        <div className={`p-1.5 rounded-full bg-slate-700/50 group-hover:bg-${color.split('-')[1]}-500 transition-colors`}>
+          <Play size={12} className="fill-current" />
         </div>
+        {playText}
       </div>
     </button>
   );
 }
 
+// 2. 定義 HeroSection 的 Props
 interface HeroSectionProps {
+  onPlayRandom: () => void;  // ✨ 確保這裡有定義
+  onPlaySong: (song: GroupedSong) => void;
   onPlayRecommended: (type: 'classic' | 'gap' | 'latest') => void;
-  onSurprise: () => void;
-  onClose?: () => void;
 }
 
-export default function HeroSection({ onPlayRecommended, onSurprise, onClose }: HeroSectionProps) {
+export default function HeroSection({ 
+  onPlayRandom,  // ✨ 確保這裡有解構出來
+  onPlaySong,
+  onPlayRecommended
+}: HeroSectionProps) {
   const { t } = useLanguage();
 
-  return (
-    <div className="relative w-full bg-slate-900 h-full flex flex-col">
-      
-      {/* 手機版關閉按鈕 (雙重保險，雖然 Layout 也有做) */}
-      {onClose && (
-        <button 
-          onClick={onClose}
-          className="lg:hidden absolute top-3 right-3 z-30 p-2 bg-slate-800/80 rounded-full text-slate-300 hover:text-white border border-slate-700 shadow-md"
-        >
-          <X size={20} />
-        </button>
-      )}
+  // 3. 定義按鈕點擊後的行為
+  const onSurprise = () => {
+    if (onPlayRandom) {
+      onPlayRandom(); // ✨ 這裡呼叫父層傳進來的 playRandom
+    }
+  };
 
-      {/* 內容捲動區 */}
-      <div className="flex-1 w-full flex flex-col p-6 lg:p-10 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700">
-        
-        {/* 標題區 */}
-        <div className="mb-6 lg:mb-8 pr-10 lg:pr-0 shrink-0">
-          <h1 
-              className="text-2xl lg:text-4xl font-bold text-white mb-2"
-              dangerouslySetInnerHTML={{ __html: t.hero_welcome_title }}
-          />
-          <p className="text-slate-400 text-sm lg:text-base max-w-lg">
-            {t.hero_welcome_desc}
-          </p>
+  return (
+    <div className="relative h-full flex flex-col p-6 lg:p-8 overflow-y-auto custom-scrollbar">
+        {/* 歡迎標題區 */}
+        <div className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+           <h1 className="text-3xl lg:text-4xl font-bold text-white mb-3 leading-tight" 
+               dangerouslySetInnerHTML={{ __html: t.hero_welcome_title }} 
+           />
+           <p className="text-slate-400 text-sm lg:text-base leading-relaxed max-w-lg">
+             {t.hero_welcome_desc}
+           </p>
         </div>
 
-        {/* 入坑三部曲 (卡片區) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 shrink-0">
-          <HeroCard 
-            title={t.hero_card_latest_title}
-            desc={t.hero_card_latest_desc}
-            icon={<Sparkles size={64} />}
-            color="text-blue-400"
-            playText={t.hero_play_now}
-            onClick={() => onPlayRecommended('latest')}
-          />
+        {/* 卡片網格區 */}
+        <div className="grid grid-cols-2 gap-3 lg:gap-4 mb-6">
+          <div className="col-span-2">
+            <HeroCard 
+              title={t.hero_card_latest_title}
+              desc={t.hero_card_latest_desc}
+              icon={<Sparkles size={64} />}
+              color="text-emerald-400"
+              playText={t.hero_play_now}
+              onClick={() => onPlayRecommended('latest')}
+            />
+          </div>
 
           <HeroCard 
             title={t.hero_card_classic_title}
@@ -109,17 +107,13 @@ export default function HeroSection({ onPlayRecommended, onSurprise, onClose }: 
           <h3 className="text-xl font-bold text-white mb-2">{t.hero_surprise_title}</h3>
           <p className="text-slate-400 text-sm mb-4">{t.hero_surprise_desc}</p>
           <button 
-            onClick={onSurprise}
-            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-full font-bold transition-all hover:scale-105 shadow-[0_0_20px_rgba(37,99,235,0.3)]"
+            onClick={onSurprise} // ✨ 綁定 onClick
+            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-full font-bold transition-all hover:scale-105 active:scale-95 shadow-lg shadow-blue-900/50"
           >
             <Sparkles size={18} />
             {t.hero_surprise_btn}
           </button>
         </div>
-        
-        {/* 底部留白，確保手機版滑到底不會太貼邊 */}
-        <div className="h-8 lg:hidden shrink-0" />
-      </div>
     </div>
   );
 }

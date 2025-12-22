@@ -25,17 +25,15 @@ interface PlayerContextType {
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
 
-// ✨ 修改 1: 定義 Props 介面，加入 initialSongs
 interface PlayerProviderProps {
   children: React.ReactNode;
   initialSongs: GroupedSong[];
 }
 
-// ✨ 修改 2: 在參數中解構出 initialSongs
 export function PlayerProvider({ children, initialSongs }: PlayerProviderProps) {
-  // ✨ 修改 3: 直接使用傳入的資料初始化 state，並將 loading 設為 false
-  const [allSongs, setAllSongs] = useState<GroupedSong[]>(initialSongs);
-  const [loading, setLoading] = useState(false);
+  // 1. 初始化資料
+  const [allSongs, setAllSongs] = useState<GroupedSong[]>(initialSongs || []);
+  const [loading, setLoading] = useState(false); // 因為是 SSR，Client 端初始 loading 為 false
   
   const [currentSong, setCurrentSong] = useState<GroupedSong | null>(null);
   const [currentVersion, setCurrentVersion] = useState<SongVersion | null>(null);
@@ -43,14 +41,20 @@ export function PlayerProvider({ children, initialSongs }: PlayerProviderProps) 
   const [isExpanded, setIsExpanded] = useState(false);
   const [playMode, setPlayMode] = useState<PlayMode>('list-loop');
 
-  // ✨ 修改 4: 移除了原本的 useEffect (fetchAndProcessSongs)，因為資料已經由 Server 提供了
-
   const playSong = useCallback((song: GroupedSong, version?: SongVersion) => {
+    // 如果沒有指定版本，預設選第一個
+    const targetVersion = version || song.versions[0];
+    
+    // 如果點擊的是當前正在播的版本，只切換播放/暫停
+    if (currentSong?.songName === song.songName && currentVersion?.streamUrl === targetVersion.streamUrl) {
+      setIsPlaying(prev => !prev);
+      return;
+    }
+
     setCurrentSong(song);
-    const ver = version || song.versions[0];
-    setCurrentVersion(ver);
+    setCurrentVersion(targetVersion);
     setIsPlaying(true);
-  }, []);
+  }, [currentSong, currentVersion]);
 
   const closePlayer = useCallback(() => {
     setCurrentSong(null);
@@ -60,8 +64,10 @@ export function PlayerProvider({ children, initialSongs }: PlayerProviderProps) 
   }, []);
 
   const togglePlay = useCallback(() => {
-    setIsPlaying(prev => !prev);
-  }, []);
+    if (currentSong) {
+      setIsPlaying(prev => !prev);
+    }
+  }, [currentSong]);
 
   const toggleMode = useCallback(() => {
     setPlayMode(prev => {
@@ -71,40 +77,67 @@ export function PlayerProvider({ children, initialSongs }: PlayerProviderProps) 
     });
   }, []);
 
-  const playNext = useCallback(() => {
-    if (!currentSong || !currentVersion || allSongs.length === 0) return;
-
-    // 1. 版本循環
-    if (playMode === 'version-loop') {
-      const currentVerIndex = currentSong.versions.findIndex(v => v === currentVersion);
-      if (currentVerIndex !== -1 && currentVerIndex < currentSong.versions.length - 1) {
-        setCurrentVersion(currentSong.versions[currentVerIndex + 1]);
-      } else {
-        setCurrentVersion(currentSong.versions[0]);
-      }
-      return;
-    }
-
-    // 2. 隨機播放
-    if (playMode === 'shuffle') {
-      let nextSong;
-      do {
-        nextSong = allSongs[Math.floor(Math.random() * allSongs.length)];
-      } while (nextSong.songName === currentSong.songName && allSongs.length > 1);
+  // ✨ 修改重點：增強版隨機播放
+  const playRandom = useCallback(() => {
+    // 1. 檢查是否有歌
+    if (allSongs.length === 0) {
+      console.warn("⚠️ 隨機播放失敗：資料庫 (allSongs) 為空。");
       
-      playSong(nextSong);
+      // 🚨 備案：如果資料庫是空的 (例如本地開發沒連 Google Sheet)，
+      // 我們手動建立一個臨時的「隨機歌單」，包含那三首 Hero Songs，確保按鈕有反應。
+      const fallbackSongs: GroupedSong[] = [
+        { songName: "てんぺんちー", artist: "CULUA", versions: [{
+          date: "2025/12/19", streamUrl: "https://youtu.be/k8l_5e1MNqE", streamTitle: "てんぺんちー", timestampSeconds: 0,
+          timestamp: '',
+          songLink: ''
+        }] },
+        { songName: "ベビ・デビ", artist: "CULUA", versions: [{
+          date: "2024/5/18", streamUrl: "https://youtu.be/Hx1KAdapT1M", streamTitle: "ベビ・デビ", timestampSeconds: 0,
+          timestamp: '',
+          songLink: ''
+        }] },
+        { songName: "スペクトロライト", artist: "CULUA", versions: [{
+          date: "2025/05/03", streamUrl: "https://youtu.be/AqTecLnlcOA", streamTitle: "スペクトロライト", timestampSeconds: 0,
+          timestamp: '',
+          songLink: ''
+        }] }
+      ];
+
+      const randomFallback = fallbackSongs[Math.floor(Math.random() * fallbackSongs.length)];
+      
+      alert(`資料庫目前沒有歌曲 (可能是 API 設定問題)。\n將為您播放備用歌曲：${randomFallback.songName}`);
+      playSong(randomFallback);
       return;
     }
 
-    // 3. 列表循環 (預設)
+    // 2. 正常的隨機播放
+    const randomSong = allSongs[Math.floor(Math.random() * allSongs.length)];
+    playSong(randomSong);
+  }, [allSongs, playSong]);
+
+  const playNext = useCallback(() => {
+    if (!currentSong || allSongs.length === 0) return;
+
+    if (playMode === 'version-loop') {
+      const vIndex = currentSong.versions.findIndex(v => v.streamUrl === currentVersion?.streamUrl);
+      let nextVIndex = vIndex + 1;
+      if (nextVIndex >= currentSong.versions.length) nextVIndex = 0;
+      playSong(currentSong, currentSong.versions[nextVIndex]);
+      return;
+    }
+
+    if (playMode === 'shuffle') {
+      playRandom();
+      return;
+    }
+
+    // list-loop
     const currentIndex = allSongs.findIndex(s => s.songName === currentSong.songName);
     let nextIndex = currentIndex + 1;
-    if (nextIndex >= allSongs.length) {
-      nextIndex = 0;
-    }
+    if (nextIndex >= allSongs.length) nextIndex = 0;
     playSong(allSongs[nextIndex]);
 
-  }, [allSongs, currentSong, currentVersion, playMode, playSong]);
+  }, [allSongs, currentSong, currentVersion, playMode, playSong, playRandom]);
 
   const playPrev = useCallback(() => {
      if (!currentSong || allSongs.length === 0) return;
@@ -113,12 +146,6 @@ export function PlayerProvider({ children, initialSongs }: PlayerProviderProps) 
      if (prevIndex < 0) prevIndex = allSongs.length - 1;
      playSong(allSongs[prevIndex]);
   }, [allSongs, currentSong, playSong]);
-
-  const playRandom = useCallback(() => {
-    if (allSongs.length === 0) return;
-    const randomSong = allSongs[Math.floor(Math.random() * allSongs.length)];
-    playSong(randomSong);
-  }, [allSongs, playSong]);
 
   const toggleExpand = useCallback(() => setIsExpanded(prev => !prev), []);
 

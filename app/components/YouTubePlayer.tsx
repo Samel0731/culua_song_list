@@ -15,6 +15,8 @@ interface YouTubePlayerProps {
   endTime?: number;
   onEnd?: () => void;
   isPlaying?: boolean;
+  // ✨ 新增：讓父組件可以拿到 player 實體
+  onPlayerReady?: (player: any) => void;
 }
 
 function extractVideoId(url: string) {
@@ -27,17 +29,24 @@ export default function YouTubePlayer({
   startTime = 0, 
   endTime, 
   onEnd,
-  isPlaying = true 
+  isPlaying = true,
+  onPlayerReady // ✨ 解構出來
 }: YouTubePlayerProps) {
   const playerRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
   // 使用 Ref 來追蹤最新的 onEnd 函式 (避免 Closure 問題)
   const onEndRef = useRef(onEnd);
+  // ✨ 使用 Ref 追蹤 onPlayerReady，避免依賴項變動導致重新初始化
+  const onPlayerReadyRef = useRef(onPlayerReady);
 
   useEffect(() => {
     onEndRef.current = onEnd;
   }, [onEnd]);
+
+  useEffect(() => {
+    onPlayerReadyRef.current = onPlayerReady;
+  }, [onPlayerReady]);
 
   // 1. 載入 API
   useEffect(() => {
@@ -45,70 +54,57 @@ export default function YouTubePlayer({
       const tag = document.createElement('script');
       tag.src = "https://www.youtube.com/iframe_api";
       const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
     }
   }, []);
 
   // 2. 初始化播放器
   useEffect(() => {
-    const videoId = extractVideoId(url);
-    if (!videoId) return;
-
     const initPlayer = () => {
-      // 如果播放器已存在，直接載入新影片 (換歌)
-      if (playerRef.current && typeof playerRef.current.loadVideoById === 'function') {
-        playerRef.current.loadVideoById({
-          videoId: videoId,
-          startSeconds: Math.floor(startTime),
-          endSeconds: endTime ? Math.floor(endTime) : undefined
-        });
-        return;
+      if (!containerRef.current) return;
+      if (playerRef.current) {
+         playerRef.current.destroy();
       }
 
-      // 建立新播放器
-      if (window.YT && window.YT.Player && containerRef.current) {
-        const playerDiv = document.createElement('div');
-        containerRef.current.innerHTML = ''; 
-        containerRef.current.appendChild(playerDiv);
+      const videoId = extractVideoId(url);
+      if (!videoId) return;
 
-        playerRef.current = new window.YT.Player(playerDiv, {
+      // 檢查 YT 是否可用
+      if (window.YT && window.YT.Player) {
+        playerRef.current = new window.YT.Player(containerRef.current, {
           height: '100%',
           width: '100%',
           videoId: videoId,
-          host: 'https://www.youtube.com', // 幫助減少 CORS 錯誤
           playerVars: {
-            autoplay: 1,
-            start: Math.floor(startTime),
-            end: endTime ? Math.floor(endTime) : undefined,
-            modestbranding: 1,
-            rel: 0,
-            controls: 1,
-            playsinline: 1,
-            origin: window.location.origin, // 幫助減少 CORS 錯誤
+            'autoplay': isPlaying ? 1 : 0,
+            'controls': 1,
+            'start': startTime,
+            'playsinline': 1,
+            'rel': 0,
+            'fs': 1, 
           },
           events: {
             'onReady': (event: any) => {
-              event.target.setVolume(50);
-              if (!isPlaying) {
-                event.target.pauseVideo();
+              // ✨ 關鍵修改：將 player 實體傳給父組件
+              if (onPlayerReadyRef.current) {
+                onPlayerReadyRef.current(event.target);
+              }
+
+              if (isPlaying) {
+                event.target.playVideo();
               }
             },
             'onStateChange': (event: any) => {
-              // 狀態 0 = 播放結束 (Ended)
-              if (event.data === 0) {
+              // 0 = ENDED
+              if (event.data === window.YT.PlayerState.ENDED) {
                 if (onEndRef.current) {
-                    onEndRef.current();
+                  onEndRef.current();
                 }
               }
             },
-            // ✨ 第四步重點：錯誤處理
             'onError': (event: any) => {
               console.warn('YouTube Player Error Code:', event.data);
-              // 錯誤代碼說明：
-              // 100: 影片找不到 (被刪除或設為私人)
-              // 101, 150: 影片擁有者禁止在嵌入播放器中播放
-              
-              // 遇到錯誤時，自動跳下一首，保持聆聽體驗不中斷
+              // 遇到錯誤時 (如影片被刪除)，自動跳下一首
               if (onEndRef.current) {
                 console.log('Video unavailable, skipping to next song...');
                 onEndRef.current();
@@ -130,7 +126,7 @@ export default function YouTubePlayer({
       }, 100);
       return () => clearInterval(interval);
     }
-  }, [url]); 
+  }, [url]); // url 改變時重新初始化
 
   // 3. 播放控制 (暫停/播放)
   useEffect(() => {
@@ -143,22 +139,5 @@ export default function YouTubePlayer({
     }
   }, [isPlaying]);
 
-  // 4. 清理
-  useEffect(() => {
-    return () => {
-      if (playerRef.current) {
-        try {
-            playerRef.current.destroy();
-        } catch (e) {}
-        playerRef.current = null;
-      }
-    };
-  }, []);
-
-  return (
-    <div 
-      ref={containerRef} 
-      className="w-full h-full rounded-xl overflow-hidden bg-black relative"
-    />
-  );
+  return <div ref={containerRef} className="w-full h-full rounded-xl overflow-hidden" />;
 }
