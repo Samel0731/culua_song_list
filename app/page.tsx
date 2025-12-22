@@ -8,9 +8,8 @@ import Link from 'next/link';
 import { GroupedSong } from '@/utils/dataProcessor';
 
 // ✨ UI 元件：歌曲卡片
-// 修改重點：在內部使用 useLanguage() 來翻譯 "versions"
 const SongCard = ({ song, onClick, label, labelColor }: { song: GroupedSong, onClick: () => void, label?: string, labelColor?: string }) => {
-  const { t } = useLanguage(); // ✨ 取得翻譯 hook
+  const { t } = useLanguage();
 
   return (
     <button 
@@ -35,7 +34,6 @@ const SongCard = ({ song, onClick, label, labelColor }: { song: GroupedSong, onC
       </div>
 
       <div className="relative z-10 pt-3 mt-2 border-t border-slate-700/50 flex items-center justify-between text-[10px] lg:text-xs text-slate-500 font-medium">
-        {/* ✨ 修改：使用翻譯變數 card_versions */}
         <span>{song.versions.length} {t.card_versions}</span>
         
         <div className="w-6 h-6 rounded-full bg-slate-700/50 flex items-center justify-center group-hover/card:bg-blue-500 group-hover/card:text-white transition-colors">
@@ -46,7 +44,7 @@ const SongCard = ({ song, onClick, label, labelColor }: { song: GroupedSong, onC
   );
 };
 
-// 可捲動的區塊容器 (邏輯保持不變)
+// 可捲動的區塊容器
 const ScrollableSection = ({ title, icon, href, children }: { title: string, icon: React.ReactNode, href?: string, children: React.ReactNode }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -139,8 +137,34 @@ export default function HomePage() {
         <p className="text-xs text-slate-500 leading-relaxed border-l-2 border-blue-500 pl-3" dangerouslySetInnerHTML={{ __html: t.home_authority_desc }} />
       </div>
 
+      {/* ✨ 新增：專注模式入口 (Focus Mode Entry) */}
+      {/* 這個區塊使用了漸層色與動態呼吸燈效果，吸引使用者點擊 */}
+      <div className="mx-4 lg:mx-8 mb-6 mt-4">
+        <Link href="/focus" className="group relative flex items-center justify-between p-4 lg:p-6 rounded-2xl bg-gradient-to-r from-indigo-900/60 to-purple-900/60 border border-indigo-500/30 hover:border-indigo-400/50 transition-all overflow-hidden shadow-lg shadow-indigo-900/20 hover:shadow-indigo-900/40 hover:-translate-y-0.5">
+           
+           {/* 背景裝飾：微弱的紋理 */}
+           <div className="absolute inset-0 bg-[url('/file.svg')] opacity-5 mix-blend-overlay"></div>
+           
+           <div className="relative z-10 flex flex-col items-start gap-1.5">
+             <div className="flex items-center gap-2 text-indigo-200 font-bold text-lg lg:text-xl">
+               <span className="flex h-3 w-3 relative">
+                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                 <span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
+               </span>
+               {t.focus_mode_btn}
+             </div>
+             <p className="text-xs lg:text-sm text-indigo-300/70 font-medium">
+               {t.focus_mode_desc}
+             </p>
+           </div>
+           
+           <div className="relative z-10 bg-indigo-500/20 p-3 rounded-full group-hover:bg-indigo-500 group-hover:text-white transition-colors text-indigo-300 border border-indigo-500/30">
+             <Play size={24} className="ml-1 fill-current" />
+           </div>
+        </Link>
+      </div>
+
       {/* 1. 最新收錄 */}
-      {/* ✨ 修改：使用 t.new_tag */}
       <ScrollableSection title={t.new_tag} icon={<Clock className="text-emerald-400" />} href="/songs">
         {latestSongs.map(song => (
           <SongCard key={song.songName} song={song} onClick={() => playSong(song)} label="NEW" labelColor="bg-emerald-500/20 text-emerald-300" />
@@ -148,7 +172,6 @@ export default function HomePage() {
       </ScrollableSection>
 
       {/* 2. 熱門金曲 */}
-      {/* ✨ 修改：使用 t.section_most_performed */}
       <ScrollableSection title={t.section_most_performed} icon={<Star className="text-yellow-400" />} href="/songs">
         {popularSongs.map(song => (
           <SongCard key={song.songName} song={song} onClick={() => playSong(song)} label={`TOP ${song.versions.length}`} labelColor="bg-yellow-500/20 text-yellow-300" />
@@ -157,7 +180,6 @@ export default function HomePage() {
 
       {/* 3. 隨機探索 */}
       {randomPicks.length > 0 && (
-        // ✨ 修改：使用 t.section_discover
         <ScrollableSection title={t.section_discover} icon={<Sparkles className="text-purple-400" />}>
           {randomPicks.map(song => (
             <SongCard key={song.songName} song={song} onClick={() => playSong(song)} />
@@ -167,7 +189,6 @@ export default function HomePage() {
 
       {/* 底部行動呼籲 (CTA) */}
       <div className="mx-4 lg:mx-8 mt-6 mb-8 p-6 lg:p-8 rounded-3xl bg-gradient-to-r from-blue-900/30 to-slate-800/50 border border-slate-700/50 text-center shadow-lg">
-        {/* ✨ 修改：使用一系列 cta 翻譯變數 */}
         <h3 className="text-lg lg:text-xl font-bold text-white mb-2">{t.cta_title}</h3>
         <p className="text-slate-400 text-sm mb-6">
           {t.cta_desc_prefix} <span className="text-blue-300 font-bold">{allSongs.length}</span> {t.cta_desc_suffix}

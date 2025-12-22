@@ -10,8 +10,8 @@ export interface Translation {
   nav_home: string;
   nav_songs: string;
   nav_artists: string;
-  nav_recommend: string; // ✨ 新增：推薦 (Mobile Nav)
-  on_air: string;        // ✨ 新增：ON AIR
+  nav_recommend: string;
+  on_air: string;
   new_tag: string;
   sort_name: string;
   sort_count: string;
@@ -19,15 +19,15 @@ export interface Translation {
   total_songs: string;
 
   // 首頁區塊 (Home Sections)
-  section_most_performed: string; // ✨ 新增
-  section_discover: string;       // ✨ 新增
-  card_versions: string;          // ✨ 新增：卡片上的 versions 文字
+  section_most_performed: string;
+  section_discover: string;
+  card_versions: string;
   
   // 首頁底部 CTA
-  cta_title: string;       // ✨ 新增
-  cta_desc_prefix: string; // ✨ 新增
-  cta_desc_suffix: string; // ✨ 新增
-  cta_btn: string;         // ✨ 新增
+  cta_title: string;
+  cta_desc_prefix: string;
+  cta_desc_suffix: string;
+  cta_btn: string;
 
   // Hero Section (首頁推薦區)
   hero_welcome_title: string;
@@ -50,9 +50,17 @@ export interface Translation {
   original_link: string;
   versions: string;
   select_song_prompt: string;
-  tag_latest: string;      // ✨ 新增：版本列表的 LATEST
-  stream_archive: string;  // ✨ 新增：Stream Archive
+  tag_latest: string;
+  stream_archive: string;
   
+  // ✨ 新增：專注模式 (Focus Mode)
+  focus_mode_btn: string;
+  focus_mode_desc: string;
+  focus_exit: string;
+  focus_next: string;
+  focus_time_format: string;
+  focus_hint_ui: string;
+
   // 權威描述 (SEO)
   home_authority_desc: string;
   songs_authority_desc_prefix: string;
@@ -60,7 +68,7 @@ export interface Translation {
   
   // 關於頁面 (About)
   about_title: string;
-  about_subtitle: string; // ✨ 新增：副標題
+  about_subtitle: string;
   about_intro_title: string;
   about_intro_content_1: string;
   about_intro_content_2: string;
@@ -129,6 +137,14 @@ export const translations: Record<Language, Translation> = {
     tag_latest: "最新",
     stream_archive: "直播存檔",
     
+    // ✨ 專注模式
+    focus_mode_btn: "開啟專注模式",
+    focus_mode_desc: "純享音樂 BGM • 自動過濾雜談 • 無限循環",
+    focus_exit: "退出專注",
+    focus_next: "切歌",
+    focus_time_format: "zh-TW",
+    focus_hint_ui: "移動游標顯示控制項",
+
     // SEO 描述
     home_authority_desc: "本網站整理 <strong>VTuber／VSinger CULUA</strong> 在 YouTube 上公開演唱過的所有歌曲，包含原創音樂與翻唱作品。資料來源為官方 YouTube 頻道，並以每小時自動更新方式維持完整性。",
     songs_authority_desc_prefix: "以下為 CULUA 目前在 YouTube 上公開可查的完整演唱歌曲列表，此列表由伺服器端自動同步官方資料，並持續更新。目前已收錄",
@@ -203,6 +219,14 @@ export const translations: Record<Language, Translation> = {
     tag_latest: "最新",
     stream_archive: "配信アーカイブ",
     
+    // ✨ 專注模式
+    focus_mode_btn: "作業用BGMモード",
+    focus_mode_desc: "音楽のみ • 雑談なし • 無限ループ",
+    focus_exit: "終了",
+    focus_next: "次へ",
+    focus_time_format: "ja-JP",
+    focus_hint_ui: "カーソルを動かしてコントロールを表示",
+
     // SEO
     home_authority_desc: "本サイトは <strong>VTuber／VSinger CULUA</strong> がYouTubeで公開したすべての歌唱曲（オリジナル曲およびカバー曲を含む）をまとめたものです。データは公式YouTubeチャンネルに基づき、1時間ごとの自動更新によって完全性を維持しています。",
     songs_authority_desc_prefix: "以下は、現在YouTubeで公開されているCULUAの全歌唱曲リストです。このリストはサーバーサイドで公式データを自動同期し、継続的に更新されています。現在",
@@ -277,6 +301,14 @@ export const translations: Record<Language, Translation> = {
     tag_latest: "LATEST",
     stream_archive: "Stream Archive",
     
+    // ✨ 專注模式
+    focus_mode_btn: "Start Focus Mode",
+    focus_mode_desc: "Music Only • No Chit-chat • Infinite Loop",
+    focus_exit: "Exit Focus",
+    focus_next: "Next Song",
+    focus_time_format: "en-US",
+    focus_hint_ui: "Move cursor to show controls",
+
     // SEO
     home_authority_desc: "This website compiles all songs performed by <strong>VTuber/VSinger CULUA</strong> on YouTube, including original music and cover works. Data is sourced from the official YouTube channel and maintained with hourly automated updates for completeness.",
     songs_authority_desc_prefix: "Below is the complete list of songs performed by CULUA currently available on YouTube. This list is automatically synchronized server-side with official data and continuously updated. Currently contains",
