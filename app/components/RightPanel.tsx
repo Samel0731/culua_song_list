@@ -107,7 +107,14 @@ export default function RightPanel({ onHeroClose }: { onHeroClose?: () => void }
   };
 
   const modeDisplay = getModeDisplay();
+  const [heroConfig, setHeroConfig] = useState<any>(null);
 
+    useEffect(() => {
+      fetch('/api/social-config')
+        .then(res => res.json())
+        .then(data => setHeroConfig(data))
+        .catch(err => console.error("Hero Config Error:", err));
+    }, []);
   // ✨ 1. 定義 Hero Section 的推薦歌曲資料與播放邏輯
   // 這段邏輯原本在 if 判斷式裡面，但因為要傳給 HeroSection，必須移到這裡
   const HERO_SONGS = {
@@ -117,18 +124,20 @@ export default function RightPanel({ onHeroClose }: { onHeroClose?: () => void }
   };
 
   const handleHeroPlay = (type: 'classic' | 'gap' | 'latest') => {
-    const target = HERO_SONGS[type];
-    if (!target) return;
+// 優先從 heroConfig 讀取，若無則使用原本的 HERO_SONGS 預設值
+    const videoId = heroConfig?.[`hero_${type}_id`] || (type === 'latest' ? 'k8l_5e1MNqE' : type === 'classic' ? 'Hx1KAdapT1M' : 'AqTecLnlcOA');
+    const songName = heroConfig?.[`hero_${type}_title`] || (type === 'latest' ? "てんぺんちー" : type === 'classic' ? "ベビ・デビ" : "スペクトロライト");
+    const date = heroConfig?.[`hero_${type}_date`] || (type === 'latest' ? "2025/12/19" : type === 'classic' ? "2024/5/18" : "2025/05/03");
     
     // 手動建構一個符合 GroupedSong 格式的物件
     const manualSong: any = {
-      songName: target.songName, 
-      artist: target.artist,
+      songName,
+      artist: "CULUA",
       versions: [{ 
-        date: target.date, 
-        streamUrl: target.url, 
-        streamTitle: target.songName, 
-        timestampSeconds: target.timestamp 
+        date, 
+        streamUrl: `https://youtu.be/${videoId}`, 
+        streamTitle: songName, 
+        timestampSeconds: 0 
       }]
     };
     // 播放這首歌的第一個版本

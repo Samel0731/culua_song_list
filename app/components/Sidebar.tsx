@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-// ✨ 修改 1: 引入 Info 圖示
-import { Music2, Mic2, ListMusic, Globe, Instagram, Youtube, Sparkles, Info } from 'lucide-react';
+// ✨ 加入 BarChart2
+import { Music2, Mic2, ListMusic, Globe, Instagram, Youtube, Sparkles, Info, BarChart2, Share2 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { Language } from '@/utils/translations';
 import { useState, useEffect } from 'react';
@@ -51,7 +51,8 @@ export default function Sidebar({ onOpenHero }: SidebarProps) {
     { label: t.nav_home, path: '/', icon: <Music2 size={24} /> },
     { label: t.nav_songs, path: '/songs', icon: <ListMusic size={24} /> },
     { label: t.nav_artists, path: '/artists', icon: <Mic2 size={24} /> },
-    // ✨ 修改 2: 加入「關於」頁面到導航選單 (電腦版/手機版都會自動出現)
+    { label: t.nav_stats, path: '/stats', icon: <BarChart2 size={24} /> },
+    { label: t.nav_social, path: '/social', icon: <Share2 size={20} /> },
     { label: t.about_title, path: '/about', icon: <Info size={24} /> }
   ];
 
