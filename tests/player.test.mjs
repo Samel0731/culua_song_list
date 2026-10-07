@@ -33,7 +33,7 @@ function loadSource(relative) {
 }
 const { PlayerProvider, usePlayer } = loadSource('context/PlayerContext.tsx');
 const YouTubePlayer = loadSource('app/components/YouTubePlayer.tsx').default;
-const { videoId, featuredWorks } = loadSource('utils/featuredWorks.ts');
+const { videoId } = loadSource('utils/featuredWorks.ts');
 let dom, root;
 beforeEach(() => {
   dom = new JSDOM('<!doctype html><html><head></head><body><div id="root"></div></body></html>', { url: 'http://localhost:3000' });
@@ -45,12 +45,18 @@ beforeEach(() => {
 afterEach(async () => { await act(async () => root.unmount()); dom.window.close(); delete global.window; delete global.document; });
 const version = (seconds, url = 'https://youtu.be/Hx1KAdapT1M') => ({ date: '2026/01/01', streamUrl: url, streamTitle: 'Live', timestamp: String(seconds), timestampSeconds: seconds, songLink: '' });
 const track = (name, versions) => ({ songName: name, artist: 'CULUA', versions });
-async function provider(songs) {
+const featuredWorks = [track("Official A", [version(0)]), track("Official B", [version(0, "https://youtu.be/tXPQo3HHAi4")])];
+async function provider(songs, originals = featuredWorks) {
   let state;
   function Probe() { const value = usePlayer(); React.useEffect(() => { state = value; }); return null; }
-  await act(async () => root.render(React.createElement(PlayerProvider, { initialSongs: songs }, React.createElement(Probe))));
+  await act(async () => root.render(React.createElement(PlayerProvider, { initialSongs: songs, initialOriginals: originals }, React.createElement(Probe))));
   return { get state() { return state; }, async call(name, ...args) { await act(async () => state[name](...args)); } };
 }
+test('missing archive and official sources never substitute fabricated tracks', async () => {
+  const p = await provider([], []);
+  await p.call('playRandom');
+  assert.equal(p.state.currentSong, null);
+});
 
 test('same stream with different timestamps selects the requested version, and one-version loops replay', async () => {
   const song = track('A', [version(30), version(90)]);

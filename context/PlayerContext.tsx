@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { GroupedSong, SongVersion } from '@/utils/dataProcessor';
-import { featuredWorks } from '@/utils/featuredWorks';
 
 export type PlayMode = 'list-loop' | 'version-loop' | 'shuffle';
 
@@ -31,9 +30,10 @@ const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
 interface PlayerProviderProps {
   children: React.ReactNode;
   initialSongs: GroupedSong[];
+  initialOriginals?: GroupedSong[];
 }
 
-export function PlayerProvider({ children, initialSongs }: PlayerProviderProps) {
+export function PlayerProvider({ children, initialSongs, initialOriginals = [] }: PlayerProviderProps) {
 
   // ✨ 終極防線：強制檢查 initialSongs 是否為真正的陣列
   const safeInitialSongs = Array.isArray(initialSongs) ? initialSongs : [];
@@ -79,7 +79,8 @@ export function PlayerProvider({ children, initialSongs }: PlayerProviderProps) 
     });
   }, []);
 
-  const queue = allSongs.length ? allSongs : featuredWorks;
+  const originalActive = (currentSong !== null && initialOriginals.includes(currentSong)) || initialOriginals.some(s => s.versions.some(v => v.songLink && v.songLink === currentVersion?.songLink && v.streamUrl === currentVersion?.streamUrl));
+  const queue = originalActive ? initialOriginals : allSongs.length ? allSongs : initialOriginals;
   const playRandom = useCallback(() => {
     const choices = queue.filter(song => song !== currentSong);
     const pool = choices.length ? choices : queue;
@@ -95,11 +96,11 @@ export function PlayerProvider({ children, initialSongs }: PlayerProviderProps) 
       playRandom();
     } else {
       // Featured originals retain their own sequence even when absent from the archive.
-      const list = featuredWorks.includes(currentSong) ? featuredWorks : queue;
-      const index = list.findIndex(song => song.songName === currentSong.songName);
+      const list = queue;
+      const index = list.findIndex(song => song.songName === currentSong.songName || (originalActive && song.versions.some(v => v.streamUrl === currentVersion?.streamUrl)));
       if (list.length) playSong(list[(index + 1) % list.length]);
     }
-  }, [queue, currentSong, currentVersion, playMode, playSong, playRandom]);
+  }, [queue, currentSong, currentVersion, playMode, playSong, playRandom, originalActive]);
 
   const playPrev = useCallback(() => {
     if (!currentSong) return;
@@ -107,11 +108,11 @@ export function PlayerProvider({ children, initialSongs }: PlayerProviderProps) 
       const index = currentSong.versions.findIndex(version => version.streamUrl === currentVersion?.streamUrl && version.timestampSeconds === currentVersion?.timestampSeconds);
       playSong(currentSong, currentSong.versions[(index - 1 + currentSong.versions.length) % currentSong.versions.length]);
     } else {
-      const list = featuredWorks.includes(currentSong) ? featuredWorks : queue;
-      const index = list.findIndex(song => song.songName === currentSong.songName);
+      const list = queue;
+      const index = list.findIndex(song => song.songName === currentSong.songName || (originalActive && song.versions.some(v => v.streamUrl === currentVersion?.streamUrl)));
       if (list.length) playSong(list[(index - 1 + list.length) % list.length]);
     }
-  }, [queue, currentSong, currentVersion, playMode, playSong]);
+  }, [queue, currentSong, currentVersion, playMode, playSong, originalActive]);
 
   const toggleExpand = useCallback(() => setIsExpanded(prev => !prev), []);
 
