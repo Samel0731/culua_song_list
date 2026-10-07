@@ -46,14 +46,6 @@ export default function ArtistsPage() {
   }, [artistGroups, searchTerm]);
 
   useEffect(() => {
-    setVisibleArtistCount(30);
-  }, [searchTerm, allSongs]);
-
-  useEffect(() => {
-    setVisibleSongCount(20);
-  }, [selectedArtist]);
-
-  useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting) {
         setVisibleArtistCount((prev) => Math.min(prev + 30, filteredArtists.length));
@@ -61,7 +53,7 @@ export default function ArtistsPage() {
     }, { root: null, rootMargin: '100px', threshold: 0 }); // ✨ 修正：threshold 0
 
     if (artistLoaderRef.current) observer.observe(artistLoaderRef.current);
-    return () => { if (artistLoaderRef.current) observer.unobserve(artistLoaderRef.current); };
+    return () => observer.disconnect();
   }, [filteredArtists.length]);
 
   useEffect(() => {
@@ -72,29 +64,30 @@ export default function ArtistsPage() {
     }, { root: null, rootMargin: '100px', threshold: 0 }); // ✨ 修正：threshold 0
 
     if (songLoaderRef.current) observer.observe(songLoaderRef.current);
-    return () => { if (songLoaderRef.current) observer.unobserve(songLoaderRef.current); };
+    return () => observer.disconnect();
   }, [selectedArtist]);
 
   const displayedArtists = filteredArtists.slice(0, visibleArtistCount);
   const displayedSongs = selectedArtist ? selectedArtist.songs.slice(0, visibleSongCount) : [];
 
   return (
-    <div className="flex h-full w-full bg-slate-900 text-slate-100 overflow-hidden">
+    <div className="artist-page flex w-full bg-slate-900 text-slate-100 overflow-hidden">
       
       {/* 欄位 1: 歌手列表 */}
       <div className={`${selectedArtist ? 'hidden lg:flex' : 'flex'} w-full lg:w-80 flex-col border-r border-slate-800 bg-slate-950/30 shrink-0`}>
         <div className="p-4 border-b border-slate-800 space-y-3 shrink-0">
-           <div className="flex items-center gap-2 text-xl font-bold text-pink-400">
-             <Mic2 /> {t.nav_artists}
-           </div>
+           <h1 className="flex items-center gap-2 text-2xl font-medium text-slate-100">
+             <Mic2 className="text-purple-400" /> {t.nav_artists}
+           </h1>
            <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
               <input 
                 type="text" 
+                aria-label={t.search_placeholder}
                 placeholder={t.search_placeholder}
                 className="w-full bg-slate-800 border border-slate-700 rounded pl-9 pr-3 py-1.5 text-sm focus:border-pink-500 focus:outline-none"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => { setSearchTerm(e.target.value); setVisibleArtistCount(30); }}
               />
            </div>
         </div>
@@ -103,10 +96,11 @@ export default function ArtistsPage() {
         <div className="flex-1 overflow-y-auto p-2 pb-24 scrollbar-thin scrollbar-thumb-slate-700">
            {loading ? <div className="p-4 text-center text-slate-500">{t.loading}</div> : (
              <div className="space-y-1">
+               {!displayedArtists.length && <p className="p-4 text-slate-400">{t.no_results}</p>}
                {displayedArtists.map(group => (
                  <button
                    key={group.name}
-                   onClick={() => setSelectedArtist(group)}
+                   onClick={() => { setSelectedArtist(group); setVisibleSongCount(20); }}
                    className={`w-full flex items-center justify-between p-3 rounded-lg text-left transition-colors ${
                      selectedArtist?.name === group.name 
                        ? 'bg-pink-600/20 text-pink-200 border border-pink-500/30' 
@@ -135,6 +129,7 @@ export default function ArtistsPage() {
         <div className="flex-1 flex flex-col min-w-0 bg-slate-900">
           <div className="p-4 border-b border-slate-800 flex items-center gap-3 bg-slate-900/95 backdrop-blur z-10 shrink-0">
              <button 
+               aria-label={t.nav_artists}
                onClick={() => setSelectedArtist(null)} 
                className="lg:hidden p-2 hover:bg-slate-800 rounded-full"
              >
@@ -150,10 +145,10 @@ export default function ArtistsPage() {
           <div className="flex-1 overflow-y-auto p-4 pb-24 scrollbar-thin scrollbar-thumb-slate-700">
             <div className="grid grid-cols-1 gap-2">
                 {displayedSongs.map(song => (
-                <div
+                <button
                     key={song.songName}
                     onClick={() => playSong(song)}
-                    className={`flex items-center justify-between p-3 rounded-lg cursor-pointer border transition-all ${
+                    className={`w-full text-left flex items-center justify-between p-3 rounded-lg cursor-pointer border transition-all ${
                     currentSong?.songName === song.songName
                         ? 'bg-pink-600/10 border-pink-500/50 shadow-[0_0_10px_rgba(236,72,153,0.1)]'
                         : 'bg-slate-800 border-slate-700 hover:bg-slate-750'
@@ -166,7 +161,7 @@ export default function ArtistsPage() {
                     </div>
                     </div>
                     <ChevronRight size={16} className={`text-slate-500 ${currentSong?.songName === song.songName ? 'text-pink-400' : ''}`} />
-                </div>
+                </button>
                 ))}
 
                 {visibleSongCount < selectedArtist.songs.length && (

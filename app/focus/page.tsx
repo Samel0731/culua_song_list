@@ -9,7 +9,7 @@ import Link from 'next/link';
 
 export default function FocusPage() {
   const { t } = useLanguage();
-  const { allSongs, currentSong, playSong } = usePlayer();
+  const { allSongs, currentSong, playRandom } = usePlayer();
   const [time, setTime] = useState<Date | null>(null);
   
   // UI 顯示狀態 (預設顯示)
@@ -47,6 +47,8 @@ export default function FocusPage() {
     window.addEventListener('mousemove', resetInteraction);
     window.addEventListener('click', resetInteraction);
     window.addEventListener('touchstart', resetInteraction);
+    window.addEventListener('keydown', resetInteraction);
+    window.addEventListener('focusin', resetInteraction);
     
     // 初始啟動計時器
     resetInteraction();
@@ -55,6 +57,8 @@ export default function FocusPage() {
       window.removeEventListener('mousemove', resetInteraction);
       window.removeEventListener('click', resetInteraction);
       window.removeEventListener('touchstart', resetInteraction);
+      window.removeEventListener('keydown', resetInteraction);
+      window.removeEventListener('focusin', resetInteraction);
       if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     };
   }, [resetInteraction]);
@@ -67,14 +71,7 @@ export default function FocusPage() {
     return () => clearInterval(timer);
   }, []);
 
-  // 隨機播放邏輯
-  const playRandomSong = () => {
-    if (allSongs.length === 0) return;
-    const songs = allSongs; 
-    if (songs.length === 0) return;
-    const random = songs[Math.floor(Math.random() * songs.length)];
-    playSong(random);
-  };
+  const playRandomSong = playRandom;
 
   useEffect(() => {
     if (allSongs.length > 0 && !currentSong) {
@@ -84,7 +81,7 @@ export default function FocusPage() {
   }, [allSongs.length]);
 
   return (
-    <div className={`relative w-full h-full flex flex-col items-center justify-center overflow-hidden bg-slate-950 transition-all duration-500 ${!showUI ? 'cursor-none' : ''}`}>
+    <div className={`relative w-full min-h-[400px] h-full flex flex-col items-center justify-center overflow-hidden bg-slate-950 transition-all duration-500 ${!showUI ? 'cursor-none' : ''}`}>
       
       {/* 背景光暈 */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
@@ -129,7 +126,7 @@ export default function FocusPage() {
               </p>
             </div>
           ) : (
-            <p className="text-slate-500 text-xl animate-pulse">{t.loading}</p>
+            <p className="text-slate-500 text-xl animate-pulse">{t.select_song_prompt}</p>
           )}
         </div>
 

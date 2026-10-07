@@ -1,7 +1,6 @@
 # Culua Song Database (Unofficial)
 
-[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
-[![Vercel](https://img.shields.io/badge/Deployed_on-Vercel-white?logo=vercel)](https://vercel.com/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
 [![Status](https://img.shields.io/badge/Status-Active-success)]()
 
 **Culua Song Database** is an open-source, non-official archive project documenting the musical activities of VSinger **Culua**.
@@ -35,18 +34,38 @@ YouTubeでの歌枠（生配信）やカバー動画、オリジナル曲を網�
 * **Framework:** [Next.js](https://nextjs.org/) (App Router)
 * **Language:** TypeScript
 * **Styling:** Tailwind CSS
-* **Data Source:** Google Sheets API (CSV) & YouTube Data API
-* **Deployment:** Vercel
+* **Data Source:** Published Google Sheets CSV & YouTube iframe API
+* **Live hosting:** Netlify
 
 ## ⚠️ Disclaimer
 
 This is a **fan-made, non-commercial project**. It is not affiliated with, endorsed by, or connected to Culua or her management team.
 
 * **Content Rights:** All copyrights for the audio, video, and images belong to the original creators and the official rights holders.
-* **Media Usage:** This website uses the official YouTube Embedded Player API. All views and playbacks count towards the official video statistics.
+* **Media Usage:** This website uses the official YouTube Embedded Player API. Links to the original videos are provided.
 
 ---
 
 ## 🤝 Contribution
 
 Contributions are welcome! If you find any bugs or have suggestions for new features, please feel free to open an issue or submit a pull request.
+## Local preview and validation
+
+Use Node.js 20.9+ and run commands from this directory:
+
+```sh
+npm ci
+npm run dev
+npm test
+npx tsc --noEmit
+npm run lint
+npm run build
+```
+
+Development uses Webpack to match the existing PWA integration and avoid stale Turbopack stylesheet caching observed during the redesign. Open http://localhost:3000. PWA generation is disabled in development; use `npm run build` followed by `npm start` to check the production service worker.
+
+The stage redesign uses shared black/purple styles, three-language navigation, a curated original-work collection, and the existing searchable performance archive. A single YouTube iframe survives client-side route changes and player expansion. Closing playback destroys it. The visible mini-video is retained in focus mode. Some archived videos may be deleted or have embedding disabled; the player displays an error with original-video and next-song actions.
+
+`npm test` runs React/DOM regression tests with a mocked YouTube API, without fetching external media. It covers timestamp changes within one stream, replay/loop/shuffle behavior, empty-data fallback, player persistence and blocked/error callbacks. Asset decisions and sources are recorded in [ASSET_SOURCES.md](ASSET_SOURCES.md).
+
+The repository has pre-existing ESLint findings in statistics, social integrations, CSV helpers and language initialization; run ESLint directly to inspect the current results. This redesign does not publish to Netlify.

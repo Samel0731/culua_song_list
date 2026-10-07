@@ -1,11 +1,11 @@
 {
-  "name": "CULUA Song DB",
+  "name": "CULUA Fan Archive",
   "short_name": "CULUA DB",
   "description": "非官方 CULUA 粉絲歌回資料庫",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
+  "background_color": "#0c0a11",
+  "theme_color": "#0c0a11",
   "icons": [
     {
       "src": "/icon-192x192.png",

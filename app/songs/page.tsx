@@ -5,6 +5,7 @@ import { Music, Search, SortAsc, SortDesc, User } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { usePlayer } from '@/context/PlayerContext';
 import Fuse from 'fuse.js';
+import { stageCopy } from '@/utils/stageCopy';
 
 // 骨架屏組件
 const SongSkeleton = () => (
@@ -29,9 +30,9 @@ const AudioEqualizer = () => (
 );
 
 export default function SongsPage() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const { allSongs, loading, playSong, currentSong } = usePlayer();
-  
+
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'count'>('name');
   const [visibleCount, setVisibleCount] = useState(20);
@@ -60,10 +61,6 @@ export default function SongsPage() {
   }, [allSongs, searchTerm, sortBy]);
 
   useEffect(() => {
-    setVisibleCount(20);
-  }, [searchTerm, sortBy]);
-
-  useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
       const target = entries[0];
       if (target.isIntersecting) {
@@ -80,9 +77,7 @@ export default function SongsPage() {
     }
 
     return () => {
-      if (loaderRef.current) {
-        observer.unobserve(loaderRef.current);
-      }
+      observer.disconnect();
     };
   }, [filteredSongs.length]);
 
@@ -111,7 +106,7 @@ export default function SongsPage() {
 
   return (
     <div className="flex flex-col h-full w-full bg-slate-900 text-slate-100 overflow-hidden">
-      
+
       {/* 注入 JSON-LD */}
       <script
         type="application/ld+json"
@@ -119,10 +114,10 @@ export default function SongsPage() {
       />
 
       <div className="p-3 lg:p-4 border-b border-slate-800 bg-slate-950/50 backdrop-blur space-y-3 shrink-0 z-10">
-        <div className="flex items-center gap-2 text-lg lg:text-xl font-bold text-purple-400">
-          <Music className="w-6 h-6" /> {t.nav_songs}
-        </div>
-        
+        <h1 className="flex items-center gap-3 text-3xl lg:text-4xl font-medium text-slate-100">
+          <Music className="w-6 h-6 text-purple-400" /> {t.nav_songs}
+        </h1>
+
         {/* ✨ 修改：將寫死的中文替換為翻譯變數 */}
         <p className="text-xs text-slate-400 leading-relaxed">
            {t.songs_authority_desc_prefix} <span className="text-slate-200 font-bold">{allSongs.length}</span> {t.songs_authority_desc_suffix}
@@ -131,17 +126,18 @@ export default function SongsPage() {
         <div className="flex gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
-            <input 
-              type="text" 
+            <input
+              type="text"
+              aria-label={t.search_placeholder}
               placeholder={t.search_placeholder}
               className="w-full bg-slate-800 border border-slate-700 rounded-lg pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-purple-500 transition-colors"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => { setSearchTerm(e.target.value); setVisibleCount(20); }}
             />
           </div>
-          
-          <button 
-            onClick={() => setSortBy(prev => prev === 'name' ? 'count' : 'name')}
+
+          <button
+            onClick={() => { setSortBy(prev => prev === 'name' ? 'count' : 'name'); setVisibleCount(20); }}
             className="flex items-center gap-2 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm hover:bg-slate-700 transition-colors shrink-0 active:scale-95"
             title={sortBy === 'name' ? t.sort_name : t.sort_count}
           >
@@ -152,7 +148,7 @@ export default function SongsPage() {
       </div>
 
       {/* 列表內容區 */}
-      <div className="flex-1 w-full overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 p-2 lg:p-4"> 
+      <div className="flex-1 w-full overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 p-2 lg:p-4">
         {loading ? (
            <div className="grid grid-cols-1 gap-2">
              {[...Array(10)].map((_, i) => <SongSkeleton key={i} />)}
@@ -162,12 +158,12 @@ export default function SongsPage() {
             {displayedSongs.map((song) => {
               const isPlaying = currentSong?.songName === song.songName;
               return (
-                <div 
+                <button
                   key={song.songName}
                   onClick={() => playSong(song)}
-                  className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all active:scale-95 border ${
+                  className={`w-full text-left flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all active:scale-95 border ${
                     isPlaying
-                      ? 'bg-purple-600/20 border-purple-500/50' 
+                      ? 'bg-purple-600/20 border-purple-500/50'
                       : 'bg-slate-800 border-slate-700 hover:bg-slate-750'
                   }`}
                 >
@@ -188,10 +184,10 @@ export default function SongsPage() {
                       </span>
                     )}
                   </div>
-                </div>
+                </button>
               );
             })}
-            
+
             {visibleCount < filteredSongs.length && (
                <div ref={loaderRef} className="py-4 flex justify-center w-full">
                  <div className="w-6 h-6 border-2 border-slate-600 border-t-purple-500 rounded-full animate-spin" />
@@ -199,7 +195,7 @@ export default function SongsPage() {
             )}
           </div>
         ) : (
-          <div className="text-center text-slate-500 py-10">{t.no_results}</div>
+          <div className="text-center text-slate-500 py-10">{allSongs.length ? t.no_results : stageCopy[lang].empty}</div>
         )}
       </div>
     </div>

@@ -1,0 +1,43 @@
+import { Language } from './translations';
+
+export const stageCopy = {
+  zh: {
+    works: '音樂作品', fan: '非官方粉絲音樂站', tagline: '讓歌聲，留在記憶裡。',
+    intro: '探索 CULUA 的原創音樂與歌回紀錄。從一首歌開始，走進她的音樂世界。',
+    explore: '探索歌曲', featured: '精選原創作品', latest: '最新歌回紀錄', profile: '關於 CULUA',
+    profileText: 'CULUA（カルア）是以可愛而帶有透明感的歌聲，留下鮮明印象的 VSinger。2024 年 5 月以首支單曲「ベビ・デビ」出道，展開音樂活動。',
+    officialProfile: '官方藝人介紹', officialNews: '官方公告', officialLinks: '追蹤她的音樂',
+    archive: '每一次演唱，都值得留下。', originals: '原創音樂', archiveLink: '瀏覽歌回資料庫',
+    empty: '目前沒有歌回資料，請稍後再試；仍可收聽精選作品。',
+    expand: '展開播放器', collapse: '收合播放器', stop: '停止並關閉', previous: '上一首', next: '下一首',
+    play: '播放', pause: '暫停', menu: '開啟導覽', closeMenu: '關閉導覽', unavailable: '影片暫時無法播放，請嘗試下一首或開啟原片。',
+    blocked: '請按播放，或在影片中點選播放開始收聽。', newest: '最新發行', az: '曲名排序', most: '演唱最多',
+    worksIntro: '精選 CULUA 原創作品。翻唱與歷年歌回請前往歌曲庫。', source: '素材與資料來源',
+  },
+  ja: {
+    works: '音楽作品', fan: '非公式ファン音楽サイト', tagline: '歌声を、記憶の中に。',
+    intro: 'CULUAのオリジナル楽曲と歌枠アーカイブ。一曲から、彼女の音楽の世界へ。',
+    explore: '曲を探す', featured: 'オリジナル楽曲', latest: '最新の歌枠記録', profile: 'CULUAについて',
+    profileText: 'キュートさと儚さがある歌声で、記憶に残るVSinger、CULUA（カルア）。2024年5月、1st Single「ベビ・デビ」と共にデビューし、音楽活動を始めました。',
+    officialProfile: '公式プロフィール', officialNews: '公式のお知らせ', officialLinks: '音楽をもっと身近に',
+    archive: 'ひとつひとつの歌声を、ここに。', originals: 'オリジナル', archiveLink: '歌枠アーカイブへ',
+    empty: '歌枠データを取得できません。時間をおいてお試しください。楽曲は引き続き再生できます。',
+    expand: 'プレーヤーを開く', collapse: 'プレーヤーを閉じる', stop: '再生を終了', previous: '前の曲', next: '次の曲',
+    play: '再生', pause: '一時停止', menu: 'メニューを開く', closeMenu: 'メニューを閉じる', unavailable: '動画を再生できません。次の曲または元の動画をお試しください。',
+    blocked: '再生ボタン、または動画内の再生ボタンを押してください。', newest: 'リリース順', az: '曲名順', most: '歌唱回数順',
+    worksIntro: 'CULUAのオリジナル楽曲。カバー曲・歌枠の記録は全曲リストへ。', source: '素材・データの出典',
+  },
+  en: {
+    works: 'Music', fan: 'Unofficial fan music site', tagline: 'A voice that stays with you.',
+    intro: 'Discover CULUA’s original music and archived performances. One song opens a whole new world.',
+    explore: 'Explore songs', featured: 'Selected originals', latest: 'Latest performances', profile: 'Meet CULUA',
+    profileText: 'CULUA is a virtual singer with a voice that blends sweetness and fragility. She made her debut in May 2024 with her first single, “ベビ・デビ”, beginning her musical journey.',
+    officialProfile: 'Official artist profile', officialNews: 'Official announcements', officialLinks: 'Follow the music',
+    archive: 'Every performance, remembered.', originals: 'Original music', archiveLink: 'Browse the archive',
+    empty: 'Performance data is unavailable. Please try again later; selected originals are still playable.',
+    expand: 'Expand player', collapse: 'Collapse player', stop: 'Stop and close', previous: 'Previous song', next: 'Next song',
+    play: 'Play', pause: 'Pause', menu: 'Open navigation', closeMenu: 'Close navigation', unavailable: 'This video is unavailable. Try the next song or open the original video.',
+    blocked: 'Press play, or use the play button inside the video to start listening.', newest: 'Release date', az: 'Title A–Z', most: 'Most performed',
+    worksIntro: 'Selected original music by CULUA. Find covers and archived performances in the song library.', source: 'Asset and data sources',
+  },
+} satisfies Record<Language, Record<string, string>>;

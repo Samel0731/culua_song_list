@@ -1,143 +1,126 @@
-'use client';
+"use client";
 
-import React, { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
+import { videoId } from '@/utils/featuredWorks';
 
-declare global {
-  interface Window {
-    YT: any;
-    onYouTubeIframeAPIReady: () => void;
-  }
+export interface YouTubeInstance {
+  loadVideoById: (options: { videoId: string; startSeconds: number }) => void;
+  cueVideoById: (options: { videoId: string; startSeconds: number }) => void;
+  playVideo: () => void;
+  pauseVideo: () => void;
+  destroy: () => void;
+  getCurrentTime: () => number;
+  seekTo: (seconds: number, allowSeekAhead: boolean) => void;
+  getVolume: () => number;
+  setVolume: (volume: number) => void;
+  isMuted: () => boolean;
+  mute: () => void;
+  unMute: () => void;
+}
+interface YouTubeAPI {
+  Player: new (element: HTMLElement, options: {
+    width: string; height: string; videoId: string;
+    playerVars: Record<string, number | string>;
+    events: {
+      onReady: (event: { target: YouTubeInstance }) => void;
+      onStateChange: (event: { data: number }) => void;
+      onError: () => void;
+      onAutoplayBlocked: () => void;
+    };
+  }) => YouTubeInstance;
+}
+declare global { interface Window { YT?: YouTubeAPI; } }
+interface Props {
+  url: string; startTime?: number; playbackRequest: number; isPlaying: boolean;
+  onEnd: () => void; onPlayingChange: (playing: boolean) => void;
+  onStatus: (status: 'ready' | 'blocked' | 'error') => void;
+  onPlayerReady?: (player: YouTubeInstance) => void;
 }
 
-interface YouTubePlayerProps {
-  url: string;
-  startTime?: number;
-  endTime?: number;
-  onEnd?: () => void;
-  isPlaying?: boolean;
-  // ✨ 新增：讓父組件可以拿到 player 實體
-  onPlayerReady?: (player: any) => void;
-}
+// One iframe for the whole session; route and panel changes never recreate it.
+export default function YouTubePlayer(props: Props) {
+  const host = useRef<HTMLDivElement>(null);
+  const player = useRef<YouTubeInstance | null>(null);
+  const latest = useRef(props);
+  useEffect(() => { latest.current = props; });
+  const loaded = useRef('');
+  const requested = useRef(-1);
 
-function extractVideoId(url: string) {
-  const match = url.match(/(?:v=|youtu\.be\/|shorts\/)([^&?/]+)/);
-  return match ? match[1] : '';
-}
-
-export default function YouTubePlayer({ 
-  url, 
-  startTime = 0, 
-  endTime, 
-  onEnd,
-  isPlaying = true,
-  onPlayerReady // ✨ 解構出來
-}: YouTubePlayerProps) {
-  const playerRef = useRef<any>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  
-  // 使用 Ref 來追蹤最新的 onEnd 函式 (避免 Closure 問題)
-  const onEndRef = useRef(onEnd);
-  // ✨ 使用 Ref 追蹤 onPlayerReady，避免依賴項變動導致重新初始化
-  const onPlayerReadyRef = useRef(onPlayerReady);
-
-  useEffect(() => {
-    onEndRef.current = onEnd;
-  }, [onEnd]);
-
-  useEffect(() => {
-    onPlayerReadyRef.current = onPlayerReady;
-  }, [onPlayerReady]);
-
-  // 1. 載入 API
-  useEffect(() => {
-    if (!window.YT) {
-      const tag = document.createElement('script');
-      tag.src = "https://www.youtube.com/iframe_api";
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-    }
+  const ready = useRef(false);
+  const syncVideo = useCallback(() => {
+      if (!ready.current || !player.current) return;
+      const current = latest.current;
+      const id = videoId(current.url);
+      if (!id) { current.onStatus('error'); return; }
+      const key = `${id}:${current.startTime || 0}`;
+      if (loaded.current !== key || requested.current !== current.playbackRequest) {
+        loaded.current = key;
+        requested.current = current.playbackRequest;
+        current.onStatus('ready');
+        const options = { videoId: id, startSeconds: current.startTime || 0 };
+        if (current.isPlaying) player.current.loadVideoById(options);
+        else player.current.cueVideoById(options);
+      }
   }, []);
 
-  // 2. 初始化播放器
   useEffect(() => {
-    const initPlayer = () => {
-      if (!containerRef.current) return;
-      if (playerRef.current) {
-         playerRef.current.destroy();
-      }
-
-      const videoId = extractVideoId(url);
-      if (!videoId) return;
-
-      // 檢查 YT 是否可用
-      if (window.YT && window.YT.Player) {
-        playerRef.current = new window.YT.Player(containerRef.current, {
-          height: '100%',
-          width: '100%',
-          videoId: videoId,
-          playerVars: {
-            'autoplay': isPlaying ? 1 : 0,
-            'controls': 1,
-            'start': startTime,
-            'playsinline': 1,
-            'rel': 0,
-            'fs': 1, 
+    let disposed = false;
+    let timer: ReturnType<typeof setInterval> | undefined;
+    const init = () => {
+      if (disposed || !host.current || !window.YT?.Player) return;
+      if (timer) clearInterval(timer);
+      const mount = document.createElement('div');
+      host.current.replaceChildren(mount);
+      player.current = new window.YT.Player(mount, {
+        width: '100%', height: '100%', videoId: videoId(latest.current.url),
+        playerVars: { controls: 1, playsinline: 1, rel: 0, origin: window.location.origin },
+        events: {
+          onReady: event => {
+            if (disposed) return;
+            player.current = event.target;
+            ready.current = true;
+            latest.current.onPlayerReady?.(event.target);
+            syncVideo();
           },
-          events: {
-            'onReady': (event: any) => {
-              // ✨ 關鍵修改：將 player 實體傳給父組件
-              if (onPlayerReadyRef.current) {
-                onPlayerReadyRef.current(event.target);
-              }
-
-              if (isPlaying) {
-                event.target.playVideo();
-              }
-            },
-            'onStateChange': (event: any) => {
-              // 0 = ENDED
-              if (event.data === window.YT.PlayerState.ENDED) {
-                if (onEndRef.current) {
-                  onEndRef.current();
-                }
-              }
-            },
-            'onError': (event: any) => {
-              console.warn('YouTube Player Error Code:', event.data);
-              // 遇到錯誤時 (如影片被刪除)，自動跳下一首
-              if (onEndRef.current) {
-                console.log('Video unavailable, skipping to next song...');
-                onEndRef.current();
-              }
-            }
-          }
-        });
-      }
+          onStateChange: event => {
+            if (disposed) return;
+            if (event.data === 1) { latest.current.onStatus('ready'); latest.current.onPlayingChange(true); }
+            if (event.data === 2) latest.current.onPlayingChange(false);
+            if (event.data === 0) latest.current.onEnd();
+          },
+          onError: () => { if (disposed) return; latest.current.onPlayingChange(false); latest.current.onStatus('error'); },
+          onAutoplayBlocked: () => { if (disposed) return; latest.current.onPlayingChange(false); latest.current.onStatus('blocked'); },
+        },
+      });
     };
-
-    if (window.YT && window.YT.Player) {
-      initPlayer();
-    } else {
-      const interval = setInterval(() => {
-        if (window.YT && window.YT.Player) {
-          clearInterval(interval);
-          initPlayer();
-        }
-      }, 100);
-      return () => clearInterval(interval);
+    if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]') && !window.YT?.Player) {
+      const script = document.createElement('script');
+      script.src = 'https://www.youtube.com/iframe_api';
+      script.onerror = () => latest.current.onStatus('error');
+      document.head.appendChild(script);
     }
-  }, [url]); // url 改變時重新初始化
+    if (window.YT?.Player) init();
+    else timer = setInterval(() => { if (window.YT?.Player) init(); }, 100);
+    const timeout = setTimeout(() => { if (!ready.current) latest.current.onStatus('error'); }, 15000);
+    return () => {
+      disposed = true;
+      if (timer) clearInterval(timer);
+      clearTimeout(timeout);
+      player.current?.destroy();
+      player.current = null;
+      ready.current = false;
+      loaded.current = '';
+      requested.current = -1;
+    };
+  }, [syncVideo]);
 
-  // 3. 播放控制 (暫停/播放)
+  useEffect(() => { syncVideo(); }, [props.url, props.startTime, props.playbackRequest, syncVideo]);
+
   useEffect(() => {
-    if (playerRef.current && typeof playerRef.current.playVideo === 'function') {
-      if (isPlaying) {
-        playerRef.current.playVideo();
-      } else {
-        playerRef.current.pauseVideo();
-      }
-    }
-  }, [isPlaying]);
+    if (!ready.current || !player.current) return;
+    if (props.isPlaying) player.current.playVideo();
+    else player.current?.pauseVideo();
+  }, [props.isPlaying]);
 
-  return <div ref={containerRef} className="w-full h-full rounded-xl overflow-hidden" />;
+  return <div ref={host} className="youtube-host" />;
 }

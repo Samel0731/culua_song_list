@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import Image from 'next/image';
+import React, { useRef, useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { toPng } from 'html-to-image';
 import { X, Download, Share2, Music2 } from 'lucide-react';
 import { GroupedSong, SongVersion } from '@/utils/dataProcessor';
+import { stageCopy } from '@/utils/stageCopy';
 import { useLanguage } from '@/context/LanguageContext';
 
 interface ShareModalProps {
@@ -15,16 +17,34 @@ interface ShareModalProps {
 }
 
 export default function ShareModal({ isOpen, onClose, song, version }: ShareModalProps) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const cardRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!isOpen) return;
+    const previous = document.activeElement as HTMLElement | null;
+    const controls = () => Array.from(dialogRef.current?.querySelectorAll<HTMLElement>('button, a[href], input, select, [tabindex="0"]') || []);
+    controls()[0]?.focus();
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+      if (event.key === 'Tab') {
+        const items = controls();
+        const first = items[0], last = items[items.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+      }
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => { document.removeEventListener('keydown', handleKey); previous?.focus(); };
+  }, [isOpen, onClose]);
   if (!isOpen) return null;
 
   // ✨ 修正重點：QR Code 的連結邏輯
   // 改為使用「原片連結 (streamUrl)」而非網站首頁
   let shareUrl = version.streamUrl;
-  
+
   // 附加功能：如果有時間戳記 (timestampSeconds)，自動加到網址後方 (?t=120)
   // 這樣掃描 QR Code 就會精準跳到唱歌的時間點
   if (version.timestampSeconds && version.timestampSeconds > 0) {
@@ -42,14 +62,14 @@ export default function ShareModal({ isOpen, onClose, song, version }: ShareModa
       const dataUrl = await toPng(cardRef.current, {
         cacheBust: true,
         pixelRatio: 2,
-        backgroundColor: '#0f172a'
+        backgroundColor: '#121019'
       });
 
       const link = document.createElement('a');
       link.download = `CULUA-Share-${song.songName}.png`;
       link.href = dataUrl;
       link.click();
-      
+
       setTimeout(onClose, 1000);
     } catch (err) {
       console.error('Failed to generate image', err);
@@ -60,22 +80,22 @@ export default function ShareModal({ isOpen, onClose, song, version }: ShareModa
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      
-      <div className="relative w-full max-w-md bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
-        
+
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t.share_modal_title} className="relative w-full max-w-md bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+
         <div className="flex items-center justify-between p-4 border-b border-slate-800">
           <h3 className="text-lg font-bold text-white flex items-center gap-2">
             <Share2 size={18} className="text-blue-400" />
             {t.share_modal_title}
           </h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
+          <button aria-label={stageCopy[lang].collapse} onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
             <X size={20} />
           </button>
         </div>
 
         <div className="p-6 flex flex-col items-center bg-slate-950/50">
           <div className="relative overflow-hidden rounded-xl shadow-lg transform scale-[0.85] sm:scale-100 origin-center">
-             <div 
+             <div
                ref={cardRef}
                className="w-[320px] bg-gradient-to-br from-indigo-900 to-slate-900 border border-slate-700/50 p-6 text-center text-white relative overflow-hidden"
              >
@@ -84,9 +104,9 @@ export default function ShareModal({ isOpen, onClose, song, version }: ShareModa
 
                 <div className="relative z-10 mx-auto w-20 h-20 rounded-full p-1 bg-gradient-to-tr from-blue-400 to-purple-500 mb-4 shadow-lg">
                    {/* 建議：如果有歌曲專屬封面圖，這裡可以改成顯示歌曲封面，目前維持顯示 CULUA 頭像 */}
-                   <img 
-                     src="/icon-512x512.png" 
-                     alt="CULUA" 
+                   <Image width={80} height={80} unoptimized
+                     src="/icon-512x512.png"
+                     alt="CULUA"
                      className="w-full h-full rounded-full bg-slate-900 object-cover"
                    />
                 </div>
@@ -102,16 +122,16 @@ export default function ShareModal({ isOpen, onClose, song, version }: ShareModa
 
                 <div className="relative z-10 my-4 border-t border-white/10 pt-4">
                   <p className="text-xs text-slate-300 italic font-serif opacity-80">
-                    "{t.share_card_desc}"
+                    &ldquo;{t.share_card_desc}&rdquo;
                   </p>
                 </div>
 
                 <div className="relative z-10 bg-white p-2 rounded-lg inline-block shadow-lg mb-2">
-                  <QRCodeSVG 
+                  <QRCodeSVG
                     value={shareUrl} // ✨ 這裡就會是 YouTube 連結了
                     size={90} //稍微加大一點點方便掃描
-                    bgColor="#ffffff" 
-                    fgColor="#000000" 
+                    bgColor="#ffffff"
+                    fgColor="#000000"
                     level="Q" // 提高容錯率，讓 QR Code 稍微密集一點但更穩
                     imageSettings={{
                         src: "/icon-192x192.png",
@@ -131,7 +151,7 @@ export default function ShareModal({ isOpen, onClose, song, version }: ShareModa
         </div>
 
         <div className="p-4 bg-slate-900 border-t border-slate-800 flex justify-end">
-          <button 
+          <button
             onClick={handleDownload}
             disabled={isGenerating}
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-full font-bold transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
