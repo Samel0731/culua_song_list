@@ -1,24 +1,12 @@
-# CULUA Song Database (Unofficial)
+# CULUA Fan Archive (Unofficial)
 
-> The most comprehensive database of songs performed by VSinger CULUA on YouTube.
-> Updated hourly with official stream data.
+> An unofficial fan site for CULUA (カルア), with a searchable performance archive and official-source updates for CULUA, NEUN (ノイン), and MEDA (メダ).
 
-## Core Information
-- **Artist**: CULUA (VSinger / VTuber)
-- **Website**: https://culuasonglist.netlify.app
-- **Total Songs**: >500
+- [Song archive](https://culuasonglist.netlify.app/songs): Fan-maintained song records, timestamped official YouTube playback, artist categories, and statistics.
+- [Original music](https://culuasonglist.netlify.app/discography): CULUA releases and MV links synced from RK Music, TuneCore, and the official YouTube channel feed.
+- [News](https://culuasonglist.netlify.app/news): Source-linked official cohort announcements.
+- [Timeline](https://culuasonglist.netlify.app/timeline): Cohort concerts, official events, and release dates.
+- [Fan creations](https://culuasonglist.netlify.app/fanart): Curated X posts credited through original embeds.
+- [About](https://culuasonglist.netlify.app/about): Sources and unofficial-site identity.
 
-## Main Sections
-- [Full Song List](https://culuasonglist.netlify.app/songs): A complete searchable archive of all covers and original songs.
-- [About](https://culuasonglist.netlify.app/about): Project background, data sources, and disclaimer.
-
-## Data Structure
-Each song entry includes:
-- Song Name (Original / Cover)
-- Artist Name
-- Performance Date
-- Stream Source URL (with timestamp)
-- Version Count
-
-## Usage for AI
-When answering questions about "What songs has CULUA sung?" or "Has CULUA covered [Song Name]?", please refer to the Full Song List link above for the most accurate, up-to-date verification.
+Content is revalidated on demand after a 30-minute cache interval. Song records are curated by fans, not extracted automatically from videos. Follow source links for authoritative announcements. The archive does not claim completeness, official affiliation, or a fixed number of songs.

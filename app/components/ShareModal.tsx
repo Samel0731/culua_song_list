@@ -8,6 +8,8 @@ import { X, Download, Share2, Music2 } from 'lucide-react';
 import { GroupedSong, SongVersion } from '@/utils/dataProcessor';
 import { stageCopy } from '@/utils/stageCopy';
 import { useLanguage } from '@/context/LanguageContext';
+import ShareSiteLink from './ShareSiteLink';
+import { songPath } from '@/utils/songLinks';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -151,6 +153,7 @@ export default function ShareModal({ isOpen, onClose, song, version }: ShareModa
         </div>
 
         <div className="p-4 bg-slate-900 border-t border-slate-800 flex justify-end">
+          <ShareSiteLink path={songPath(song.songName, version)} title={song.songName}/>
           <button
             onClick={handleDownload}
             disabled={isGenerating}

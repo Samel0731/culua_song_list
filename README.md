@@ -69,3 +69,11 @@ The stage redesign uses shared black/purple styles, three-language navigation, a
 `npm test` runs React/DOM regression tests with a mocked YouTube API, without fetching external media. It covers timestamp changes within one stream, replay/loop/shuffle behavior, empty-data fallback, player persistence and blocked/error callbacks. Asset decisions and sources are recorded in [ASSET_SOURCES.md](ASSET_SOURCES.md).
 
 The repository has pre-existing ESLint findings in statistics, social integrations, CSV helpers and language initialization; run ESLint directly to inspect the current results. This redesign does not publish to Netlify.
+
+## Fan information hub (2026-10-07)
+
+The site now has official-source news, original releases, a CULUA/NEUN/MEDA event and release timeline, and a curated fan-art section. Artist browsing and statistics are tabs inside the song archive; old routes redirect to the new entries. Song pages and site-sharing links help visitors discover specific performances.
+
+Official content adapters use RK Music, TuneCore/LinkCore, and the official CULUA YouTube RSS feed with 30-minute Next.js revalidation. There is no paid X API or background scheduler. See [DATA_SETUP.md](DATA_SETUP.md) for the existing Google Sheets curation tabs and publication step, and [SEARCH_VISIBILITY.md](SEARCH_VISIBILITY.md) for Search Console checks after deployment.
+
+For environments that disallow test-runner child processes, use node --test --test-isolation=none tests/*.test.mjs. The current suite covers content parsing, cohort attribution, exact MV matching, curation, and shared playback.

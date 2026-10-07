@@ -5,6 +5,7 @@ import { LanguageProvider } from "@/context/LanguageContext";
 import ClientLayout from "@/app/components/ClientLayout";
 // ✨ 修改 1: 引入 Server 端抓取函式
 import { fetchSongsServer } from "@/utils/fetchSongsServer";
+import { fetchHubContent } from '@/utils/fetchHubContent';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,11 +21,11 @@ export const metadata: Metadata = {
     default: "CULUA Fan Archive | 非官方音樂站",
     template: "%s | CULUA Fan Archive"
   },
-  description: "非官方 CULUA 粉絲歌回資料庫。收錄 CULUA 的歷年歌回、翻唱曲目、原創曲與直播紀錄。搜尋 CULUA 唱過的歌最方便的工具。Fan-made database for VSinger CULUA.",
+  description: "CULUA（カルア）非官方粉絲站。搜尋歌回與翻唱紀錄、播放官方 MV，追蹤 CULUA、NEUN、MEDA 演唱會及音樂發行。",
   applicationName: 'CULUA Fan Archive', // PWA 應用程式名稱
   manifest: "/manifest.json",
   keywords: [
-    "CULUA", "クルア", "くるあ", "VSinger", "Vtuber",
+    "CULUA", "カルア", "NEUN", "ノイン", "MEDA", "メダ", "VSinger", "Vtuber",
     "歌回", "歌枠", "歌ってみた", "Song List", "Setlist",
     "Cover", "原創曲", "Original Song", "翻唱", "Fan Database",
     "非官方", "粉絲維護", "YouTube", "音樂資料庫", "Music Database",
@@ -97,7 +98,8 @@ export default async function RootLayout({
 }>) {
   // ✨ 修改 3: 在 Server 端直接抓取資料 (這行會在伺服器執行)
   // 透過 ISR 機制，這份資料會被快取，不需要每次請求都去 Google Sheet 抓
-  const songs = await fetchSongsServer();
+  const [songs, content] = await Promise.all([fetchSongsServer(), fetchHubContent()]);
+  const originals = content.works.filter(w => w.artists.includes('CULUA')).flatMap(w => w.videos.map(v => ({ songName: v.title, artist: 'CULUA', versions: [{ date: w.releaseDate || '', streamUrl: v.url, streamTitle: v.title, timestamp: '0:00', timestampSeconds: 0, songLink: w.sourceUrl }] })));
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -120,7 +122,7 @@ export default async function RootLayout({
         <LanguageProvider>
           {/* ✨ 修改 4: 把抓到的 songs 傳給 ClientLayout */}
           <a href="#main-content" className="skip-link">Skip to content</a>
-          <ClientLayout initialSongs={songs}>
+          <ClientLayout initialSongs={songs} initialOriginals={originals}>
             {children}
           </ClientLayout>
         </LanguageProvider>
