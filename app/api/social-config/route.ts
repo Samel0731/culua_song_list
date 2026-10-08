@@ -17,16 +17,16 @@ export async function GET() {
     const csvText = await res.text();
     
     // 解析 CSV 資料
-    const parseResult = Papa.parse(csvText, {
+    const parseResult = Papa.parse<Record<string, string>>(csvText, {
       header: true,
       skipEmptyLines: true,
     });
 
-    const rows = parseResult.data as any[];
+    const rows = parseResult.data;
     
     // 將 Key/Value 格式轉為物件
     // 預期表格欄位名稱為 "Key" 與 "Value"
-    const config: Record<string, any> = {};
+    const config: Record<string, string | string[]> = {};
     rows.forEach(row => {
       const key = row.Key || row.key;
       const value = row.Value || row.value;

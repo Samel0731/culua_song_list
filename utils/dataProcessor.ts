@@ -24,11 +24,11 @@ const fetchCsvWithHeaderSearch = async <T>(csvUrl: string, keyColumn: string): P
     const cleanCsv = lines.slice(headerIndex).join('\n');
 
     return new Promise((resolve, reject) => {
-      Papa.parse(cleanCsv, {
+      Papa.parse<T>(cleanCsv, {
         header: true,
         skipEmptyLines: true,
-        complete: (results) => resolve(results.data as T[]),
-        error: (err: any) => reject(err),
+        complete: (results) => resolve(results.data),
+        error: (err: Error) => reject(err),
       });
     });
   } catch (error) {
@@ -188,8 +188,8 @@ export const fetchArtistStats = async (csvUrl: string): Promise<ArtistStat[]> =>
 
   rows.forEach((row) => {
     // 試著抓取歌手名稱，可能是 "アーティスト" 欄位，也可能是空白欄位(CSV第一欄)
-    // @ts-ignore: 忽略動態存取屬性的型別檢查
-    const name = row['アーティスト'] || row[''] || row[Object.keys(row)[0]];
+    const firstColumn = Object.keys(row)[0] as keyof ArtistStatRow | undefined;
+    const name = row['アーティスト'] || row[''] || (firstColumn ? row[firstColumn] : undefined);
 
     if (!name || name.includes('合計') || name.includes('注意喚起')) return;
 

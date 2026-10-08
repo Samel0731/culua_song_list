@@ -4,6 +4,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { usePlayer } from '@/context/PlayerContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { translations } from '@/utils/translations';
 import {
   BarChart2, Music2, Calendar, Mic2, ListMusic,
   Users, TrendingUp, UserCheck, PieChart as PieIcon, Sparkles, Activity
@@ -15,7 +16,7 @@ import {
 } from 'recharts';
 
 // --- 工具函數 ---
-const parseDateToInt = (dateStr: any) => {
+const parseDateToInt = (dateStr: string) => {
   if (!dateStr || typeof dateStr !== 'string') return 0;
   const parts = dateStr.split(/[-/]/).map(Number);
   if (parts.length >= 3) {
@@ -25,7 +26,7 @@ const parseDateToInt = (dateStr: any) => {
   return 0;
 };
 
-const toInputFormat = (dateStr: any) => {
+const toInputFormat = (dateStr: string) => {
   if (!dateStr || typeof dateStr !== 'string') return "";
   const parts = dateStr.split(/[-/]/);
   if (parts.length >= 3) {
@@ -37,10 +38,20 @@ const toInputFormat = (dateStr: any) => {
   return "";
 };
 
-const CustomTooltip = ({ active, payload, label, t }: any) => {
+interface TooltipProps {
+  active?: boolean;
+  payload?: ReadonlyArray<{
+    value?: number | string | ReadonlyArray<number | string>;
+    payload?: { name?: string; count?: number; latestYear?: number };
+  }>;
+  label?: number | string;
+  t: typeof translations['zh'];
+}
+
+const CustomTooltip = ({ active, payload, label, t }: TooltipProps) => {
   if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    const displayCount = data.count || (payload[0].value ? Math.round(payload[0].value) : 0);
+    const data = payload[0].payload ?? {};
+    const displayCount = data.count ?? (typeof payload[0].value === 'number' ? Math.round(payload[0].value) : 0);
 
     return (
       <div className="bg-slate-800 border border-slate-600 p-3 rounded-lg shadow-xl">
@@ -87,9 +98,9 @@ export default function StatsPage() {
 
   const normalizedRecords = useMemo(() => {
     if (!allSongs) return [];
-    const records: any[] = [];
+    const records: { songName: string; artist: string; dateNum: number; dateFmt: string }[] = [];
     allSongs.forEach(song => {
-      song.versions?.forEach((v: any) => {
+      song.versions?.forEach(v => {
         const num = parseDateToInt(v.date);
         const fmt = toInputFormat(v.date);
         if (num > 0) records.push({ songName: song.songName, artist: song.artist, dateNum: num, dateFmt: fmt });
@@ -114,13 +125,13 @@ export default function StatsPage() {
   const stats = useMemo(() => {
     if (normalizedRecords.length === 0 || !t) return null;
     const filtered = normalizedRecords.filter(r => r.dateNum >= startNum && r.dateNum <= endNum);
-    const counts: Record<string, any> = {};
+    const counts: Record<string, { count: number; artist: string; latestDate: number }> = {};
     const artistCounts: Record<string, number> = {};
     const trendMap: Record<string, number> = {};
-    const firstSeenMap = new Map();
+    const firstSeenMap = new Map<string, number>();
 
     normalizedRecords.forEach(r => {
-      if (!firstSeenMap.has(r.songName) || r.dateNum < firstSeenMap.get(r.songName)) {
+      if (r.dateNum < (firstSeenMap.get(r.songName) ?? Infinity)) {
         firstSeenMap.set(r.songName, r.dateNum);
       }
     });
@@ -138,7 +149,7 @@ export default function StatsPage() {
     const sortedSongs = Object.entries(counts).map(([songName, d]) => ({ songName, ...d })).sort((a, b) => b.count - a.count);
 
     let newSongsCount = 0;
-    firstSeenMap.forEach((date, name) => { if (date >= startNum && date <= endNum) newSongsCount++; });
+    firstSeenMap.forEach(date => { if (date >= startNum && date <= endNum) newSongsCount++; });
 
     const div = { mainstay: 0, favorite: 0, occasional: 0, firstTry: 0 };
     Object.values(artistCounts).forEach(c => {
@@ -276,7 +287,7 @@ export default function StatsPage() {
                     <ZAxis type="number" dataKey="z" range={[60, 500]} />
                     <Tooltip content={<CustomTooltip t={t} />} cursor={{ strokeDasharray: '3 3' }} />
                     <Scatter name="Songs" data={stats.bubbleData}>
-                      {stats.bubbleData.map((entry: any, index: number) => (
+                      {stats.bubbleData.map((entry, index) => (
                         <Cell key={index} fill={entry.latestYear >= currentYear ? '#fbbf24' : '#60a5fa'} />
                       ))}
                     </Scatter>
@@ -344,7 +355,7 @@ export default function StatsPage() {
   );
 }
 
-function StatCard({ icon, label, value, unit }: any) {
+function StatCard({ icon, label, value, unit }: { icon: React.ReactNode; label: string; value: number; unit: string }) {
   return (
     <div className="bg-slate-800/50 border border-slate-700 p-5 rounded-xl shadow-lg flex flex-col justify-center">
       <div className="flex items-center gap-2 text-slate-400 mb-2">
