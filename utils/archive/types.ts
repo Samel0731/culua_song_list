@@ -1,0 +1,10 @@
+export type Member = { id: string; user_id: string | null; email: string; role: 'owner' | 'editor'; active: boolean };
+export type Stream = { video_id: string; title: string; stream_date: string; duration: number | null; scan_status: string; scan_complete: boolean; last_checked_at: string | null; last_error: string | null; version: number };
+export type Song = { id: string; name: string; artist: string; version: number };
+export type Alias = { id:string;song_id:string;name:string;artist:string;route_alias:boolean };
+export type Candidate = { id: string; video_id: string; source_id: string | null; position: number; name: string; artist: string; timestamp_seconds: number | null; status: string; reasons: string[]; version: number; human_edited: boolean };
+export type Evidence = { id: string; video_id: string; kind: string; source_url: string | null; storage_path: string | null; raw_text: string | null; status: string; submitted_by: string | null };
+export type Performance = { id: string; video_id: string; position: number; song_id: string; timestamp_seconds: number; song_link: string; published: boolean; version: number };
+export type Revision = { id: number; entity: string; entity_id: string; action: string; actor: string | null; created_at: string; before_data: Record<string, unknown> | null; after_data: Record<string, unknown> };
+export type Job = { id: string; status: string; started_at: string; finished_at: string | null; details: Record<string, unknown> };
+export type Dashboard = { role: 'owner' | 'editor'; streams: Stream[]; songs: Song[]; aliases:Alias[];candidates: Candidate[]; evidence: Evidence[]; performances: Performance[]; members: Member[]; revisions: Revision[]; jobs: Job[]; unavailable: {id:string;raw_data:Record<string,string>;resolved_video_id:string|null;version:number}[]; settings: { auto_publish: boolean; dry_run_started_at: string } };

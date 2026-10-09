@@ -22,7 +22,7 @@ FeaturedWorks：貼入官方發行頁或 LinkCore 網址，勾選 pinned 置頂�
 1. 在維護表選「檔案 → 分享 → 發布到網路」。
 2. 分別選 FanArt、FeaturedWorks，格式選 CSV 並發布；保留原本歌回分頁的發布設定。
 3. 開啟自動重新發布變更。使用無痕視窗確認兩個 CSV 可以開啟，第一列是上表的欄位。
-4. 網站已內建目前發布文件與新分頁的 gid。若 Google 提供不同發布網址，在 Netlify 環境變數設定 `FANART_SHEET_CSV_URL`、`FEATURED_WORKS_SHEET_CSV_URL` 後重新部署。不要填需登入的 `/edit` 網址。
+4. 將 Google 提供的兩個 CSV 發布網址填入本機 `.env.local` 或 Netlify 的 `FANART_SHEET_CSV_URL`、`FEATURED_WORKS_SHEET_CSV_URL`，重啟本機服務或重新部署。不要填需登入的 `/edit` 網址。未設定時不抓取策展來源，顯示「尚未設定精選」；已設定但無法讀取時顯示來源同步失敗並記錄 warning，不把未發布資料當成成功同步。
 
 新增 X 原帖後，快取到期的下一次瀏覽會觸發重新驗證；官方資料與策展 CSV 的週期均為 30 分鐘，並非固定排程工作。
 
