@@ -1,3 +1,17 @@
+# 2026-10-08 React 與套件修正驗證
+
+- 修正 `LanguageContext` 的 `react-hooks/set-state-in-effect`：以 `useSyncExternalStore` 訂閱語言偏好；SSR 與 hydration 使用一致的繁中初始值，之後還原儲存的語言。儲存被封鎖或寫入失敗仍可切換語言，並同步其他分頁的語言變更。
+- 修正 statistics、social-config API、CSV helper 的型別與 lint 問題。全專案 ESLint 從 13 errors / 1 warning 改為通過。
+- React / React DOM：19.2.3 → 19.2.8；Next.js：16.2.1 → 16.3.8；eslint-config-next：16.1.0 → 16.3.8。同步更新 lockfile，保留 React 19.2 與 Next.js 16。
+- `npm test`：21 項全部通過，新增 4 項語言 hydration、跨分頁、儲存阻擋與寫入失敗的實際 React/DOM 測試。
+- `npm run lint`、`npx tsc --noEmit`、`npm run build`、`git diff --check`：通過。正式建置產生 18 個頁面，Google Sheets 成功讀取 639 首歌曲。
+- 正式建置期間部分 RK Music、TuneCore、策展 CSV、YouTube 請求逾時，建置正常完成；未據此宣稱所有外部內容來源已驗證。
+- 正式伺服器 smoke test：首頁、關於、歌曲列表、統計 tab、日文單曲頁與 Open Graph 圖片皆回應 200；HTML 頁面皆有 canonical。
+- `npm audit`：更新後 Next.js 不再被列為受影響套件，critical 從 1 降為 0；仍有 21 項相依套件警示（18 high / 2 moderate / 1 low），涉及既有 PWA/Workbox、lint 與其他間接相依套件。此修正未使用會降級 PWA 或 ESLint 的 `npm audit fix --force`；不宣稱整個相依樹已無漏洞。
+- 安全版本依據：<https://nextjs.org/blog/nextjs-security-update-september-22-2026>、<https://github.com/vercel/next.js/security/advisories>。
+
+以下保留前次改版的歷史驗證紀錄；本次修正未部署至正式站。
+
 # 2026-10-07 改版驗證紀錄
 
 本機正式版預覽：http://localhost:3000/。尚未部署至 Netlify。

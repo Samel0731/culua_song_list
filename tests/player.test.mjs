@@ -8,7 +8,8 @@ import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import { JSDOM } from 'jsdom';
 import React, { act } from 'react';
-import { createRoot } from 'react-dom/client';
+import { createRoot, hydrateRoot } from 'react-dom/client';
+import { renderToString } from 'react-dom/server';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const nativeRequire = createRequire(import.meta.url);
 
@@ -32,6 +33,7 @@ function loadSource(relative) {
   return sourceModule.exports;
 }
 const { PlayerProvider, usePlayer } = loadSource('context/PlayerContext.tsx');
+const { LanguageProvider, useLanguage } = loadSource('context/LanguageContext.tsx');
 const YouTubePlayer = loadSource('app/components/YouTubePlayer.tsx').default;
 const { videoId } = loadSource('utils/featuredWorks.ts');
 let dom, root;
@@ -40,11 +42,71 @@ beforeEach(() => {
   global.window = dom.window;
   global.document = dom.window.document;
   global.IS_REACT_ACT_ENVIRONMENT = true;
+  window.dispatchEvent(new window.StorageEvent('storage', { key: null }));
   root = createRoot(document.getElementById('root'));
 });
 afterEach(async () => { await act(async () => root.unmount()); dom.window.close(); delete global.window; delete global.document; });
 const version = (seconds, url = 'https://youtu.be/Hx1KAdapT1M') => ({ date: '2026/01/01', streamUrl: url, streamTitle: 'Live', timestamp: String(seconds), timestampSeconds: seconds, songLink: '' });
 const track = (name, versions) => ({ songName: name, artist: 'CULUA', versions });
+
+test('saved language hydrates without a server/client mismatch and switches immediately', async () => {
+  let state;
+  function Probe() {
+    state = useLanguage();
+    return React.createElement('span', null, state.lang);
+  }
+  const tree = React.createElement(LanguageProvider, null, React.createElement(Probe));
+  window.localStorage.setItem('app-language', 'ja');
+  const html = renderToString(tree);
+  assert.equal(html, '<span>zh</span>');
+  await act(async () => root.unmount());
+  const container = document.getElementById('root');
+  container.innerHTML = html;
+  const errors = [];
+  await act(async () => { root = hydrateRoot(container, tree, { onRecoverableError: error => errors.push(error) }); });
+  assert.equal(container.textContent, 'ja');
+  assert.equal(document.documentElement.lang, 'ja');
+  assert.deepEqual(errors, []);
+  await act(async () => state.setLang('en'));
+  assert.equal(container.textContent, 'en');
+  assert.equal(window.localStorage.getItem('app-language'), 'en');
+});
+
+test('language follows changes in other tabs and falls back for invalid or cleared storage', async () => {
+  function Probe() { return React.createElement('span', null, useLanguage().lang); }
+  await act(async () => root.render(React.createElement(LanguageProvider, null, React.createElement(Probe))));
+  const update = async value => {
+    if (value === null) window.localStorage.clear();
+    else window.localStorage.setItem('app-language', value);
+    await act(async () => window.dispatchEvent(new window.StorageEvent('storage', { key: value === null ? null : 'app-language' })));
+  };
+  await update('ja'); assert.equal(document.getElementById('root').textContent, 'ja');
+  await update('unsupported'); assert.equal(document.getElementById('root').textContent, 'zh');
+  await update('en'); assert.equal(document.documentElement.lang, 'en');
+  await update(null); assert.equal(document.documentElement.lang, 'zh-Hant');
+});
+
+test('blocked storage still allows language switching', async () => {
+  Object.defineProperty(window, 'localStorage', { get() { throw new Error('Storage blocked'); }, configurable: true });
+  let state;
+  function Probe() { state = useLanguage(); return React.createElement('span', null, state.lang); }
+  await act(async () => root.render(React.createElement(LanguageProvider, null, React.createElement(Probe))));
+  assert.equal(state.lang, 'zh');
+  await act(async () => state.setLang('ja'));
+  assert.equal(document.getElementById('root').textContent, 'ja');
+  assert.equal(document.documentElement.lang, 'ja');
+});
+
+test('failed storage writes do not prevent a language change', async () => {
+  window.localStorage.setItem('app-language', 'en');
+  window.localStorage.__proto__.setItem = () => { throw new Error('Storage full'); };
+  let state;
+  function Probe() { state = useLanguage(); return React.createElement('span', null, state.lang); }
+  await act(async () => root.render(React.createElement(LanguageProvider, null, React.createElement(Probe))));
+  await act(async () => state.setLang('ja'));
+  assert.equal(document.getElementById('root').textContent, 'ja');
+});
+
 const featuredWorks = [track("Official A", [version(0)]), track("Official B", [version(0, "https://youtu.be/tXPQo3HHAi4")])];
 async function provider(songs, originals = featuredWorks) {
   let state;

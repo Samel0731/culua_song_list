@@ -68,7 +68,7 @@ The stage redesign uses shared black/purple styles, three-language navigation, a
 
 `npm test` runs React/DOM regression tests with a mocked YouTube API, without fetching external media. It covers timestamp changes within one stream, replay/loop/shuffle behavior, empty-data fallback, player persistence and blocked/error callbacks. Asset decisions and sources are recorded in [ASSET_SOURCES.md](ASSET_SOURCES.md).
 
-The repository has pre-existing ESLint findings in statistics, social integrations, CSV helpers and language initialization; run ESLint directly to inspect the current results. This redesign does not publish to Netlify.
+The React/language and TypeScript lint findings have been corrected. Run `npm run lint`, `npm test`, `npx tsc --noEmit`, and `npm run build` to validate changes. Validation does not publish to Netlify.
 
 ## Fan information hub (2026-10-07)
 
