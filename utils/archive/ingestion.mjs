@@ -28,8 +28,8 @@ export function parseSetlist(text) {
     const timestamp = parseTimestamp(match[1]);
     if (timestamp === null) continue;
     let body = line.replace(match[0], ' ').replace(/^[\s【】[\]()]+/, '').trim();
-    body = body.replace(/^\d{1,2}\s*[.)、:-]?\s*/, '').trim();
-    if (/^(?:OP|ED|START|END|配信開始|配信終了|開始|終了|雑談|トーク|MC|待機|お知らせ|告知)(?:$|\s|[:：(（])/i.test(body)) continue;
+    body = body.replace(/^\d{1,2}(?:\s*[.)、:-]\s*|\s+)/, '').trim();
+    if (/^(?:OP|ED|START|END|配信開始|配信終了|開始|終了|雑談|トーク|MC|待機|お知らせ|告知)(?:$|\s|[:：(（『「【])/i.test(body)) continue;
     const pieces = body.split(/\s*\/\s*/);
     const name = pieces.shift()?.trim();
     if (!name) continue;

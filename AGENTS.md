@@ -184,6 +184,31 @@ treat existing workflow files or successful local builds as deployment proof.
 
 ## Features already implemented
 
+### Production rollout verified on 2026-10-10
+
+PR #4 was merged into `main` as `002d1477bf91fd1e2ee977d15923050258834e23`
+and Netlify deploy `6aca53f56a59be00080e2d14` was published. Production uses
+`ARCHIVE_DATA_SOURCE=supabase`. Google OAuth returned to the production owner
+dashboard; anonymous admin and private-image APIs returned 401 with private,
+no-store responses. Production-only Netlify keys and GitHub Actions secrets
+were configured with explicit owner authorization. YouTube Data API v3 is
+enabled with a key restricted to that API; the workflow gate is enabled.
+GitHub run `38062304452` succeeded, scanned both supplied videos using six
+quota units, published nothing, and uploaded an encrypted backup retained for
+seven days. The effective dry run starts at `2026-10-10T15:07:17.116324Z`;
+automatic publication remains disabled. Seven actual successful days and an
+owner decision are required before enabling it.
+
+Live comments exposed Japanese quote delimiters after OP/ED. A parser follow-up
+excludes these markers and preserves numeric song titles. Its live rerun produced
+nine and seven review candidates respectively, with zero publications and 3,131
+performances unchanged. Extra historical candidates were rejected through the
+owner UI, preserving audit history. Local follow-up checks passed 51 tests using
+the documented non-isolated runner, lint, TypeScript and production build.
+The second real collaborator login remains unverified. The observations above
+supersede earlier rollout-pending notes without implying future scheduled runs
+or a subsequent parser deployment have already succeeded.
+
 - Home, official news, discography, event/release timeline, curated fan art,
   about, searchable songs, individual song pages, and focus playback mode.
 - Artists and statistics are archive tabs; `/artists`, `/stats`, and `/social`

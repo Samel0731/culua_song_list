@@ -77,3 +77,10 @@ Google Sheets 的 FanArt、FeaturedWorks 分頁已建立並讀回確認；目前
 ## 上線後仍需完成
 
 发布 Sheets 策展分頁並填入選定 X 原帖、部署既有 Netlify 站點、於 Search Console 提交 sitemap 並確認收錄。尚無 Search Console/流量帳號數據，不能判定過去少人點擊的實際原因，也不能宣稱改版已提升訪客數。操作見 DATA_SETUP.md、SEARCH_VISIBILITY.md。
+# 2026-10-10 正式上線與解析修正
+
+PR #4 已合併至 main `002d1477`，Netlify deploy `6aca53f56a59be00080e2d14` 實際發布，正式來源為 Supabase。正式 Google OAuth 已回到 owner 後台；公開歌曲及日文歌曲頁200，匿名管理／私人圖片API為401且private, no-store。
+
+GitHub [工作38062304452](https://github.com/Samel0731/culua_song_list/actions/runs/38062304452) 掃描兩支真實影片成功，20則頂層留言、6 units、發布0、錯誤0；加密備份artifact成功上傳並保留7天。排程閘門已啟用，尚不能以一次成功代替未來七天排程。有效試運轉開始2026-10-10T15:07:17.116324Z，自動發布關閉。
+
+真實留言發現 OP／ED 日文引號漏排除，解析修正版本地重跑得到9／7筆待審、正式演唱仍3,131筆。新增數字曲名與日文標記測試；51測試、lint、TypeScript、production build通過。npm test遭本機子程序EPERM阻擋，非隔離runner通過。詳細證據及限制見 BACKEND_TEST_REPORT.md；以下為歷史記錄。

@@ -2,6 +2,10 @@
 
 ## 目前完成與外部設定
 
+2026-10-10 正式上線更新：PR #4 已合併至 main `002d1477`，Netlify deploy `6aca53f56a59be00080e2d14` 已發布，Production 使用 `ARCHIVE_DATA_SOURCE=supabase`。正式 Google OAuth 已實際進入 owner 後台。Netlify Production 專用密鑰、GitHub Actions secrets、YouTube API 受限金鑰與官方頻道均已設定，每日08:17排程閘門已啟用；第一次真實 Actions 工作38062304452與七天保留的加密備份 artifact 成功。備份加密金鑰安全副本仍由 owner 保管，不提交 Git。
+
+有效七天試運轉起點為2026-10-10T15:07:17.116324Z；自動發布保持關閉，不以首次成功代替七天實際工作。最早10月17日23:07（台灣）完成檢查後由 owner 啟用。第二個受邀 Google 帳號尚未實測；OCR 仍須人工校正。下方未部署／排程待設定的敘述屬較早觀察，以本節及最新測試報告為準。
+
 程式提供 `/admin`，包含邀請制 Google 登入、直播管理、歌曲／核准別名、待審候選、逐項發布、演唱紀錄修正、OCR、修訂還原、匯出和加密備份。資料庫變更在交易內執行，版本衝突回傳 409，撤銷成員不依賴 JWT 中的舊權限。
 
 2026-10-10 已接上 Supabase `culua-song-list`（東京，專案 ID `akmktondfagxhsksnsbz`），確認組織方案為 Free。初始 worker migration 分成兩筆远端記錄；加上 owner 綁定與四筆可靠性修正，遠端目前共九筆。請先核對歷史，不重播已套用檔案。私人圖片 bucket、RLS 與預設關閉的自動發布已建立；本地公開資料來源已切換 `supabase`。
