@@ -8,11 +8,12 @@ import React,{act} from 'react';
 import {createRoot} from 'react-dom/client';
 import {JSDOM} from 'jsdom';
 import * as ingestion from '../utils/archive/ingestion.mjs';
+import * as requests from '../utils/archive/adminRequest.mjs';
 const require=createRequire(import.meta.url);
 const code=ts.transpileModule(fs.readFileSync(new URL('../app/admin/Admin.tsx',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,esModuleInterop:true}}).outputText;
 let oauth;
 const mod={exports:{}};
-vm.runInThisContext(`(function(require,module,exports){${code}\n})`)(name=>name.endsWith('.css')?{}:name.includes('supabaseBrowser')?{browserClient:()=>({auth:{signInWithOAuth:async options=>{oauth=options;return {};},signOut:async()=>({})}})}:name.includes('ingestion')?ingestion:require(name),mod,mod.exports);
+vm.runInThisContext(`(function(require,module,exports){${code}\n})`)(name=>name.endsWith('.css')?{}:name.includes('adminRequest')?requests:name.includes('supabaseBrowser')?{browserClient:()=>({auth:{signInWithOAuth:async options=>{oauth=options;return {};},signOut:async()=>({})}})}:name.includes('ingestion')?ingestion:require(name),mod,mod.exports);
 const Admin=mod.exports.default;
 const dashboard=role=>({role,streams:[{video_id:'GzB_HSosjw8',title:'歌枠',stream_date:'2026-09-08',duration:4414,version:1,scan_status:'ready',scan_complete:true}],songs:[],performances:[],evidence:[],candidates:[{id:'candidate',video_id:'GzB_HSosjw8',position:1,name:'深海少女',artist:'ゆうゆ',timestamp_seconds:753,status:'review',reasons:[],version:2}],members:[{id:'owner',email:'owner@example.com',role:'owner',active:true}],revisions:[],jobs:[],settings:{auto_publish:false,dry_run_started_at:'2026-10-10'}});
 async function mount(props,role='editor') {
@@ -51,9 +52,37 @@ test('unsaved candidate changes disable publication; publish submits the saved v
     await act(async()=>{select.value='GzB_HSosjw8';select.dispatchEvent(new window.Event('change',{bubbles:true}));});
     const publish=button('發布已儲存版本');assert.ok(publish);assert.equal(publish.disabled,false);
     await act(async()=>publish.click());
-    const request=app.calls.find(c=>c.options?.method==='POST');assert.deepEqual(JSON.parse(request.options.body),{command:'candidate_publish',input:{id:'candidate',version:2}});
+    const request=app.calls.find(c=>c.options?.method==='POST');const sent=JSON.parse(request.options.body);assert.equal(sent.command,'candidate_publish');assert.equal(sent.input.id,'candidate');assert.equal(sent.input.version,2);assert.match(sent.input.request_id,/^[a-f0-9-]{36}$/);
     const form=button('發布已儲存版本').closest('form');
     await act(async()=>form.querySelector('input[name="name"]').dispatchEvent(new window.Event('input',{bubbles:true})));
     assert.equal(button('發布已儲存版本').disabled,true);assert.match(form.textContent,/修改尚未儲存/);
   }finally{await app.close();}
+});
+
+
+test('successful save followed by failed reload keeps the draft and unlocks controls',async()=>{
+ const app=await mount({authenticated:true,allowed:true});
+ try {
+  const select=document.querySelector('select');
+  await act(async()=>{select.value='GzB_HSosjw8';select.dispatchEvent(new window.Event('change',{bubbles:true}));});
+  const form=button('儲存待審內容').closest('form');form.elements.namedItem('name').value='Draft survives';
+  globalThis.fetch=async(url,options)=>{if(options?.method==='POST')return new Response('{}');throw new Error('Reload unavailable');};
+  await act(async()=>form.dispatchEvent(new window.Event('submit',{bubbles:true,cancelable:true})));
+  assert.match(document.body.textContent,/已儲存，清單更新失敗/);
+  assert.equal(form.elements.namedItem('name').value,'Draft survives');
+  assert.equal(document.querySelector('fieldset').disabled,false);
+ }finally{await app.close();}
+});
+
+test('409 preserves submitted draft and exposes current version without a second write',async()=>{
+ const app=await mount({authenticated:true,allowed:true});
+ try {
+  const select=document.querySelector('select');
+  await act(async()=>{select.value='GzB_HSosjw8';select.dispatchEvent(new window.Event('change',{bubbles:true}));});
+  const form=button('儲存待審內容').closest('form');form.elements.namedItem('name').value='Local draft';let writes=0;
+  globalThis.fetch=async()=>{writes++;return new Response(JSON.stringify({error:'Version conflict',current:{version:3,name:'Remote change'}}),{status:409});};
+  await act(async()=>form.dispatchEvent(new window.Event('submit',{bubbles:true,cancelable:true})));
+  assert.match(document.body.textContent,/Local draft/);assert.match(document.body.textContent,/Remote change/);
+  assert.equal(writes,1);assert.equal(form.elements.namedItem('name').value,'Local draft');
+ }finally{await app.close();}
 });

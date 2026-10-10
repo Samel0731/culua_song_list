@@ -180,7 +180,7 @@ test('initial migration preserves the actual baseline, private rows and all lega
   await login(owner);
   await assert.rejects(db.query('select public.archive_import_sheet($1::jsonb)',[JSON.stringify([rows[0],{...rows[1],video_id:'invalid'}])]),/check constraint/);
   assert.equal((await db.query('select count(*)::integer n from public.archive_performances')).rows[0].n,0);
-  const migrated=(await db.query('select public.archive_import_sheet($1::jsonb,$2::jsonb) data',[JSON.stringify(rows),JSON.stringify([{曲名:'足りない',配信URL:'非公開',タイムスタンプ:'h:mm:ss'}])])).rows[0].data;
+  const migrated=(await db.query(`select public.archive_import_sheet_request($1::jsonb,$2::jsonb,'77777777-7777-4777-8777-777777777777','aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa') data`,[JSON.stringify(rows),JSON.stringify([{曲名:'足りない',配信URL:'非公開',タイムスタンプ:'h:mm:ss'}])])).rows[0].data;
   assert.equal(migrated.performances,3131);assert.equal(migrated.songs,658);assert.equal(migrated.unavailable,1);
   const publicData=(await db.query('select public.archive_public_snapshot() data')).rows[0].data;
   assert.equal(publicData.songs.length,639);assert.equal(publicData.songs.reduce((sum,s)=>sum+s.versions.length,0),3131);
@@ -190,4 +190,30 @@ test('initial migration preserves the actual baseline, private rows and all lega
   const fullBackup=(await db.query('select public.archive_export_backup() data')).rows[0].data;
   const restored=(await db.query('select public.archive_restore_backup($1::jsonb) data',[JSON.stringify(fullBackup)])).rows[0].data;
   assert.equal(restored.performances,3131);assert.equal((await db.query('select resolved_video_id from public.archive_unavailable')).rows[0].resolved_video_id,rows[0].video_id);
+});
+
+
+test('receipts are atomic, actor-bound and replays cannot resurrect a removed candidate',async()=>{
+  await login(owner);
+  const request_id='55555555-5555-4555-8555-555555555555';
+  const id='66666666-6666-4666-8666-666666666666';
+  const input={id,create:true,request_id,video_id:video,position:99,name:'Receipt test',artist:'Test',timestamp_seconds:60};
+  const created=await command('candidate_save',input);
+  assert.equal(created.id,id);
+  assert.deepEqual(await command('candidate_save',input),created);
+  await assert.rejects(command('candidate_save',{...input,name:'Changed'}),/Request identity mismatch/);
+  await db.exec('reset role');
+  await db.query('delete from public.archive_candidates where id=$1',[id]);
+  await login(owner);
+  await assert.rejects(command('candidate_save',{id,version:1,video_id:video,position:99,name:'Stale',timestamp_seconds:61}),error=>error.code==='PT409'&&/Candidate no longer exists/.test(error.message));
+  assert.deepEqual(await command('candidate_save',input),created);
+  assert.equal((await db.query('select count(*)::int n from public.archive_candidates where id=$1',[id])).rows[0].n,0);
+  await login(editor);
+  await assert.rejects(command('candidate_save',input),/Request identity mismatch|Forbidden/);
+  await db.exec('reset role');
+  await db.exec("update public.archive_members set active=false where role='owner'");
+  await login(owner);
+  await assert.rejects(command('candidate_save',input),/Forbidden/);
+  await db.exec('reset role');
+  await db.exec("update public.archive_members set active=true where role='owner'");
 });

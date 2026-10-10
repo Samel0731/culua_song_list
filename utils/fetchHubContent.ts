@@ -57,7 +57,11 @@ const getDistributor = unstable_cache(async () => {
   const works = await mapLimited(list, async w => parseLinkCore(await read(`${w.sourceUrl}?lang=ja`), w));
   return { works, updatedAt: new Date().toISOString() };
 }, ['culua-distributor-v2'], { revalidate: 1800 });
-const getVideos = unstable_cache(async () => ({ videos: parseOfficialVideos(await read(VIDEOS)), updatedAt: new Date().toISOString() }), ['culua-official-videos-v1'], { revalidate: 1800 });
+let lastVideos: ReturnType<typeof parseOfficialVideos> = [];
+const getVideos = unstable_cache(async () => {
+  try {lastVideos=parseOfficialVideos(await read(VIDEOS));return {videos:lastVideos,updatedAt:new Date().toISOString(),error:null};}
+  catch(error){return {videos:lastVideos,updatedAt:null,error:error instanceof Error?error.message:'fetch failed'};}
+}, ['culua-official-videos-v2'], {revalidate:1800});
 const getCuration = unstable_cache(async (url: string, kind: 'fanart' | 'works') => {
   const allowed = safeUrl(url, ['docs.google.com']);
   if (!allowed || !new URL(allowed).pathname.startsWith('/spreadsheets/d/e/')) throw new Error('Use a published Google Sheets CSV URL');
@@ -74,8 +78,9 @@ export const fetchHubContent = cache(async (): Promise<HubContent> => {
     const names = ['RK Music · News', 'RK Music · Releases', 'TuneCore · CULUA', 'X · Selection', 'Music · Selection', 'YouTube · CULUA'];
     const urls = [NEWS, RELEASES, TUNECORE, fanUrl, worksUrl, VIDEOS];
     const updatedAt = r.status === 'fulfilled' ? r.value?.updatedAt || null : null;
+    const failed = r.status === 'rejected' || (r.value && 'error' in r.value && !!r.value.error);
     if (r.status === 'rejected') console.warn(`[CULUA content] ${names[i]}`, r.reason instanceof Error ? r.reason.message : 'fetch failed');
-    return { name: names[i], url: urls[i], updatedAt, status: !urls[i] ? 'unconfigured' : r.status === 'rejected' ? 'error' : updatedAt && Date.now() - Date.parse(updatedAt) > 3600000 ? 'stale' : 'ready' };
+    return { name: names[i], url: urls[i], updatedAt, status: !urls[i] ? 'unconfigured' : failed ? 'error' : updatedAt && Date.now() - Date.parse(updatedAt) > 3600000 ? 'stale' : 'ready' };
   });
   const works = attachOfficialVideos(mergeWorks(releases.status === 'fulfilled' ? releases.value.works : [], distributor.status === 'fulfilled' ? distributor.value.works : []), videos.status === 'fulfilled' ? videos.value.videos : []);
   const timeline = [...(news.status === 'fulfilled' ? news.value.events : []), ...works.flatMap(w => w.releaseDate ? [{ id: `release:${w.id}`, title: w.title, date: w.releaseDate, kind: 'release' as const, sourceUrl: w.sourceUrl, artists: w.artists }] : [])].sort((a, b) => b.date.localeCompare(a.date));

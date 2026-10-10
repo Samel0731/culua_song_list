@@ -3,11 +3,11 @@ import { createHash } from 'node:crypto';
 import { revalidateTag } from 'next/cache';
 import { AccessError, checkOrigin, requireMember, serviceClient } from '@/utils/archive/supabaseServer';
 import { collectBackup, encryptBackup, decryptBackup, restoreAssets } from '@/utils/archive/backup.mjs';
-import { apiError } from '@/utils/archive/api';
+import { apiError, rpcError } from '@/utils/archive/api';
 export const runtime='nodejs';
 export async function GET() {
   try {
-    await requireMember(true);
+    await requireMember(true,55000);
     const data=await collectBackup(serviceClient());
     const bytes=encryptBackup(data,process.env.ARCHIVE_BACKUP_KEY);
     return new Response(new Uint8Array(bytes),{headers:{'Content-Type':'application/octet-stream','Content-Disposition':`attachment; filename="culua-${new Date().toISOString().slice(0,10)}.enc"`,'Cache-Control':'private, no-store'}});
@@ -16,7 +16,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     checkOrigin(request);
-    const {db}=await requireMember(true);
+    const {db}=await requireMember(true,55000);
     const form=await request.formData(),file=form.get('file');
     if(!(file instanceof File)||file.size>25*1024*1024)throw new AccessError('需要 25 MB 以下的加密備份',400);
     const bytes=Buffer.from(await file.arrayBuffer());
@@ -29,8 +29,10 @@ export async function POST(request: Request) {
     }
     if(form.get('digest')!==digest)throw new AccessError('備份檔案變更，請重新預覽',400);
     await restoreAssets(serviceClient(),data);
-    const restored=await db.rpc('archive_restore_backup',{backup:data,expected_revision:Number(form.get('revision'))});
-    if(restored.error)throw new AccessError(restored.error.message,400);
+    const request_id=String(form.get('request_id')||'');
+    if(!/^[a-f0-9-]{36}$/i.test(request_id))throw new AccessError('需要有效請求識別碼',400);
+    const restored=await db.rpc('archive_restore_backup_request',{backup:data,expected_revision:Number(form.get('revision')),request_id});
+    if(restored.error)throw rpcError(restored.error);
     revalidateTag('song-archive',{expire:0});
     return NextResponse.json(restored.data,{headers:{'Cache-Control':'private, no-store'}});
   }catch(error){return apiError(error);}

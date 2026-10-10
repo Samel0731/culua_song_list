@@ -1,4 +1,20 @@
-# 2026-10-10 歌單產品與多人管理實作
+# 2026-10-10 正式資料匯入與可靠性複驗
+
+- 上線分支後續驗證：50 項測試、ESLint、TypeScript、production build 成功。匯入／還原／圖片 RPC 共用終止衝突與暫時性錯誤分類；伺服器504回應仍保留固定請求識別碼供結果查詢。後台截圖只留本機，不公開內部草稿與識別碼。
+- Supabase security advisor 提醒公開 SECURITY DEFINER RPC：公開 snapshot 為刻意提供已發布資料，role RPC 只返回目前帳號角色；管理 RPC 內仍強制 active member／owner 檢查，RLS保留。未宣稱零警示。參考 [公開函式檢查](https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable)、[已登入函式檢查](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable)。密碼外洩保護警示保留；網站登入使用 Google OAuth。
+
+- 48 項自動測試通過（Node test isolation=none），ESLint、TypeScript、Webpack production build 與差異檢查通過。Windows sandbox 下建置子程序 EPERM，經授權在 sandbox 外建置成功。既有相依警示仍在。
+- 擁有者瀏覽器後台正式 CSV 匯入成功：658 組歌曲／歌手、3,131 筆演唱、422 場直播、8 筆非公開待補，格式錯誤 0。摘要 `e37329a335c5b1a8d4d35339f74ad902ce4b86bca9281ad258d80c2a2d2175a7`；逐筆影片 ID、時間、歌曲／歌手、日期與歌曲連結比對通過。公開 snapshot 為 639 曲名入口，3,131 演唱。
+- 本地來源已切換 Supabase；Netlify 正式部署／來源尚未切換。現有 Google owner 已綁定，未測第二個真實協作者帳號。
+- 已套用四個新的可靠性 migrations，遠端共九筆。一般寫入固定 request_id、交易保存結果、20/60 秒前端等待、有限資料庫等待。隔離測試驗證永不回應與 body 卡住、寫入成功刷新失敗、409 草稿保留、重複請求、撤銷與已刪除候選不能復活。
+- 真實同專案 owner 還原第一輪遇到 Supabase 安全更新限制，交易回滾；新增明確 WHERE 的 migration 後重試成功。已確認 backup_restore 審計與操作 receipt，還原後歌曲／演唱／待補／別名和匯入後加密備份一致，owner 權限保留，自動發布關閉。
+- 官方貼文 `2096983824911790103` 明確綁定 `z65138fhtm8`。JPEG 儲存私人 bucket，瀏覽器 Tesseract 日英 OCR 真實執行兩輪。第二輪裁切 20/10/60/80%、1 倍、對比 100%、反轉明暗：辨識 5 行，去除非原文空白後 4/10 曲名正確、1 行誤字、5 行漏辨。人工補齊 10 首，全部待審、歌手空白、時間 null。這是一張圖的測量，不能外推整體準確率。
+- 含私人原圖的加密備份已解密驗證，圖片 SHA-256 與官方原 JPEG 一致；金鑰與副本均未進 Git。匿名／撤銷保護有隔離測試，真實協作者圖片到發布流程仍待指定帳號。
+- YouTube Data API 啟用／受限金鑰等待本人確認；GitHub 和 Netlify 管理瀏覽器需本人登入。尚未配置遠端 secrets、啟用每日工作、取得實際七天試運轉或部署後驗收。
+
+以下為較早的歷史驗證，不代表目前狀態。
+
+# 2026-10-10 歌單產品與多人管理實作（早期）
 
 - owner 首次 Google 登入修正：新增 `owner_invitation_claim` migration，允許既有有效 owner/editor 的已驗證 Google 信箱綁定未綁定 UUID，保留角色及審計。42 項測試、lint、TypeScript、正式建置通過；新增測試覆蓋 owner 初次綁定與冪等、未驗證／未確認信箱、撤銷、不同信箱及已綁定 UUID 保護。遠端套用成功，回滾交易以 authenticated role 驗證 owner 綁定與角色成功，不以管理連接器直接永久改寫使用者綁定。瀏覽器刷新後的實際管理流程仍需確認。
 - 此次建置仍出現 YouTube RSS 500 快取重驗證錯誤，但建置完成。這是官方內容來源故障，與 Google OAuth/owner 綁定分開，未宣稱已修正 RSS。

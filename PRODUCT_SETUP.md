@@ -4,9 +4,9 @@
 
 程式提供 `/admin`，包含邀請制 Google 登入、直播管理、歌曲／核准別名、待審候選、逐項發布、演唱紀錄修正、OCR、修訂還原、匯出和加密備份。資料庫變更在交易內執行，版本衝突回傳 409，撤銷成員不依賴 JWT 中的舊權限。
 
-2026-10-10 已接上 Supabase `culua-song-list`（東京，專案 ID `akmktondfagxhsksnsbz`），確認組織方案為 Free。三個 migration 已完整套用；第二個因工具請求狀態錯誤分成 scan 與 jobs/import 兩段執行，遠端 migration 名称因此有四筆，請勿再次套用這三個本地檔案。已建立私人圖片 bucket、RLS 與預設關閉的自動發布。本機 `.env.local` 已填入 URL／publishable key，保留 `ARCHIVE_DATA_SOURCE=sheet`。
+2026-10-10 已接上 Supabase `culua-song-list`（東京，專案 ID `akmktondfagxhsksnsbz`），確認組織方案為 Free。初始 worker migration 分成兩筆远端記錄；加上 owner 綁定與四筆可靠性修正，遠端目前共九筆。請先核對歷史，不重播已套用檔案。私人圖片 bucket、RLS 與預設關閉的自動發布已建立；本地公開資料來源已切換 `supabase`。
 
-唯一擁有者信箱已按使用者指定建立。Google OAuth 已由使用者完成登入回呼，遠端確認信箱已驗證；額外的 `owner_invitation_claim` migration 已套用，修正 owner 首次綁定，重新整理 `/admin` 即會再嘗試綁定。遠端已用回滾交易驗證可取得 owner；實際後台仍需使用者瀏覽器確認。server-only service role key、備份密鑰、YouTube API key／排程、初次 Sheet 匯入與 Netlify 部署尚待完成。不要把 `.env.local`、服務金鑰、備份密鑰或擁有者 access token 提交 Git。
+唯一擁有者已完成 Google UUID 綁定，瀏覽器後台、正式匯入及同專案備份還原已實測。本機 server-only service role key、備份與快取更新密鑰已設定。YouTube API／GitHub 排程及 Netlify 部署仍待外部帳戶設定。不要把 `.env.local`、服務金鑰、備份密鑰或擁有者 access token 提交 Git。
 
 此專案 Google authorized redirect URI：`https://akmktondfagxhsksnsbz.supabase.co/auth/v1/callback`。Supabase Redirect URLs 加入 `http://localhost:3000/auth/callback` 與 `https://culuasonglist.netlify.app/auth/callback`。在 [Google provider 設定](https://supabase.com/dashboard/project/akmktondfagxhsksnsbz/auth/providers) 啟用 Google 並填入 Google Cloud OAuth client ID／secret；私密資訊只填設定頁。
 
@@ -31,6 +31,14 @@ values ('你的 Google 信箱小寫', 'owner');
 只有擁有者管理成員、啟用自動發布及還原整份備份。協作者可以編輯、審核、發布、重試與匯出；不能提升自己的權限。此站仍是非官方網站，受邀身分不代表官方背書。
 
 ## 2. 一次匯入 Sheet 與切換資料來源
+
+2026-10-10 更新：正式 CSV 已由擁有者後台匯入，658 筆歌曲／歌手、3,131 筆演唱、422 場直播、8 筆非公開待補，格式錯誤 0。逐筆影片 ID、時間、歌曲／歌手、日期與播放連結比對通過。本地已切換 `supabase`，Netlify 正式來源尚未切換。當次 CSV、摘要、比對報告和加密備份保存於不進 Git 的 `.archive-private/`。
+
+本機服務金鑰、備份與快取更新密鑰已設定；擁有者可取得的密鑰副本是 `.archive-private/keys.env`，請另存到自己的安全保管位置。不要貼到聊天或提交版本控制。GitHub／Netlify 的設定不能由本機 `.env.local` 推定完成。
+
+管理讀取與一般寫入等待上限 20 秒，匯入／備份 60 秒；資料庫操作有 statement/lock timeout。逾時顯示結果待確認，先查詢操作結果，再使用原請求識別碼重試；不自動重送。同一操作者與相同內容回傳交易保存的原結果，內容不同拒絕。儲存成功但刷新失敗時保留草稿並提供重新讀取。409 畫面並列草稿與目前版本；已刪除候選不能復活。
+
+新增的四個可靠性 migration 已套用，現有遠端共九筆記錄；新專案仍按本地全部檔名順序建立。`archive_restore_safe_delete` 保留安全更新限制，將整批還原的刪除及重設改為明確主鍵条件。正式同專案還原已實測成功，內容與匯入後備份一致、成員權限保留、自動發布保持關閉。
 
 1. 由 Google Sheet 下載目前工作表 CSV；在「匯出與匯入」選擇檔案並預覽。
 2. 比對歌曲、演唱、直播數量及播放時間。舊日期的 `YYYY/MM/DD` 轉成相同日期的 `YYYY-MM-DD`；自動新直播日期使用台灣時區。程式按影片／秒數排序分配演唱順序，完全相同列會去重；不同時間的同首歌曲保留。曲連結欄的「リンク」文字不會當 URL，會使用真正 HTTPS 曲 URL。
@@ -76,7 +84,7 @@ GitHub repository 設定：
 - 正式曲名修正保留舊名稱導向；原分享連結的 video／t 參數保留。曲名和原唱核准別名由協作者明確建立。
 - 誤核准的別名可以撤銷；舊網址導向會保留。自動發布交易再次查驗目前核准名稱及當輪兩位作者的未過期證據，撤銷後不採用工作先前讀到的別名。
 
-兩支樣本留言已建立逐字轉錄測試；兩篇 X 圖片只做過視覺檢查，尚未完成真實 Tesseract 辨識率量測，不能宣稱準確率。貼文 `2096983824911790103` 對應 `z65138fhtm8`，`2091907669770834344` 對應 `oBB1DtC2Vv0`；不得配到留言範例 `GzB_HSosjw8`／`Yg2Iw8x-r5U`。上線前由協作者用原圖記錄字元修正量、漏曲與耗時，再決定常用裁切設定。
+兩支樣本留言已建立逐字轉錄測試。貼文 `2096983824911790103` 對應 `z65138fhtm8`，`2091907669770834344` 對應 `oBB1DtC2Vv0`；不得配到留言範例 `GzB_HSosjw8`／`Yg2Iw8x-r5U`。第一篇已實测 Tesseract：裁切20/10/60/80%、1倍、100%對比、反轉明暗後5行可辨識，去除空白後4/10曲名正確，1行誤字、5行漏辨；人工校正10首送審，歌手和時間仍待補。不把單張圖結果當作所有圖片的辨識率。
 
 ## 5. 備份、還原與故障排查
 

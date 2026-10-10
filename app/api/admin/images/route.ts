@@ -1,8 +1,8 @@
-import { randomUUID } from 'node:crypto';
+import { createHash } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { AccessError, checkOrigin, requireMember, serviceClient } from '@/utils/archive/supabaseServer';
 import { imageMime, validateImageUrl, validateXPost, videoIdFromUrl } from '@/utils/archive/ingestion.mjs';
-import { apiError } from '@/utils/archive/api';
+import { apiError, rpcError } from '@/utils/archive/api';
 export const runtime='nodejs';
 const MAX=10*1024*1024;
 
@@ -11,6 +11,8 @@ export async function POST(request: Request) {
     checkOrigin(request);
     const {db,user}=await requireMember();
     const form=await request.formData();
+    const request_id=String(form.get('request_id')||'');
+    if(!/^[a-f0-9-]{36}$/i.test(request_id))throw new AccessError('需要有效請求識別碼',400);
     const vid=videoIdFromUrl(String(form.get('video')||''));
     if (!vid) throw new AccessError('需要有效的 YouTube 影片',400);
     const stream=await db.from('archive_streams').select('video_id').eq('video_id',vid).single();
@@ -41,19 +43,22 @@ export async function POST(request: Request) {
     }
     if (!bytes && !post) throw new AccessError('請提供 X 貼文或圖片',400);
     let path: string|null=uploadedPath?String(uploadedPath):null;
+    let newlyUploaded=false;
     if(bytes) {
-      let mime:string;
-      try{mime=imageMime(bytes);}catch(error){if(path)await serviceClient().storage.from('archive-evidence').remove([path]);throw error;}
+      const mime=imageMime(bytes);
       if(!path) {
-        path=`${user.id}/${vid}/${randomUUID()}.${mime==='image/png'?'png':'jpg'}`;
+        path=`${user.id}/${vid}/${request_id}.${mime==='image/png'?'png':'jpg'}`;
         const uploaded=await serviceClient().storage.from('archive-evidence').upload(path,bytes,{contentType:mime,upsert:false});
-        if(uploaded.error)throw new Error('圖片儲存失敗');
+        if(uploaded.error && !/already exists|duplicate/i.test(uploaded.error.message))throw new Error('圖片儲存失敗');
+        newlyUploaded=!uploaded.error;
       }
     }
-    const saved=await db.rpc('archive_command',{command:form.get('sourceId')?'source_attach':'source_add',input:{id:form.get('sourceId')||null,video_id:vid,source_url:post,storage_path:path}});
+    const saved=await db.rpc('archive_command',{command:form.get('sourceId')?'source_attach':'source_add',input:{request_id,id:form.get('sourceId')||null,video_id:vid,source_url:post,storage_path:path,image_digest:bytes?createHash('sha256').update(bytes).digest('hex'):null}});
     if(saved.error) {
-      if(path)await serviceClient().storage.from('archive-evidence').remove([path]);
-      throw new AccessError(saved.error.message,400);
+      // A transport error may occur after commit. Never remove an existing asset,
+      // or an asset whose association has an unknown result.
+      if(path&&newlyUploaded&&saved.error.code&&!['57014','55P03'].includes(saved.error.code))await serviceClient().storage.from('archive-evidence').remove([path]);
+      throw rpcError(saved.error);
     }
     return NextResponse.json(saved.data,{headers:{'Cache-Control':'private, no-store'}});
   }catch(error){return apiError(error);}

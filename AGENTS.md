@@ -139,29 +139,46 @@ playback continue to work across the Sheet-to-database transition.
   succeeded, and anonymous access to the members table was denied.
 - Local `.env.local` contains the project URL and publishable key and is
   ignored by Git. Do not reproduce its values in this file or tool output.
-  Public song reads still use `ARCHIVE_DATA_SOURCE=sheet`.
+  Local public song reads now use `ARCHIVE_DATA_SOURCE=supabase`; production
+  source switching has not yet been verified.
 - The unique owner membership has been seeded for the user-designated Google
-  email, with an audit record. It awaits the first verified Google login to
-  bind its Auth user UUID; do not publish the member's email or infer other
+  email, with an audit record. Its verified Google Auth UUID is now bound and
+  the local owner dashboard works; do not publish the member's email or infer other
   collaborators from names or domains.
 - Google OAuth login has now returned successfully from the user's local
   browser, and the owner email matches a confirmed Google identity in Auth.
-  The full owner dashboard still needs browser confirmation after refreshing
-  with the binding fix. Server-only service/backup keys, YouTube API
-  configuration, worker activation, initial Sheet import,
-  seven-day trial, real OCR accuracy, and deployment of these changes remain
+  The owner dashboard and initial import have now been exercised in the browser.
+  Local server-only service/backup keys are configured. YouTube API
+  configuration, worker activation,
+  seven-day trial and deployment of these changes remain
   pending. Recheck current settings before claiming any of these are done.
-- `/admin` returned HTTP 200 and displayed the Google login UI. This does
-  not establish that Google login or the full authenticated flow works yet.
+- `/admin` has been tested with the real owner session, including import,
+  private images/OCR, backup restore and two-window conflict recovery.
+  A second real invited Google account has not been tested.
 - FanArt and FeaturedWorks tabs exist but their anonymous CSV requests
   previously returned 401. Their URLs are now opt-in environment variables;
   missing URLs show "Selection not configured" without a request. Handled
   source failures use `console.warn` and retain the visible error state.
-- The most recent local checks passed: 42 tests, ESLint, TypeScript,
+- The most recent local checks passed: 50 tests, ESLint, TypeScript,
   production build, and `git diff --check`. Dependency audit warnings remain;
   do not describe the dependency tree as vulnerability-free.
 
 These are dated observations, not guarantees of current account settings.
+The 2026-10-10 reliability follow-up applied `archive_request_reliability`,
+`archive_restore_receipt`, `archive_restore_safe_delete`, and
+`archive_conflict_http_status`; remote history now has nine entries.
+Business conflicts use `PT409`, never `40001`, which can trigger PostgREST
+transaction retries. Writes use request receipts and finite deadlines; a timeout
+does not prove cancellation. Never automatically retry a timed-out write with
+a new request ID. Deleted candidate updates cannot recreate the candidate.
+The official CSV was imported: 658 song/artist combinations, 3,131 performances,
+422 streams and eight unavailable rows. A real owner backup restore succeeded
+and content was compared against the import backup; member access was retained.
+Private operational copies and local keys live under ignored `.archive-private/`.
+Real Japanese/English OCR was measured on one official set-list image: four of
+ten titles correct after removing extraneous spaces, one incorrect title and
+five missed titles. Manual correction produced ten review-only candidates with
+no fabricated artist or timestamp; image-inclusive encrypted backup verified.
 Keep this section and `VERIFICATION.md` current when setup changes. Do not
 treat existing workflow files or successful local builds as deployment proof.
 
