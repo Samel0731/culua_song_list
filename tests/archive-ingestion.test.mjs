@@ -8,6 +8,15 @@ import {youtubeClient,YouTubeError,BudgetExceeded,isoDuration} from '../utils/ar
 const fixtures=JSON.parse(await readFile(new URL('./fixtures/culua-comments.json',import.meta.url)));
 const catalogFor=comments=>parseSetlist(comments[0].text).map((s,i)=>({...s,id:`song-${i}`}));
 
+test('live OP/ED titles in Japanese quotes are markers; numeric song titles stay intact',()=>{
+  const comment=fixtures['Yg2Iw8x-r5U'][0].text.replace('0:00:00 OP','0:00:00 OP『眩々』').replace('0:32:04 ED','0:32:04 ED『少しの自信があったら、』');
+  const songs=parseSetlist(comment);
+  assert.equal(songs.length,7);
+  assert.equal(songs[0].name,'サターン');
+  assert.equal(songs[0].timestamp_seconds,140);
+  assert.deepEqual(parseSetlist('01:00 10月無口な君を忘れる / あたらよ\n02:00 05 曲名 / 歌手').map(s=>s.name),['10月無口な君を忘れる','曲名']);
+});
+
 test('real fixtures parse nine and seven songs each; OP, ED and start excluded',()=>{
   for(const comment of fixtures.GzB_HSosjw8)assert.equal(parseSetlist(comment.text).length,9);
   for(const comment of fixtures['Yg2Iw8x-r5U'])assert.equal(parseSetlist(comment.text).length,7);
