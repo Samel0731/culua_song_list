@@ -6,10 +6,15 @@
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint app context utils",
-    "test": "node --test tests/*.test.mjs"
+    "lint": "eslint app context utils proxy.ts scripts/archive-*.mjs tests/archive-*.test.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "archive:sync": "node scripts/archive-sync.mjs",
+    "archive:snapshot": "node scripts/archive-snapshot.mjs",
+    "archive:backup": "node scripts/archive-backup.mjs backup archive-backup.enc"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.117.3",
     "cheerio": "^1.2.0",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.20",
@@ -23,9 +28,11 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-player": "^3.4.0",
-    "recharts": "^3.8.1"
+    "recharts": "^3.8.1",
+    "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/papaparse": "^5.5.2",

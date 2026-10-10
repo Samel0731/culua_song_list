@@ -34,7 +34,8 @@ YouTubeでの歌枠（生配信）やカバー動画、オリジナル曲を網�
 * **Framework:** [Next.js](https://nextjs.org/) (App Router)
 * **Language:** TypeScript
 * **Styling:** Tailwind CSS
-* **Data Source:** Published Google Sheets CSV & YouTube iframe API
+* **Data Source:** Supabase PostgreSQL (after migration), published Google Sheets CSV during setup; YouTube Data / iframe APIs
+* **Management:** Invite-only Google login, transactional review/publish, browser Tesseract OCR
 * **Live hosting:** Netlify
 
 ## ⚠️ Disclaimer
@@ -51,7 +52,9 @@ This is a **fan-made, non-commercial project**. It is not affiliated with, endor
 Contributions are welcome! If you find any bugs or have suggestions for new features, please feel free to open an issue or submit a pull request.
 ## Local preview and validation
 
-Use Node.js 20.9+ and run commands from this directory:
+多人管理、自動匯入、OCR、備份和正式啟用步驟請見 [PRODUCT_SETUP.md](PRODUCT_SETUP.md)。未設定 Supabase 時保留現有 Sheet 公開資料；後台會顯示設定提示。
+
+Use Node.js 22+ and run commands from this directory:
 
 ```sh
 npm ci

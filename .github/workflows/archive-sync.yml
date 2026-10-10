@@ -1,0 +1,42 @@
+name: Archive daily import
+on:
+  schedule:
+    - cron: '17 0 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: archive-production
+  cancel-in-progress: false
+jobs:
+  import:
+    if: vars.ARCHIVE_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+      YOUTUBE_CHANNEL_ID: ${{ vars.YOUTUBE_CHANNEL_ID }}
+      ARCHIVE_JOB_KEY: github:${{ github.run_id }}
+      ARCHIVE_BACKUP_KEY: ${{ secrets.ARCHIVE_BACKUP_KEY }}
+      ARCHIVE_REVALIDATE_SECRET: ${{ secrets.ARCHIVE_REVALIDATE_SECRET }}
+      ARCHIVE_SITE_URL: ${{ vars.ARCHIVE_SITE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: node scripts/archive-sync.mjs
+      - name: Encrypted application backup
+        if: always()
+        run: node scripts/archive-backup.mjs backup archive-backup.enc
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: archive-backup-${{ github.run_id }}
+          path: archive-backup.enc
+          retention-days: 7
+          if-no-files-found: error

@@ -52,6 +52,8 @@ export interface CsvRow {
 }
 
 export interface SongVersion {
+  artist?: string;
+  streamIncomplete?: boolean;
   date: string;
   streamUrl: string;
   streamTitle: string;

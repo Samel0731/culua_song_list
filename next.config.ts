@@ -10,7 +10,10 @@ const withPWA = require('next-pwa')({
   disable: process.env.NODE_ENV === 'development',
   // Content pages must receive ISR updates; only assets are cached offline.
   cacheStartUrl: false,
-  runtimeCaching: [{ urlPattern: /\.(?:js|css|woff2|png|jpg|jpeg|svg|ico)$/i, handler: 'StaleWhileRevalidate', options: { cacheName: 'culua-assets-v2', expiration: { maxEntries: 120, maxAgeSeconds: 604800 } } }],
+  runtimeCaching: [
+    { urlPattern: /\/admin(?:\/|$)|\/api\/admin(?:\/|$)|\/auth(?:\/|$)|\.supabase\.co\//i, handler: 'NetworkOnly' },
+    { urlPattern: /\.(?:js|css|woff2|png|jpg|jpeg|svg|ico)$/i, handler: 'StaleWhileRevalidate', options: { cacheName: 'culua-assets-v2', expiration: { maxEntries: 120, maxAgeSeconds: 604800 } } },
+  ],
 });
 
 const nextConfig: NextConfig = {

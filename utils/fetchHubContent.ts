@@ -57,7 +57,11 @@ const getDistributor = unstable_cache(async () => {
   const works = await mapLimited(list, async w => parseLinkCore(await read(`${w.sourceUrl}?lang=ja`), w));
   return { works, updatedAt: new Date().toISOString() };
 }, ['culua-distributor-v2'], { revalidate: 1800 });
-const getVideos = unstable_cache(async () => ({ videos: parseOfficialVideos(await read(VIDEOS)), updatedAt: new Date().toISOString() }), ['culua-official-videos-v1'], { revalidate: 1800 });
+let lastVideos: ReturnType<typeof parseOfficialVideos> = [];
+const getVideos = unstable_cache(async () => {
+  try {lastVideos=parseOfficialVideos(await read(VIDEOS));return {videos:lastVideos,updatedAt:new Date().toISOString(),error:null};}
+  catch(error){return {videos:lastVideos,updatedAt:null,error:error instanceof Error?error.message:'fetch failed'};}
+}, ['culua-official-videos-v2'], {revalidate:1800});
 const getCuration = unstable_cache(async (url: string, kind: 'fanart' | 'works') => {
   const allowed = safeUrl(url, ['docs.google.com']);
   if (!allowed || !new URL(allowed).pathname.startsWith('/spreadsheets/d/e/')) throw new Error('Use a published Google Sheets CSV URL');
@@ -66,17 +70,17 @@ const getCuration = unstable_cache(async (url: string, kind: 'fanart' | 'works')
 }, ['culua-curation-v1'], { revalidate: 1800 });
 
 export const fetchHubContent = cache(async (): Promise<HubContent> => {
-  const published = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTQdBtem90otSSCpAHO7Al5fz2F0dx-ReDDpgbEfuioiOlkbT5uyfdWbDqPNZvG6YXI0PSab_ge6nE1/pub';
-  const fanUrl = process.env.FANART_SHEET_CSV_URL ?? `${published}?gid=1270000001&single=true&output=csv`;
-  const worksUrl = process.env.FEATURED_WORKS_SHEET_CSV_URL ?? `${published}?gid=1270000002&single=true&output=csv`;
+  const fanUrl = process.env.FANART_SHEET_CSV_URL?.trim() || '';
+  const worksUrl = process.env.FEATURED_WORKS_SHEET_CSV_URL?.trim() || '';
   const results = await Promise.allSettled([getNews(), getReleases(), getDistributor(), fanUrl ? getCuration(fanUrl, 'fanart') : Promise.resolve(null), worksUrl ? getCuration(worksUrl, 'works') : Promise.resolve(null), getVideos()]);
   const [news, releases, distributor, fans, selections, videos] = results;
   const sources: SourceState[] = results.map((r, i) => {
     const names = ['RK Music · News', 'RK Music · Releases', 'TuneCore · CULUA', 'X · Selection', 'Music · Selection', 'YouTube · CULUA'];
     const urls = [NEWS, RELEASES, TUNECORE, fanUrl, worksUrl, VIDEOS];
     const updatedAt = r.status === 'fulfilled' ? r.value?.updatedAt || null : null;
-    if (r.status === 'rejected') console.error(`[CULUA content] ${names[i]}`, r.reason instanceof Error ? r.reason.message : 'fetch failed');
-    return { name: names[i], url: urls[i], updatedAt, status: !urls[i] ? 'unconfigured' : r.status === 'rejected' ? 'error' : updatedAt && Date.now() - Date.parse(updatedAt) > 3600000 ? 'stale' : 'ready' };
+    const failed = r.status === 'rejected' || (r.value && 'error' in r.value && !!r.value.error);
+    if (r.status === 'rejected') console.warn(`[CULUA content] ${names[i]}`, r.reason instanceof Error ? r.reason.message : 'fetch failed');
+    return { name: names[i], url: urls[i], updatedAt, status: !urls[i] ? 'unconfigured' : failed ? 'error' : updatedAt && Date.now() - Date.parse(updatedAt) > 3600000 ? 'stale' : 'ready' };
   });
   const works = attachOfficialVideos(mergeWorks(releases.status === 'fulfilled' ? releases.value.works : [], distributor.status === 'fulfilled' ? distributor.value.works : []), videos.status === 'fulfilled' ? videos.value.videos : []);
   const timeline = [...(news.status === 'fulfilled' ? news.value.events : []), ...works.flatMap(w => w.releaseDate ? [{ id: `release:${w.id}`, title: w.title, date: w.releaseDate, kind: 'release' as const, sourceUrl: w.sourceUrl, artists: w.artists }] : [])].sort((a, b) => b.date.localeCompare(a.date));
