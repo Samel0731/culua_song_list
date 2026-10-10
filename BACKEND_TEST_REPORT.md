@@ -3,9 +3,9 @@
 ## 正式上線與真實工作複驗（2026-10-10）
 
 - PR #4 已合併，正式站已發布 main `002d1477`，Netlify deploy `6aca53f56a59be00080e2d14`；正式來源為 Supabase。
-- 正式歌曲列表及日文歌曲網址回應 200；Google 登入成功進入正式 owner 後台。匿名管理及私人圖片 API 回應 401，使用 private, no-store。
+- 正式歌曲列表及日文歌曲網址回應 200；Google 登入成功進入正式 owner 後台。匿名管理及私人圖片 API 回應 401，使用 private, no-store；owner 經正式 API 開啟私人原圖，瀏覽器確認1715×2000成功解碼。
 - Netlify Production 專用設定與 GitHub Actions secrets 已安全配置；YouTube API 啟用，金鑰只限 YouTube Data API v3。Supabase、Netlify 畫面確認 Free 方案，沒有啟用付費方案。
-- [真實 Actions 工作](https://github.com/Samel0731/culua_song_list/actions/runs/38062304452) 成功：兩支影片共掃描20則頂層留言、使用6 units、發布0筆、錯誤0筆；加密備份 artifact 559 KB，保留7天。該 artifact 尚未下載解密驗證；既有本地含圖片備份已解密比對及還原成功。
+- [真實 Actions 工作](https://github.com/Samel0731/culua_song_list/actions/runs/38062304452) 成功：兩支影片共掃描20則頂層留言、使用6 units、發布0筆、錯誤0筆；加密備份 artifact 559 KB，保留7天。該 artifact 已下載並成功解密：658首、3,131演唱、422直播、1張圖片；圖片 SHA-256 與既有已驗證備份一致。既有 owner 同專案還原已成功。
 - 真實留言發現 OP／ED 後接日文引號的漏排除問題，修正解析器並新增回歸測試；保留「10月」等數字開頭曲名。修正版本地 worker 重跑成功，兩支影片分別9、7筆待審；舊多餘候選由 owner 排除，來源與審計保留，正式演唱仍3,131筆。
 - 修正版51項測試、lint、TypeScript、production build通過。預設 npm test 子程序被本機沙箱 EPERM 阻擋，使用文件指定的非隔離 runner 通過；同工作識別碼重跑被 lease／已完成防護擋下，但 Node 25 本機結束時另出現 libuv assertion，不據此宣稱本機執行環境完全無問題。CI 使用 Node 22。
 - 有效試運轉起点為 2026-10-10 23:07:17（台灣）；自動發布保持關閉，最早10月17日同時間且完成七天人工檢查後由 owner 決定。
