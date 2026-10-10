@@ -1,5 +1,11 @@
 # 後台功能測試報告
 
+## PR #4 接續驗證
+
+2026-10-10：GitHub Product checks（提交 `98ded6a7`）成功。本地最新 production preview 的8個公開頁面、3個轉址、646筆 sitemap、歌曲查詢 canonical 檢查通過；真實 owner 後台成功載入。核對10筆 OCR 候選均有既有演唱，透過 owner UI 全部排除，來源及審計保留；資料庫確認演唱仍3,131筆、該影片待審0筆。截圖只保存在本機。
+
+尚未合併／部署：Netlify及GitHub設定頁未登入；YouTube API與受限金鑰授權待完成，因此尚無每日 worker 成功或有效七天試運轉證據。
+
 ## 2026-10-10 修正後複驗
 
 正式 Google Sheet 已完成擁有者授權的交易匯入。本地以 Supabase 提供公開歌單；正式 Netlify 來源仍未切換，整體上線尚未完成。
