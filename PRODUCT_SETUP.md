@@ -6,25 +6,27 @@
 
 2026-10-10 已接上 Supabase `culua-song-list`（東京，專案 ID `akmktondfagxhsksnsbz`），確認組織方案為 Free。三個 migration 已完整套用；第二個因工具請求狀態錯誤分成 scan 與 jobs/import 兩段執行，遠端 migration 名称因此有四筆，請勿再次套用這三個本地檔案。已建立私人圖片 bucket、RLS 與預設關閉的自動發布。本機 `.env.local` 已填入 URL／publishable key，保留 `ARCHIVE_DATA_SOURCE=sheet`。
 
-唯一擁有者信箱已按使用者指定建立，尚未綁定 Auth UUID；首次以該已驗證 Google 信箱登入會自動綁定。Google provider 尚未啟用，server-only service role key、備份密鑰、YouTube API key／排程、初次 Sheet 匯入與 Netlify 部署尚待完成。不要把 `.env.local`、服務金鑰、備份密鑰或擁有者 access token 提交 Git。
+唯一擁有者信箱已按使用者指定建立。Google OAuth 已由使用者完成登入回呼，遠端確認信箱已驗證；額外的 `owner_invitation_claim` migration 已套用，修正 owner 首次綁定，重新整理 `/admin` 即會再嘗試綁定。遠端已用回滾交易驗證可取得 owner；實際後台仍需使用者瀏覽器確認。server-only service role key、備份密鑰、YouTube API key／排程、初次 Sheet 匯入與 Netlify 部署尚待完成。不要把 `.env.local`、服務金鑰、備份密鑰或擁有者 access token 提交 Git。
 
 此專案 Google authorized redirect URI：`https://akmktondfagxhsksnsbz.supabase.co/auth/v1/callback`。Supabase Redirect URLs 加入 `http://localhost:3000/auth/callback` 與 `https://culuasonglist.netlify.app/auth/callback`。在 [Google provider 設定](https://supabase.com/dashboard/project/akmktondfagxhsksnsbz/auth/providers) 啟用 Google 並填入 Google Cloud OAuth client ID／secret；私密資訊只填設定頁。
 
 ## 1. 建立免費 Supabase 與 Google 登入
 
-1. 建立 Supabase Free 專案，使用 SQL Editor 按檔名順序執行 `supabase/migrations/` 的三個 migration，或使用 Supabase CLI `supabase db push`。先在測試專案驗證，勿重複執行同一 migration。
+1. 新專案建立 Supabase Free，使用 SQL Editor 按檔名順序執行 `supabase/migrations/` 的所有 migration，或使用 Supabase CLI `supabase db push`。現有專案已套用，遠端版本與本地初始檔名不同，使用 CLI 前先核對 migration history，勿重複執行。
 2. 在 Google Cloud 建立 OAuth Web application，用 Supabase Auth 顯示的 callback URL 作為 Google authorized redirect URI。只使用 `openid email profile`；YouTube API key 另設，不向協作者索取 Google Sheet 或 YouTube 存取權。[官方 Google OAuth 設定](https://supabase.com/docs/guides/auth/social-login/auth-google)
 3. 在 Supabase Auth 啟用 Google provider，填入 client ID／secret；Site URL 設定正式網站 origin。Redirect URLs 加入 `http://localhost:3000/auth/callback` 和正式網站的 `/auth/callback`。正式部署將 Google OAuth app 設為可供指定協作者使用的狀態。
 4. 複製 `.env.example` 到 `.env.local`，填入 Supabase URL、publishable key、server-only service role key。`NEXT_PUBLIC_SITE_URL` 必須與瀏覽器 origin 一致；Netlify 正式環境不能保留 localhost。
 5. 產生備份密鑰：`node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"`，存入 `ARCHIVE_BACKUP_KEY`，並在獨立密碼管理器保存一份。遺失密鑰無法解密備份。
-6. `npm install`、`npm run dev`，開啟 `/admin`，用你的 Google 帳號登入。首次登入會顯示尚未受邀。到 Supabase Auth Users 複製你的 user UUID，再用 SQL Editor 建立唯一擁有者：
+6. 新專案先由 SQL Editor 建立唯一擁有者的 Google 信箱（必須小寫），再執行 `npm ci`、`npm run dev`，開啟 `/admin` 用該 Google 帳號登入。經 Google 驗證的信箱會綁定 Auth UUID，保留 owner 角色並寫入修訂紀錄。現有專案已有 owner，勿重複新增：
 
 ```sql
-insert into public.archive_members(email,user_id,role)
-values ('你的 Google 信箱小寫', '你的 Auth user UUID', 'owner');
+insert into public.archive_members(email,role)
+values ('你的 Google 信箱小寫', 'owner');
 ```
 
 7. 重新進入 `/admin`。在「成員」輸入 Sheet 維護者、CULUA 或 RKMusic 指定人員的 Google 信箱，再自行提供網站網址給本人。系統不自動寄邀請信；首次登入以 Google 驗證信箱綁定 UUID。撤銷後所有後台讀寫及圖片存取皆重新檢查成員資格。已發出的圖片短效簽名最長 60 秒失效。
+
+若已登入却顯示「此帳號尚未受邀」，先核對預先建立的信箱、active 與 UUID 綁定。`owner_invitation_claim` migration 修正早期只允許 editor 首次綁定的問題；既有專案套用該修正後直接重新整理 `/admin`，不需要重建 OAuth 或手動調整角色。未邀請、未驗證或已綁定其他 UUID 的帳號仍不會取得權限。
 
 只有擁有者管理成員、啟用自動發布及還原整份備份。協作者可以編輯、審核、發布、重試與匯出；不能提升自己的權限。此站仍是非官方網站，受邀身分不代表官方背書。
 

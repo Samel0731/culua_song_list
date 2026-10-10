@@ -1,5 +1,7 @@
 # 2026-10-10 歌單產品與多人管理實作
 
+- owner 首次 Google 登入修正：新增 `owner_invitation_claim` migration，允許既有有效 owner/editor 的已驗證 Google 信箱綁定未綁定 UUID，保留角色及審計。42 項測試、lint、TypeScript、正式建置通過；新增測試覆蓋 owner 初次綁定與冪等、未驗證／未確認信箱、撤銷、不同信箱及已綁定 UUID 保護。遠端套用成功，回滾交易以 authenticated role 驗證 owner 綁定與角色成功，不以管理連接器直接永久改寫使用者綁定。瀏覽器刷新後的實際管理流程仍需確認。
+- 此次建置仍出現 YouTube RSS 500 快取重驗證錯誤，但建置完成。這是官方內容來源故障，與 Google OAuth/owner 綁定分開，未宣稱已修正 RSS。
 - 策展 401 修正：移除尚未發布分頁的預設 CSV 網址，只有明確設定環境變數才請求策展來源。可恢復的來源失敗以 warning 記錄，頁面保留同步失敗狀態。未設定時 `/fanart` 回應 200 並顯示「尚未設定精選」，回應沒有 401 錯誤字串；40 項測試、lint、TypeScript 與正式建置再次通過，建置未出現兩個策展 401。
 - 新增 Supabase 三個 migrations、Google 邀請登入、owner/editor RLS、管理後台、樂曲／別名與演唱紀錄、候選審核、圖片來源、瀏覽器日英 OCR、修訂歷史、CSV 初次匯入及加密備份還原。
 - 每日 YouTube 工作有 quota／時間／頁數上限、可續跑游標、作者共識及三秒條件、人工修正保護、發布後衝突候選與工作租約；預設關閉自動發布，需七天試運轉及 owner 啟用。

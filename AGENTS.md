@@ -123,12 +123,17 @@ playback continue to work across the Sheet-to-database transition.
   organization uses the Free plan. Budget target is NT$0/month, with a
   NT$100/month ceiling; do not enable paid plans, automatic top-ups, paid AI
   OCR, or the paid X API as a routine implementation choice.
-- All three local SQL migration files have been applied. The worker file was
+- The three initial SQL migration files have been applied. The worker file was
   split into two remote migrations after a tool request-state error, so the
   remote history has four entries: `archive`, `archive_worker_scan`,
   `archive_worker_jobs_import`, and `archive_backup`. Do not blindly replay
   these files or assume local filename versions match remote history. Verify
   migration history before using CLI push; add new migrations for changes.
+- The additional `owner_invitation_claim` migration fixes initial owner
+  binding: only active, pre-seeded memberships matching a verified Google
+  identity may bind an unbound UUID, retaining the existing role and writing
+  an audit record. It has been applied and verified in a rolled-back remote
+  transaction. Remote migration history now includes this fifth entry.
 - All 12 archive tables have RLS enabled. `archive-evidence` is a private
   bucket allowing PNG/JPEG up to 10 MB. The anonymous public snapshot RPC
   succeeded, and anonymous access to the members table was denied.
@@ -139,9 +144,11 @@ playback continue to work across the Sheet-to-database transition.
   email, with an audit record. It awaits the first verified Google login to
   bind its Auth user UUID; do not publish the member's email or infer other
   collaborators from names or domains.
-- Google Auth provider was confirmed disabled and no Auth users existed at
-  the last check. OAuth configuration, server-only service/backup keys,
-  YouTube API configuration, worker activation, initial Sheet import,
+- Google OAuth login has now returned successfully from the user's local
+  browser, and the owner email matches a confirmed Google identity in Auth.
+  The full owner dashboard still needs browser confirmation after refreshing
+  with the binding fix. Server-only service/backup keys, YouTube API
+  configuration, worker activation, initial Sheet import,
   seven-day trial, real OCR accuracy, and deployment of these changes remain
   pending. Recheck current settings before claiming any of these are done.
 - `/admin` returned HTTP 200 and displayed the Google login UI. This does
@@ -150,7 +157,7 @@ playback continue to work across the Sheet-to-database transition.
   previously returned 401. Their URLs are now opt-in environment variables;
   missing URLs show "Selection not configured" without a request. Handled
   source failures use `console.warn` and retain the visible error state.
-- The most recent local checks passed: 40 tests, ESLint, TypeScript,
+- The most recent local checks passed: 42 tests, ESLint, TypeScript,
   production build, and `git diff --check`. Dependency audit warnings remain;
   do not describe the dependency tree as vulnerability-free.
 
@@ -198,7 +205,7 @@ times in Japan time, and exclude releases with unconfirmed dates from the
 timeline. Curated fan-art entries link to original posts and retain an external
 link when embedding fails. Source URL allowlists remain enforced.
 
-For a new Supabase project, setup requires applying the three existing
+For a new Supabase project, setup requires applying all existing
 migrations in filename order, configuring Google OAuth and the
 `/auth/callback` redirect, and seeding the initial owner membership. The
 current project's migrations and owner seed are already applied. The UI can invite editors after

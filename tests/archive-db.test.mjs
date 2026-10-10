@@ -1,6 +1,6 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { PGlite } from '@electric-sql/pglite';
 
 let db;
@@ -25,13 +25,62 @@ before(async()=>{
     create table storage.objects(id uuid,bucket_id text,name text);alter table storage.objects enable row level security;
     insert into auth.users values('${owner}',now()),('${editor}',now()),('${stranger}',now());
     insert into auth.identities values('${editor}','google','{"email":"editor@example.com","email_verified":true}');`);
-  for(const name of ['202610100001_archive.sql','202610100002_worker.sql','202610100003_backup.sql']){
+  for(const name of (await readdir(new URL('../supabase/migrations/',import.meta.url))).filter(name=>name.endsWith('.sql')).sort()){
     try{await db.exec(await readFile(new URL(`../supabase/migrations/${name}`,import.meta.url),'utf8'));}
     catch(error){error.message=`${name}: ${error.message}`;throw error;}
   }
-  await db.exec(`insert into public.archive_members(email,user_id,role) values('owner@example.com','${owner}','owner');`);
+  await db.exec(`insert into public.archive_members(email,role) values('owner@example.com','owner');`);
 });
 after(async()=>{await db?.close();});
+
+test('pre-seeded owner claims verified Google identity once, retaining role and an audit record',async()=>{
+  await login(owner);
+  assert.equal((await db.query('select public.archive_claim_invitation() role')).rows[0].role,null);
+  await db.exec('reset role');
+  await db.exec(`insert into auth.identities values('${owner}','google','{"email":"OWNER@example.com","email_verified":false}');`);
+  await login(owner);
+  assert.equal((await db.query('select public.archive_claim_invitation() role')).rows[0].role,null);
+  await db.exec('reset role');
+  await db.exec(`update auth.identities set identity_data=jsonb_set(identity_data,'{email_verified}','true') where user_id='${owner}';
+    update auth.users set email_confirmed_at=null where id='${owner}';`);
+  await login(owner);
+  assert.equal((await db.query('select public.archive_claim_invitation() role')).rows[0].role,null);
+  await db.exec('reset role');
+  await db.exec(`update auth.users set email_confirmed_at=now() where id='${owner}';
+    update public.archive_members set active=false where role='owner';`);
+  await login(owner);
+  assert.equal((await db.query('select public.archive_claim_invitation() role')).rows[0].role,null);
+  await db.exec('reset role');
+  assert.equal((await db.query("select user_id from public.archive_members where role='owner'")).rows[0].user_id,null);
+  await db.exec("update public.archive_members set active=true where role='owner'");
+  await login(owner);
+  assert.equal((await db.query('select public.archive_claim_invitation() role')).rows[0].role,'owner');
+  assert.equal((await db.query('select public.archive_claim_invitation() role')).rows[0].role,'owner');
+  const member=(await db.query("select * from public.archive_members where role='owner'")).rows[0];
+  assert.equal(member.user_id,owner);
+  const revisions=(await db.query("select * from public.archive_revisions where entity_id=$1 and action='invitation_claim'",[member.id])).rows;
+  assert.equal(revisions.length,1);assert.equal(revisions[0].actor,owner);
+  assert.equal(revisions[0].after_data.role,'owner');
+});
+
+test('different email, revoked invitation and already-bound owner cannot be claimed by another account',async()=>{
+  await db.exec('reset role');
+  await db.exec(`insert into auth.identities values('${stranger}','google','{"email":"stranger@example.com","email_verified":true}');`);
+  await login(stranger);
+  assert.equal((await db.query('select public.archive_claim_invitation() role')).rows[0].role,null);
+  await db.exec('reset role');
+  await db.exec("insert into public.archive_members(email,role,active) values('stranger@example.com','editor',false)");
+  await login(stranger);
+  assert.equal((await db.query('select public.archive_claim_invitation() role')).rows[0].role,null);
+  await db.exec('reset role');
+  await db.exec(`update auth.identities set identity_data=jsonb_set(identity_data,'{email}','"owner@example.com"') where user_id='${stranger}';`);
+  await login(stranger);
+  assert.equal((await db.query('select public.archive_claim_invitation() role')).rows[0].role,null);
+  await db.exec('reset role');
+  assert.equal((await db.query("select user_id from public.archive_members where role='owner'")).rows[0].user_id,owner);
+  assert.equal((await db.query("select user_id from public.archive_members where email='stranger@example.com'")).rows[0].user_id,null);
+  await db.exec(`delete from public.archive_members where email='stranger@example.com';delete from auth.identities where user_id='${stranger}';`);
+});
 
 test('invitation binds verified Google email, editor cannot invite; revocation immediately blocks writes',async()=>{
   await login(owner);await command('member_invite',{email:'Editor@example.com'});
