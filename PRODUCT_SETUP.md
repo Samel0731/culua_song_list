@@ -95,6 +95,14 @@ CLI restore 額外需要有效 `SUPABASE_OWNER_ACCESS_TOKEN` 及 publishable key
 - 新增可重跑的唯讀 `node scripts/verify-release.mjs <網址>`，本機通過：422 場直播、639 個曲名、3,131 筆演唱，公開索引與單場歌單數量／時間連結一致，公開 DTO 精確欄位白名單、canonical、robots、sitemap、管理頁 noindex 及 private/no-store、匿名管理／缺漏／匯出／備份 API 401。第二次讀取的來源時間更新至 `2026-10-23T14:40:09.808Z`，確認既有快取會重新查詢；不以首次回應宣稱即時資料。
 - `node scripts/verify-content.mjs` 成功讀取官方發行與發行商來源；當次消息索引沒有符合的同期消息，不外推為官方沒有新消息。瀏覽器存取未獲授權，本輪沒有新增瀏覽器、真人協作者登入或真實圖片 OCR 驗收。
 
+### 2026-10-23 正式發布確認
+
+[PR #6](https://github.com/Samel0731/culua_song_list/pull/6) 已合併為 `30e7495cb82df714232075d7147645ff15b888a5`。PR 的 [Product checks 39972429488](https://github.com/Samel0731/culua_song_list/actions/runs/39972429488) 與合併後 [main 檢查 39972830132](https://github.com/Samel0731/culua_song_list/actions/runs/39972830132) 全部成功，包含 Node 22 的預設 `npm test`、lint、TypeScript 及 build。Netlify 預覽成功，預覽站 `verify-site` 通過；既有 GitHub 整合隨 main 更新發布正式站，未透過管理頁變更設定。
+
+正式站原先 `/admin/demo` 為 404，發布後為 200。`node scripts/verify-release.mjs https://culuasonglist.netlify.app` 全部通過，來源時間為 `2026-10-23T14:51:39.420Z`；422 場、639 曲名、3,131 演唱及646筆 sitemap 保持一致。公開索引與 `z65138fhtm8` 單場歌單的數量／時間連結、公開白名單、頁面 canonical、robots、管理頁 noindex／private/no-store、匿名後台 API 401 均已從正式網址讀回確認。部署包含既有 OP／ED 解析修正；沒有重跑 worker 或變更自動發布設定。
+
+可直接從正式 [展示後台](https://culuasonglist.netlify.app/admin/demo) 測試假資料，從 [直播歌單](https://culuasonglist.netlify.app/songs?view=streams) 查看公開內容。正式 owner／第二協作者登入及真實 OCR 新介面仍需真人驗收；七個實際成功試運轉日與 owner 決策、每月用量及 Search Console／策展發布仍未在本輪驗證。Git 命令列推送缺少可用登入流程，改用已連線 GitHub 外掛；發布前核對檔案樹雜湊與本機驗證版本一致。未提交本機設定截圖、金鑰或備份。
+
 ### 手機 Codex Cloud 接手
 
 先讓完成的程式碼進入 GitHub `main`，手機雲端才取得已發布版本；本機未提交修改、`.env.local` 與本機對話不會因此自動變成雲端工作。接手時先讀 README、AGENTS 與本文件的最新有日期紀錄。
@@ -136,7 +144,7 @@ CLI restore 額外需要有效 `SUPABASE_OWNER_ACCESS_TOKEN` 及 publishable key
 
 繁中可從 `http://localhost:3002/admin/demo` 測試假資料；前台入口為 `http://localhost:3002/songs?view=streams`。連接埠依本機啟動方式可變，正式 Google 登入須使用已設定的 callback origin。已收到並處理選單辨識回饋，完整真人操作任務仍待完成，不宣稱真人新手驗收完成。
 
-仍需真人第二協作者 Google 登入、實際圖片 OCR 新介面驗收、七天工作人工觀察、解析修正部署狀態、每月用量及 Search Console／策展發布檢查。相依套件曾有 audit 警示，不宣稱無漏洞。
+仍需真人第二協作者 Google 登入、實際圖片 OCR 新介面驗收、七天工作人工觀察、每月用量及 Search Console／策展發布檢查。相依套件曾有 audit 警示，不宣稱無漏洞。
 
 ### 繁中實測任務與日英文檢查
 
