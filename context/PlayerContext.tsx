@@ -7,6 +7,7 @@ export type PlayMode = 'list-loop' | 'version-loop' | 'shuffle';
 
 interface PlayerContextType {
   allSongs: GroupedSong[];
+  refreshSongs: (songs: GroupedSong[]) => void;
   loading: boolean;
   currentSong: GroupedSong | null;
   currentVersion: SongVersion | null;
@@ -39,7 +40,8 @@ export function PlayerProvider({ children, initialSongs, initialOriginals = [] }
   const safeInitialSongs = Array.isArray(initialSongs) ? initialSongs : [];
 
   // 1. 初始化資料 (使用安全檢查後的變數)
-  const [allSongs] = useState<GroupedSong[]>(safeInitialSongs);
+  const [allSongs, setAllSongs] = useState<GroupedSong[]>(safeInitialSongs);
+  const refreshSongs = useCallback((songs: GroupedSong[]) => { setAllSongs(songs); }, []);
   const [loading] = useState(false); // 因為是 SSR，Client 端初始 loading 為 false
 
   const [currentSong, setCurrentSong] = useState<GroupedSong | null>(null);
@@ -119,6 +121,7 @@ export function PlayerProvider({ children, initialSongs, initialOriginals = [] }
   return (
     <PlayerContext.Provider value={{
       allSongs,
+      refreshSongs,
       loading,
       currentSong,
       currentVersion,

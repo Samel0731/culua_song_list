@@ -114,6 +114,16 @@ async function provider(songs, originals = featuredWorks) {
   await act(async () => root.render(React.createElement(PlayerProvider, { initialSongs: songs, initialOriginals: originals }, React.createElement(Probe))));
   return { get state() { return state; }, async call(name, ...args) { await act(async () => state[name](...args)); } };
 }
+
+test('refreshing archive data preserves active playback and uses the refreshed queue', async () => {
+  const a=track('A',[version(90)]), b=track('B',[version(200)]);
+  const p=await provider([a]);await p.call('playSong',a);
+  const request=p.state.playbackRequest, active=p.state.currentVersion;
+  await p.call('refreshSongs',[a,b]);
+  assert.equal(p.state.allSongs.length,2);assert.equal(p.state.currentVersion,active);
+  assert.equal(p.state.playbackRequest,request);assert.equal(p.state.isPlaying,true);
+  await p.call('playNext');assert.equal(p.state.currentSong.songName,'B');
+});
 test('missing archive and official sources never substitute fabricated tracks', async () => {
   const p = await provider([], []);
   await p.call('playRandom');

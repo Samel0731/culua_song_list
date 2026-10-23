@@ -1,6 +1,10 @@
 'use client';
 
 import { useMemo, useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import StreamSetlists from './StreamSetlists';
+import { experienceCopy } from '@/utils/archive/experienceCopy';
 import { Music, Search, SortAsc, SortDesc, User } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { usePlayer } from '@/context/PlayerContext';
@@ -32,8 +36,15 @@ const AudioEqualizer = () => (
 
 export default function SongsPage({ initialQuery = "" }: { initialQuery?: string }) {
   const { t, lang } = useLanguage();
-  const { allSongs, loading, playSong, currentSong } = usePlayer();
+  const params = useSearchParams(); const c = experienceCopy[lang];
+  const streamView = params.get('view') === 'streams';
+  const { allSongs, loading, playSong, currentSong, refreshSongs } = usePlayer();
 
+  const [refreshing, setRefreshing] = useState(false), [refreshStatus, setRefreshStatus] = useState('');
+  async function refreshArchive() {
+    setRefreshing(true); setRefreshStatus('');
+    try { const res = await fetch('/api/archive/streams', { cache: 'no-store', signal: AbortSignal.timeout(20000) }); if (!res.ok) throw new Error(); const archive = await res.json(); refreshSongs(archive.songs); setRefreshStatus(archive.stale ? c.stale : c.refresh); } catch { setRefreshStatus(c.failed); } finally { setRefreshing(false); }
+  }
   const [searchTerm, setSearchTerm] = useState(initialQuery);
   const [sortBy, setSortBy] = useState<'name' | 'count'>('name');
   const [visibleCount, setVisibleCount] = useState(20);
@@ -108,6 +119,9 @@ export default function SongsPage({ initialQuery = "" }: { initialQuery?: string
   return (
     <div className="flex flex-col h-full w-full bg-slate-900 text-slate-100 overflow-hidden">
 
+      <nav className="stream-view-tabs" aria-label={c.streams}><Link href="/songs" aria-current={!streamView ? 'page' : undefined}>{c.all}</Link><Link href="/songs?view=streams" aria-current={streamView ? 'page' : undefined}>{c.streams}</Link></nav>
+      {streamView && <StreamSetlists/>}
+      <div hidden={streamView} className="songs-all-content">
       {/* 注入 JSON-LD */}
       <script
         type="application/ld+json"
@@ -119,6 +133,7 @@ export default function SongsPage({ initialQuery = "" }: { initialQuery?: string
           <Music className="w-6 h-6 text-purple-400" /> {t.nav_songs}
         </h1>
 
+        <button className="archive-refresh" disabled={refreshing} onClick={refreshArchive}>{refreshing ? c.loading : c.refresh}</button>{refreshStatus && <p role="status">{refreshStatus}</p>}
         {/* ✨ 修改：將寫死的中文替換為翻譯變數 */}
         <p className="text-xs text-slate-400 leading-relaxed">
            {t.songs_authority_desc_prefix} <span className="text-slate-200 font-bold">{allSongs.length}</span> {t.songs_authority_desc_suffix}
@@ -198,6 +213,7 @@ export default function SongsPage({ initialQuery = "" }: { initialQuery?: string
         ) : (
           <div className="text-center text-slate-500 py-10">{allSongs.length ? t.no_results : stageCopy[lang].empty}</div>
         )}
+      </div>
       </div>
     </div>
   );

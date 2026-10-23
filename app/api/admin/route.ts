@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { revalidateTag } from 'next/cache';
 import { AccessError, checkOrigin, requireMember } from '@/utils/archive/supabaseServer';
 import { apiError, rpcError } from '@/utils/archive/api';
+import { readAll } from '@/utils/archive/readAll';
 
 export const dynamic = 'force-dynamic';
 const commands = new Set(['member_invite','member_revoke','enable_auto_publish','stream_save','stream_retry','song_save','alias_add','alias_revoke','candidate_save','candidate_publish','candidate_reject','performance_save','source_ocr','revision_restore','unavailable_resolve']);
@@ -35,6 +36,10 @@ export async function GET(request: Request) {
           if (page.data.length<1000) break;
         }
         data[table]=songs; return;
+      }
+      if (table === 'unavailable' || (vid && ['candidates', 'evidence', 'performances'].includes(table))) {
+        data[table] = await readAll((start, end) => query.order('id').range(start, end));
+        return;
       }
       const { data: rows, error } = await query.limit(vid ? 1000 : table==='streams'?200:100);
       if (error) throw new Error(error.message);
