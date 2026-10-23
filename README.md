@@ -1,82 +1,49 @@
-# Culua Song Database (Unofficial)
+# CULUA Song List
 
-[![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
-[![Status](https://img.shields.io/badge/Status-Active-success)]()
+CULUA 的非官方、非營利歌回資料庫，提供歌曲搜尋、直播歌單、共用播放器，以及 CULUA／NEUN／MEDA 的官方消息與活動整理。
 
-**Culua Song Database** is an open-source, non-official archive project documenting the musical activities of VSinger **Culua**.
+CULUA の非公式・非営利の歌枠アーカイブです。曲・配信のセットリストを検索できます。
 
-The primary goal is to provide a structured, searchable, and constantly updated index of all songs performed by Culua on YouTube, including original releases and cover songs from live streams.
+An unofficial, non-commercial CULUA music archive with searchable songs and stream setlists. Interface languages: Traditional Chinese, Japanese and English.
 
-🔗 **Live Website:** [https://culuasonglist.netlify.app](https://culuasonglist.netlify.app)
+[正式網站](https://culuasonglist.netlify.app) · [操作與維護](PRODUCT_SETUP.md) · [開發規範](AGENTS.md)
 
----
+## 本機啟動與檢查
 
-### 🇯🇵 日本語紹介
-**Culua 歌枠データベース**は、VSinger **Culua** の音楽活動を記録する非公式のアーカイブプロジェクトです。
-YouTubeでの歌枠（生配信）やカバー動画、オリジナル曲を網羅し、検索可能なデータベースとして提供しています。データはサーバーサイドで定期的に同期され、常に最新の状態を保つよう設計されています。
-
-### 🇹🇼 專案簡介
-**Culua 非官方歌回資料庫** 是一個開源的粉絲專案，旨在完整記錄 VSinger **Culua** 的音樂歷程。
-本專案透過自動化技術整理 Culua 在 YouTube 上演唱過的所有歌曲（包含原創曲與翻唱），提供快速檢索與播放功能，並透過伺服器端渲染 (SSR) 確保資料的完整性與 SEO 友善度。
-
----
-
-## ✨ Key Features
-
-* **Comprehensive Indexing:** Tracks original songs, covers, and stream archives.
-* **Server-Side Rendering (SSR):** Optimized for SEO and AI search discoverability.
-* **Automated Synchronization:** Uses **Incremental Static Regeneration (ISR)** to periodically fetch the latest data from the official source (Google Sheets / YouTube) without manual rebuilding.
-* **Multilingual Support:** Fully localized in English, Japanese, and Traditional Chinese.
-* **Progressive Web App (PWA):** Installable on mobile devices for an app-like experience.
-
-## 🛠️ Tech Stack
-
-* **Framework:** [Next.js](https://nextjs.org/) (App Router)
-* **Language:** TypeScript
-* **Styling:** Tailwind CSS
-* **Data Source:** Supabase PostgreSQL (after migration), published Google Sheets CSV during setup; YouTube Data / iframe APIs
-* **Management:** Invite-only Google login, transactional review/publish, browser Tesseract OCR
-* **Live hosting:** Netlify
-
-## ⚠️ Disclaimer
-
-This is a **fan-made, non-commercial project**. It is not affiliated with, endorsed by, or connected to Culua or her management team.
-
-* **Content Rights:** All copyrights for the audio, video, and images belong to the original creators and the official rights holders.
-* **Media Usage:** This website uses the official YouTube Embedded Player API. Links to the original videos are provided.
-
----
-
-## 🤝 Contribution
-
-Contributions are welcome! If you find any bugs or have suggestions for new features, please feel free to open an issue or submit a pull request.
-## Local preview and validation
-
-多人管理、自動匯入、OCR、備份和正式啟用步驟請見 [PRODUCT_SETUP.md](PRODUCT_SETUP.md)。未設定 Supabase 時保留現有 Sheet 公開資料；後台會顯示設定提示。
-
-Use Node.js 22+ and run commands from this directory:
+使用 Node.js 22+、npm。保留既有 `.env.local`；需要設定時參考 `.env.example`，不要覆蓋或提交金鑰。
 
 ```sh
 npm ci
 npm run dev
-npm test
-npx tsc --noEmit
-npm run lint
-npm run build
 ```
 
-Development uses Webpack to match the existing PWA integration and avoid stale Turbopack stylesheet caching observed during the redesign. Open http://localhost:3000. PWA generation is disabled in development; use `npm run build` followed by `npm start` to check the production service worker.
+開啟 `http://localhost:3000`。`/admin/demo` 是假資料展示，可切換協作者／擁有者、重設及模擬儲存失敗情境；不會寫入正式資料。`/admin` 需要受邀 Google 帳號。
 
-The stage redesign uses shared black/purple styles, three-language navigation, a curated original-work collection, and the existing searchable performance archive. A single YouTube iframe survives client-side route changes and player expansion. Closing playback destroys it. The visible mini-video is retained in focus mode. Some archived videos may be deleted or have embedding disabled; the player displays an error with original-video and next-song actions.
+```sh
+npm test
+npm run lint
+npx tsc --noEmit
+npm run build
+git diff --check
+```
 
-`npm test` runs React/DOM regression tests with a mocked YouTube API, without fetching external media. It covers timestamp changes within one stream, replay/loop/shuffle behavior, empty-data fallback, player persistence and blocked/error callbacks. Asset decisions and sources are recorded in [ASSET_SOURCES.md](ASSET_SOURCES.md).
+正式模式啟動後，以 `node scripts/verify-release.mjs http://localhost:3000` 檢查頁面、公開歌單、時間連結及匿名後台權限；部署後將網址換成正式站。手機 Codex Cloud 的環境與接手步驟見 [操作與維護](PRODUCT_SETUP.md#手機-codex-cloud-接手)。
 
-The React/language and TypeScript lint findings have been corrected. Run `npm run lint`, `npm test`, `npx tsc --noEmit`, and `npm run build` to validate changes. Validation does not publish to Netlify.
+若測試子程序遭 `EPERM` 阻擋，使用 `node --test --test-isolation=none tests/*.test.mjs`。正式預覽用 `npm run build` 後接 `npm start`。本機檢查不會部署。
 
-## Fan information hub (2026-10-07)
+Next.js 16.3.8 App Router、React 19.2.8、TypeScript strict、Tailwind 4、Supabase。開發與 build 使用 Webpack 配合 next-pwa；開發時不產生 PWA service worker。
 
-The site now has official-source news, original releases, a CULUA/NEUN/MEDA event and release timeline, and a curated fan-art section. Artist browsing and statistics are tabs inside the song archive; old routes redirect to the new entries. Song pages and site-sharing links help visitors discover specific performances.
+`ARCHIVE_DATA_SOURCE` 未設定時使用公開 Sheet；Supabase 模式需設定伺服器與公開金鑰。官方消息與策展按需快取 30 分鐘，歌單快取 5 分鐘；每日 YouTube 工作是獨立排程。細節見維護文件。
 
-Official content adapters use RK Music, TuneCore/LinkCore, and the official CULUA YouTube RSS feed with 30-minute Next.js revalidation. There is no paid X API or background scheduler. See [DATA_SETUP.md](DATA_SETUP.md) for the existing Google Sheets curation tabs and publication step, and [SEARCH_VISIBILITY.md](SEARCH_VISIBILITY.md) for Search Console checks after deployment.
+## 內容來源與聲明
 
-For environments that disallow test-runner child processes, use node --test --test-isolation=none tests/*.test.mjs. The current suite covers content parsing, cohort attribution, exact MV matching, curation, and shared playback.
+本站不是 CULUA 或經紀公司的官方網站，未獲官方背書。音樂、影片、圖片及創作權利屬原作者與權利人；保留原始來源及作者署名。
+
+- [RK Music CULUA](https://rkmusic.jp/artist/284/)：人物資料以三語摘要呈現；消息與發行頁連回官方，不複製文章全文。
+- [RK Music](https://rkmusic.jp/)、TuneCore／LinkCore 官方發行頁、CULUA 官方 YouTube 頻道 `UCn1Zf28m6WbhMDjMjdIjOIA`：發行、日期、原創 MV 與影片資訊。精選不是完整官方目錄。
+- YouTube 縮圖隨對應影片顯示，使用官方 iframe API 播放，不抽取音訊、不下載重包裝官方美術。禁止嵌入時仍提供原片連結。
+- 歌回資料來自既有粉絲維護 Sheet 與經審核的資料庫。歌曲保留原名、原唱及演唱時間；無法確認的資料不編造補齊。
+- 粉絲作品使用經策展的 X 原帖嵌入、作者署名與原帖外連，不將圖片複製到專案。
+- 首頁與分享圖使用程式繪製的文字和燈光；未將官方角色圖或標誌當成可任意使用素材。[RK Music 二次創作規範](https://rkmusic.jp/guideline/)於 2026-10-07 查閱，未據此宣稱所有官方美術可直接重用。
+
+歡迎透過 issue／PR 回報錯誤。修改播放、資料來源或權限前，請閱讀開發規範並執行相應測試。

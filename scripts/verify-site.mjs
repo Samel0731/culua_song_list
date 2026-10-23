@@ -1,5 +1,5 @@
 import { load } from 'cheerio';
-const base = 'http://localhost:3000';
+const base = process.argv[2] || 'http://localhost:3000';
 for (const path of ['/', '/news', '/timeline', '/fanart', '/discography', '/songs', '/about', '/songs/' + encodeURIComponent('夢追い人')]) {
  const r = await fetch(base + path); const $ = load(await r.text());
  const data = { path, status:r.status, canonical:$('link[rel=canonical]').attr('href'), title:$('title').text() };

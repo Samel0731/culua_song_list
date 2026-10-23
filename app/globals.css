@@ -400,3 +400,17 @@ button:disabled { cursor: default; opacity: .5; }
 .song-version-grid .text-link { display: inline-block; font-size: 12px; margin: 18px 15px 0 0; }
 .site-share p { margin-top: 8px; max-width: 350px; font-size: 12px; overflow-wrap: anywhere; color: #cba9ef; }
 .fan-post .fan-post-artists { font-size: 11px; letter-spacing: .08em; padding: 5px 0 12px; color: #cba9ef; }
+.stream-view-tabs { display:flex; gap:12px; padding:16px; border-bottom:1px solid #493555; flex-shrink:0; }
+.stream-view-tabs a { padding:10px 16px; border-radius:8px; color:#dec9ef; }
+.stream-view-tabs a[aria-current=page] { background:#493555; color:white; }
+.songs-all-content:not([hidden]) { display:flex; flex-direction:column; min-height:0; flex:1; }
+.stream-setlists { overflow:auto; min-height:0; padding:24px; color:#eee5f5; }
+.stream-setlists h2 { font-size:1.5rem; }.stream-setlists h3 { font-size:1.25rem; margin:20px 0 10px; overflow-wrap:anywhere; }
+.stream-setlists p { color:#ccbed9; margin:12px 0; line-height:1.7; }
+.stream-setlists label { display:block; margin:16px 0; }.stream-setlists input,.stream-setlists select { display:block; width:100%; min-width:0; margin-top:8px; padding:12px; border:1px solid #67576f; border-radius:8px; background:#19141f; color:#f2edf8; }
+.stream-setlists button { min-height:44px; padding:10px 16px; border:1px solid #67576f; border-radius:8px; background:#35243f; color:#f2edf8; cursor:pointer; }
+.stream-setlists button:hover { background:#493555; }.stream-setlists button:disabled { opacity:.6; cursor:wait; }.stream-setlists a { color:#dec0f5; text-decoration:underline; }
+.stream-setlists :focus-visible,.stream-view-tabs :focus-visible { outline:2px solid #e3caef; outline-offset:3px; }
+.stream-toolbar { display:flex; justify-content:space-between; flex-wrap:wrap; gap:16px; align-items:center; }
+.stream-tracks { display:grid; gap:10px; list-style:none; padding:0; margin-top:24px; }.stream-tracks button { display:flex; width:100%; align-items:center; justify-content:space-between; gap:16px; text-align:left; }.stream-tracks span { min-width:0; overflow-wrap:anywhere; }.stream-tracks small { display:block; color:#ccbed9; margin-top:6px; }.stream-tracks time { font-variant-numeric:tabular-nums; white-space:nowrap; }
+@media(max-width:600px) { .stream-setlists { padding:16px; }.stream-view-tabs { gap:6px; padding:12px; }.stream-view-tabs a { padding:10px; } }
