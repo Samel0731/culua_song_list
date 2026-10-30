@@ -10,21 +10,31 @@ import YouTubePlayer, { YouTubeInstance } from './YouTubePlayer';
 import ShareModal from './ShareModal';
 
 export default function RightPanel() {
-  const { currentSong, currentVersion, isPlaying, setPlaying, playbackRequest, closePlayer, playSong, playNext, playPrev, playMode, toggleMode, togglePlay, isExpanded, toggleExpand } = usePlayer();
+  const { currentSong, currentVersion, isPlaying, setPlaying, playbackRequest, closePlayer, playSong, playNext, playPrev, playMode, toggleMode, togglePlay, isExpanded, toggleExpand, liveSession, setBuffering } = usePlayer();
   const { lang, t } = useLanguage();
   const copy = stageCopy[lang];
   const [shareOpen, setShareOpen] = useState(false);
   const [statusState, setStatus] = useState<{ kind: 'ready' | 'blocked' | 'error'; request: number }>({ kind: 'ready', request: -1 });
   const status = statusState.request === playbackRequest ? statusState.kind : 'ready';
   const playerRef = useRef<YouTubeInstance | null>(null);
+  const panelRef = useRef<HTMLElement>(null);
   const expandRef = useRef<HTMLButtonElement>(null);
+  const hasSong = !!currentSong;
   const modeLabel = playMode === 'shuffle' ? t.mode_shuffle : playMode === 'version-loop' ? t.mode_version_loop : t.mode_list_loop;
+
+  useEffect(() => {
+    const panel = panelRef.current, shell = panel?.closest<HTMLElement>('.site-shell');
+    if (!panel || !shell || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(() => shell.style.setProperty('--lh-player-height', `${Math.ceil(panel.getBoundingClientRect().height)}px`));
+    observer.observe(panel);
+    return () => { observer.disconnect(); shell.style.removeProperty('--lh-player-height'); };
+  }, [hasSong]);
 
   useEffect(() => {
     const handleKey = (event: KeyboardEvent) => {
       if (!currentSong || shareOpen) return;
       const target = event.target as HTMLElement;
-      if (target.closest('input, textarea, select, button, a, [contenteditable=true]')) return;
+      if (target.closest('input, textarea, select, button, a, dialog, [contenteditable=true]')) return;
       const player = playerRef.current;
       if (event.code === 'Escape' && isExpanded) { toggleExpand(); expandRef.current?.focus(); }
       if (event.code === 'Space' || event.code === 'KeyK') { event.preventDefault(); togglePlay(); }
@@ -41,24 +51,25 @@ export default function RightPanel() {
   }, [currentSong, shareOpen, isExpanded, toggleExpand, togglePlay, playNext, playPrev]);
 
   if (!currentSong || !currentVersion) return null;
-  return <aside className={`stage-player ${isExpanded ? 'expanded' : ''}`} aria-label={copy.expand}>
+  return <aside ref={panelRef} className={`stage-player ${isExpanded ? 'expanded' : ''}`} aria-label={copy.expand}>
     <div className="player-panel" id="player-panel">
-      <div className="player-video"><YouTubePlayer url={currentVersion.streamUrl} startTime={currentVersion.timestampSeconds} playbackRequest={playbackRequest} isPlaying={isPlaying} onEnd={playNext} onPlayingChange={setPlaying} onStatus={kind => setStatus({ kind, request: playbackRequest })} onPlayerReady={player => { playerRef.current = player; }} /></div>
+      <div className="player-video"><YouTubePlayer url={currentVersion.streamUrl} startTime={currentVersion.timestampSeconds} endTime={liveSession?.project.tracks[liveSession.index].end} playbackRequest={playbackRequest} isPlaying={isPlaying} onBuffering={setBuffering} onEnd={playNext} onPlayingChange={setPlaying} onStatus={kind => setStatus({ kind, request: playbackRequest })} onPlayerReady={player => { playerRef.current = player; }} /></div>
       <div className="player-details" hidden={!isExpanded}>
         <div className="player-details-title"><div><p className="eyebrow">NOW PLAYING</p><h2>{currentSong.songName}</h2><p>{currentSong.artist} · {currentVersion.date}</p></div><button className="icon-button" onClick={toggleExpand} aria-label={copy.collapse}><ChevronDown/></button></div>
         <div className="player-extra"><button onClick={() => setShareOpen(true)}><Share2 size={16}/>{t.share_btn}</button><a href={currentVersion.streamUrl} target="_blank" rel="noopener noreferrer">{t.original_link}<ExternalLink size={15}/></a><Link href="/focus" onClick={() => { if (isExpanded) toggleExpand(); }}>{t.focus_mode_btn}</Link></div>
-        <h3>{t.versions} ({currentSong.versions.length})</h3><div className="version-list">{currentSong.versions.map((version, index) => {
+        {!liveSession && <><h3>{t.versions} ({currentSong.versions.length})</h3><div className="version-list">{currentSong.versions.map((version, index) => {
           const active = version.streamUrl === currentVersion.streamUrl && version.timestampSeconds === currentVersion.timestampSeconds;
           return <button key={`${version.streamUrl}-${version.timestampSeconds}-${index}`} aria-pressed={active} className={active ? 'active' : ''} onClick={() => playSong(currentSong, version)}><Play size={15}/><span>{version.streamTitle}<small>{version.date} · {version.timestamp || '0:00'}</small></span></button>;
-        })}</div>
+        })}</div></>}
       </div>
     </div>
     {status !== 'ready' && <div className="player-status" role="status">{status === 'error' ? copy.unavailable : copy.blocked}<button onClick={status === 'error' ? playNext : togglePlay}>{status === 'error' ? copy.next : copy.play}</button><a href={currentVersion.streamUrl} target="_blank" rel="noopener noreferrer">YouTube ↗</a></div>}
     <div className="player-bar">
       <div className="player-track"><span className={`playing-light ${isPlaying ? 'playing' : ''}`} /><div><strong>{currentSong.songName}</strong><small>{currentSong.artist}</small></div></div>
       <div className="transport"><button className="icon-button" onClick={playPrev} aria-label={copy.previous}><SkipBack size={19}/></button><button className="play-button" onClick={togglePlay} aria-label={isPlaying ? copy.pause : copy.play}>{isPlaying ? <Pause size={20} fill="currentColor"/> : <Play size={20} fill="currentColor"/>}</button><button className="icon-button" onClick={playNext} aria-label={copy.next}><SkipForward size={19}/></button></div>
-      <div className="player-tools"><button className="mode-button" onClick={toggleMode} aria-label={modeLabel} title={modeLabel}>{playMode === 'shuffle' ? <Shuffle size={17}/> : <Repeat size={17}/>}<span>{modeLabel}</span></button><button ref={expandRef} className="icon-button" onClick={toggleExpand} aria-controls="player-panel" aria-expanded={isExpanded} aria-label={isExpanded ? copy.collapse : copy.expand}>{isExpanded ? <ChevronDown size={21}/> : <ChevronUp size={21}/>}</button><button className="icon-button stop-button" onClick={closePlayer} aria-label={copy.stop}><X size={18}/></button></div>
+      <div className="player-tools">{!liveSession && <button className="mode-button" onClick={toggleMode} aria-label={modeLabel} title={modeLabel}>{playMode === 'shuffle' ? <Shuffle size={17}/> : <Repeat size={17}/>}<span>{modeLabel}</span></button>}<button ref={expandRef} className="icon-button" onClick={toggleExpand} aria-controls="player-panel" aria-expanded={isExpanded} aria-label={isExpanded ? copy.collapse : copy.expand}>{isExpanded ? <ChevronDown size={21}/> : <ChevronUp size={21}/>}</button><button className="icon-button stop-button" onClick={closePlayer} aria-label={copy.stop}><X size={18}/></button></div>
     </div>
+    <a className="player-original" href={currentVersion.streamUrl} target="_blank" rel="noopener noreferrer">{t.original_link} ↗</a>
     <ShareModal isOpen={shareOpen} onClose={() => setShareOpen(false)} song={currentSong} version={currentVersion}/>
   </aside>;
 }

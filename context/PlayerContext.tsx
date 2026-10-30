@@ -2,10 +2,15 @@
 
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { GroupedSong, SongVersion } from '@/utils/dataProcessor';
+import { checkLive, trackSong, type LiveHouseProject, type LiveSession, type LiveCheck } from '@/utils/liveHouse/model';
 
 export type PlayMode = 'list-loop' | 'version-loop' | 'shuffle';
 
 interface PlayerContextType {
+  liveSession: LiveSession | null;
+  startLive: (project: LiveHouseProject) => LiveCheck;
+  isBuffering: boolean;
+  setBuffering: (buffering: boolean) => void;
   allSongs: GroupedSong[];
   refreshSongs: (songs: GroupedSong[]) => void;
   loading: boolean;
@@ -50,10 +55,29 @@ export function PlayerProvider({ children, initialSongs, initialOriginals = [] }
   const [playbackRequest, setPlaybackRequest] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const [playMode, setPlayMode] = useState<PlayMode>('list-loop');
+  const [liveSession, setLiveSession] = useState<LiveSession | null>(null);
+  const [isBuffering, setBuffering] = useState(false);
+
+  const loadLiveTrack = useCallback((session: LiveSession) => {
+    const song = trackSong(session.project.tracks[session.index]);
+    setLiveSession(session);
+    setCurrentSong(song);
+    setCurrentVersion(song.versions[0]);
+    setPlaybackRequest(request => request + 1);
+    setBuffering(true);
+    setIsPlaying(true);
+  }, []);
+  const startLive = useCallback((project: LiveHouseProject) => {
+    const result = checkLive(project);
+    if (result.ok) loadLiveTrack({ project: structuredClone(result.project), index: 0, finished: false });
+    return result;
+  }, [loadLiveTrack]);
 
   const playSong = useCallback((song: GroupedSong, version?: SongVersion) => {
     const targetVersion = version || song.versions[0];
     if (!targetVersion?.streamUrl) return;
+    setLiveSession(null);
+    setBuffering(true);
     setCurrentSong(song);
     setCurrentVersion(targetVersion);
     setPlaybackRequest(request => request + 1);
@@ -61,6 +85,8 @@ export function PlayerProvider({ children, initialSongs, initialOriginals = [] }
   }, []);
 
   const closePlayer = useCallback(() => {
+    setLiveSession(null);
+    setBuffering(false);
     setCurrentSong(null);
     setCurrentVersion(null);
     setIsPlaying(false);
@@ -68,10 +94,11 @@ export function PlayerProvider({ children, initialSongs, initialOriginals = [] }
   }, []);
 
   const togglePlay = useCallback(() => {
+    if (liveSession?.finished) { loadLiveTrack({ ...liveSession, finished: false }); return; }
     if (currentSong) {
       setIsPlaying(prev => !prev);
     }
-  }, [currentSong]);
+  }, [currentSong, liveSession, loadLiveTrack]);
 
   const toggleMode = useCallback(() => {
     setPlayMode(prev => {
@@ -90,6 +117,11 @@ export function PlayerProvider({ children, initialSongs, initialOriginals = [] }
   }, [queue, currentSong, playSong]);
 
   const playNext = useCallback(() => {
+    if (liveSession) {
+      if (liveSession.index + 1 < liveSession.project.tracks.length) loadLiveTrack({ ...liveSession, index: liveSession.index + 1, finished: false });
+      else { setIsPlaying(false); setLiveSession({ ...liveSession, finished: true }); }
+      return;
+    }
     if (!currentSong) return;
     if (playMode === 'version-loop') {
       const index = currentSong.versions.findIndex(version => version.streamUrl === currentVersion?.streamUrl && version.timestampSeconds === currentVersion?.timestampSeconds);
@@ -102,9 +134,13 @@ export function PlayerProvider({ children, initialSongs, initialOriginals = [] }
       const index = list.findIndex(song => song.songName === currentSong.songName || (originalActive && song.versions.some(v => v.streamUrl === currentVersion?.streamUrl)));
       if (list.length) playSong(list[(index + 1) % list.length]);
     }
-  }, [queue, currentSong, currentVersion, playMode, playSong, playRandom, originalActive]);
+  }, [queue, currentSong, currentVersion, playMode, playSong, playRandom, originalActive, liveSession, loadLiveTrack]);
 
   const playPrev = useCallback(() => {
+    if (liveSession) {
+      loadLiveTrack({ ...liveSession, index: Math.max(0, liveSession.index - 1), finished: false });
+      return;
+    }
     if (!currentSong) return;
     if (playMode === 'version-loop') {
       const index = currentSong.versions.findIndex(version => version.streamUrl === currentVersion?.streamUrl && version.timestampSeconds === currentVersion?.timestampSeconds);
@@ -114,12 +150,12 @@ export function PlayerProvider({ children, initialSongs, initialOriginals = [] }
       const index = list.findIndex(song => song.songName === currentSong.songName || (originalActive && song.versions.some(v => v.streamUrl === currentVersion?.streamUrl)));
       if (list.length) playSong(list[(index - 1 + list.length) % list.length]);
     }
-  }, [queue, currentSong, currentVersion, playMode, playSong, originalActive]);
+  }, [queue, currentSong, currentVersion, playMode, playSong, originalActive, liveSession, loadLiveTrack]);
 
   const toggleExpand = useCallback(() => setIsExpanded(prev => !prev), []);
 
   return (
-    <PlayerContext.Provider value={{
+    <PlayerContext.Provider value={{ liveSession, startLive, isBuffering, setBuffering,
       allSongs,
       refreshSongs,
       loading,

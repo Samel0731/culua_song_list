@@ -10,6 +10,7 @@ import { GroupedSong } from '@/utils/dataProcessor';
 import { stageCopy } from '@/utils/stageCopy';
 import RightPanel from './RightPanel';
 import { hubCopy } from '@/utils/hubCopy';
+import { LiveHouseViewProvider } from '@/context/LiveHouseViewContext';
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -23,8 +24,9 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   const links = [
     ['/', t.nav_home], ['/discography', hub.works], ['/songs', hub.archive],
     ['/timeline', hub.events], ['/fanart', hub.fanart],
+    ['/live-house', 'Live House'],
   ];
-  return <div className={`site-shell ${currentSong ? 'has-player' : ''} ${focus ? 'focus-shell' : ''}`}>
+  return <div className={`site-shell ${currentSong ? 'has-player' : ''} ${focus ? 'focus-shell' : ''} ${pathname === '/live-house' ? 'live-house-shell' : ''}`}>
     {!focus && <header className="site-header">
       <Link href="/" className="brand" aria-label="CULUA Home">CULUA<span>FAN ARCHIVE</span></Link>
       <nav className="desktop-nav" aria-label="Main navigation">{links.map(([href, label]) => <Link key={href} href={href} aria-current={pathname === href ? 'page' : undefined}>{label}</Link>)}</nav>
@@ -38,5 +40,5 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 }
 
 export default function ClientLayout({ children, initialSongs, initialOriginals }: { children: React.ReactNode; initialSongs: GroupedSong[]; initialOriginals: GroupedSong[] }) {
-  return <PlayerProvider initialSongs={Array.isArray(initialSongs) ? initialSongs : []} initialOriginals={initialOriginals}><LayoutContent>{children}</LayoutContent></PlayerProvider>;
+  return <PlayerProvider initialSongs={Array.isArray(initialSongs) ? initialSongs : []} initialOriginals={initialOriginals}><LiveHouseViewProvider><LayoutContent>{children}</LayoutContent></LiveHouseViewProvider></PlayerProvider>;
 }

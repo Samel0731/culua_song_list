@@ -31,6 +31,8 @@ interface YouTubeAPI {
 }
 declare global { interface Window { YT?: YouTubeAPI; } }
 interface Props {
+  endTime?: number | null;
+  onBuffering?: (buffering: boolean) => void;
   url: string; startTime?: number; playbackRequest: number; isPlaying: boolean;
   onEnd: () => void; onPlayingChange: (playing: boolean) => void;
   onStatus: (status: 'ready' | 'blocked' | 'error') => void;
@@ -45,6 +47,17 @@ export default function YouTubePlayer(props: Props) {
   useEffect(() => { latest.current = props; });
   const loaded = useRef('');
   const requested = useRef(-1);
+  const completed = useRef(-1);
+  const running = useRef(false);
+  const hasStarted = useRef(false);
+  const finish = useCallback(() => {
+    const current = latest.current;
+    if (completed.current === current.playbackRequest) return;
+    completed.current = current.playbackRequest;
+    running.current = false;
+    hasStarted.current = false;
+    current.onEnd();
+  }, []);
 
   const ready = useRef(false);
   const syncVideo = useCallback(() => {
@@ -56,6 +69,8 @@ export default function YouTubePlayer(props: Props) {
       if (loaded.current !== key || requested.current !== current.playbackRequest) {
         loaded.current = key;
         requested.current = current.playbackRequest;
+        running.current = false;
+        hasStarted.current = false;
         current.onStatus('ready');
         const options = { videoId: id, startSeconds: current.startTime || 0 };
         if (current.isPlaying) player.current.loadVideoById(options);
@@ -84,9 +99,16 @@ export default function YouTubePlayer(props: Props) {
           },
           onStateChange: event => {
             if (disposed) return;
+            running.current = event.data === 1;
+            if (running.current) hasStarted.current = true;
+            latest.current.onBuffering?.(event.data === 3);
             if (event.data === 1) { latest.current.onStatus('ready'); latest.current.onPlayingChange(true); }
-            if (event.data === 2) latest.current.onPlayingChange(false);
-            if (event.data === 0) latest.current.onEnd();
+            // Loading another video can emit PAUSED for the outgoing video.
+            // Only accept iframe pauses after this request has actually played.
+            if (event.data === 2 && hasStarted.current) latest.current.onPlayingChange(false);
+            // A delayed ENDED from the previous segment must not finish a
+            // freshly loaded request which has not started playing yet.
+            if (event.data === 0 && hasStarted.current) finish();
           },
           onError: () => { if (disposed) return; latest.current.onPlayingChange(false); latest.current.onStatus('error'); },
           onAutoplayBlocked: () => { if (disposed) return; latest.current.onPlayingChange(false); latest.current.onStatus('blocked'); },
@@ -112,7 +134,18 @@ export default function YouTubePlayer(props: Props) {
       loaded.current = '';
       requested.current = -1;
     };
-  }, [syncVideo]);
+  }, [syncVideo, finish]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const current = latest.current;
+      if (!running.current || !current.isPlaying || current.endTime == null || !player.current) return;
+      if (player.current.getCurrentTime() >= current.endTime) {
+        finish();
+      }
+    }, 250);
+    return () => clearInterval(timer);
+  }, [finish]);
 
   useEffect(() => { syncVideo(); }, [props.url, props.startTime, props.playbackRequest, syncVideo]);
 

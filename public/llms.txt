@@ -8,5 +8,6 @@
 - [Timeline](https://culuasonglist.netlify.app/timeline): Cohort concerts, official events, and release dates.
 - [Fan creations](https://culuasonglist.netlify.app/fanart): Curated X posts credited through original embeds.
 - [About](https://culuasonglist.netlify.app/about): Sources and unofficial-site identity.
+- [Live House](https://culuasonglist.netlify.app/live-house): A local virtual-show builder using public archive versions or manually supplied YouTube segments. Projects and supplied images stay in the visitor's browser. Character appearances do not imply artist participation or an audio collaboration.
 
 Content is revalidated on demand after a 30-minute cache interval. Song records are curated by fans, not extracted automatically from videos. Follow source links for authoritative announcements. The archive does not claim completeness, official affiliation, or a fixed number of songs.

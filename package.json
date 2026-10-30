@@ -29,7 +29,8 @@
     "react-dom": "19.2.8",
     "react-player": "^3.4.0",
     "recharts": "^3.8.1",
-    "tesseract.js": "^7.0.0"
+    "tesseract.js": "^7.0.0",
+    "three": "0.186.1"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
@@ -40,6 +41,7 @@
     "@types/react-dom": "^19",
     "@types/react-virtualized-auto-sizer": "^1.0.4",
     "@types/react-window": "^1.8.8",
+    "@types/three": "0.186.0",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.3.8",

@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { boundedFetch } from './utils/archive/adminRequest.mjs';
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
+  response.headers.set('Cache-Control', 'private, no-store');
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) return response;
   const db = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
     global:{fetch:(url,init)=>boundedFetch(url,init,5000)},

@@ -2,6 +2,10 @@
 
 CULUA 的非官方、非營利歌回資料庫，提供歌曲搜尋、直播歌單、共用播放器，以及 CULUA／NEUN／MEDA 的官方消息與活動整理。
 
+`/live-house` 可免登入組一場虛擬 Live：以大型 3D 舞台呈現 MEDA、CULUA、NEUN 的六曲萬聖節演出，先各自獨唱，再三人同台，合計 24:23。角色可走動、揮手與輕跳，搭配追光及掃光；全螢幕保留原片與播放控制。也可從公開歌庫與外部 YouTube 片段製作歌單，每首需填起訖時間，演出自動換歌與主唱。場次與圖片只存本機，可匯出／匯入 JSON，保留舊草稿相容；不寫回正式歌庫，不使用付費 AI API。操作見 [Live House](PRODUCT_SETUP.md#製作-live-house)。
+
+三位 Q 版角色依初期造型分區配色：NEUN 為銀白長髮與白紫衣裝，MEDA 為莓紅髮、白色上身與黑色腰裙，CULUA 為深藍短髮與炭灰紫衣裝。造型參考和原有素材來源分開列於「場次與來源」。本機可執行 `node scripts/preview-character-looks.mjs`，開啟 `http://127.0.0.1:3010` 比對白光／舞台色光的正面、斜側面、背面及動畫；這是本機檢查工具，不是公開路由。
+
 CULUA の非公式・非営利の歌枠アーカイブです。曲・配信のセットリストを検索できます。
 
 An unofficial, non-commercial CULUA music archive with searchable songs and stream setlists. Interface languages: Traditional Chinese, Japanese and English.
@@ -47,3 +51,7 @@ Next.js 16.3.8 App Router、React 19.2.8、TypeScript strict、Tailwind 4、Supa
 - 首頁與分享圖使用程式繪製的文字和燈光；未將官方角色圖或標誌當成可任意使用素材。[RK Music 二次創作規範](https://rkmusic.jp/guideline/)於 2026-10-07 查閱，未據此宣稱所有官方美術可直接重用。
 
 歡迎透過 issue／PR 回報錯誤。修改播放、資料來源或權限前，請閱讀開發規範並執行相應測試。
+
+Live House 提供通用單人／三人互動編排與自動攝影；手動拖曳或選鏡頭後停止自動接管，可按「自動攝影」恢復。編排未分析歌曲段落或音訊。
+
+Live House 以「桌機優先測試版」公開，手機仍待實體裝置驗收；自動攝影預設關閉。場次保存在目前瀏覽器，正式站不會自動讀取 localhost 草稿，搬移前請先匯出 JSON。
