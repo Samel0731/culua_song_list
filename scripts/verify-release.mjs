@@ -8,7 +8,7 @@ const canonicalOrigin = process.argv[3] || 'https://culuasonglist.netlify.app';
 const read = async path => fetch(new URL(path, base), { signal: AbortSignal.timeout(60000), redirect: 'manual' });
 const keys = (value, allowed) => assert.deepEqual(Object.keys(value).sort(), [...allowed].sort());
 const versionKeys = ['artist', 'date', 'streamUrl', 'streamTitle', 'timestamp', 'timestampSeconds', 'songLink'];
-const publicPaths = ['/', '/songs', '/news', '/timeline', '/fanart', '/discography', '/about'];
+const publicPaths = ['/', '/songs', '/news', '/timeline', '/fanart', '/discography', '/about', '/live-house'];
 
 for (const path of publicPaths) {
   const response = await read(path);

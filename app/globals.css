@@ -225,7 +225,7 @@ button:disabled { cursor: default; opacity: .5; }
 .player-status button, .player-status a { text-decoration: underline; }
 @media (min-width: 900px) {
   .stage-player:not(.expanded) .player-panel { position: absolute; bottom: 88px; right: 4.5%; padding: 0; }
-  .stage-player:not(.expanded) .player-video { width: 356px; height: 200px; border: 1px solid #393044; box-shadow: 0 10px 40px #0008; }
+  .stage-player:not(.expanded) .player-video { width: 356px; height: 202px; border: 1px solid #393044; box-shadow: 0 10px 40px #0008; }
   .stage-player:not(.expanded) .player-details { display: none; }
 }
 @media (max-width: 899px) {
