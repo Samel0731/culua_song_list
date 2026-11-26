@@ -102,6 +102,12 @@ CLI restore 額外需要有效 `SUPABASE_OWNER_ACCESS_TOKEN` 及 publishable key
 
 ## 驗證與尚待完成
 
+### 2026-11-26 同期作品篩選（擴展第一期第 1 步）
+
+- 原創作品頁新增 CULUA／NEUN／MEDA 篩選，預設全部；作品卡顯示演出者，播放署名與無縮圖標籤改用作品的實際藝人，不再寫死 CULUA。非 CULUA 篩選時說明歌回資料庫目前只收錄 CULUA，NEUN／MEDA 歌單尚未收錄。首頁精選仍只取 CULUA。「歌手」分頁改稱「原唱歌手」（三語）。
+- `npm run check` 通過（100 項測試）。`tests/content.test.mjs` 新增篩選與 MV 曲名署名的測試。正式 build 以 `npx next start -p 3101` 執行 `node scripts/drive.mjs discography home language player-keeps-playing-across-routes`：桌機 4/4、`--mobile` 3/3 通過，已看過 MEDA 篩選與原唱歌手分頁的截圖。`npm run review:codex` 沒有回報缺陷。
+- 檢查時發現：另一個仍在執行的舊版 `next start` 會把舊程式渲染的頁面寫進共用的 `.next/server/route-cache`，新伺服器因此送出舊頁面且 CSS 404。重新 build 後先停掉舊伺服器或清除該目錄，再進行驗證。未部署。
+
 ### 2026-11-26 Claude／Codex 協作檢查
 
 - Claude Code 與 Codex CLI 0.172 共用 `AGENTS.md`，並跑同一組 `scripts/hooks/`。Codex 的設定在 `.codex/hooks.json`；`lint-edited.mjs` 能從 Codex 的 apply_patch 內容取出檔名。`npm run review:codex` 會用唯讀沙箱請 Codex 審查，報告存到忽略的 `artifacts/review/`。

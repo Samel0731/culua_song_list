@@ -10,7 +10,7 @@ function load(name) {
   const module = { exports: {} }; vm.runInThisContext(`(function(require,module,exports){${code}\n})`)(require, module, module.exports); return module.exports;
 }
 const p = load('contentParsers');
-const { selectWorks } = load('contentSelectors');
+const { selectWorks, worksBy, mvSongName } = load('contentSelectors');
 const news = (title, category = 'EVENT') => `<ul class="cmn_info_list"><li><a class="cmn_info_rack" href="https://rkmusic.jp/info/123/"><div class="cmn_date_tag_box"><span class="c_fill_white">${category}</span><span>2026.07.31</span></div><h2 class="title">${title}</h2></a></li></ul>`;
 test('news filters the cohort, distinguishes unrelated artists, and tags shared events', () => {
   assert.deepEqual(p.parseNewsList(news('MEDA×NEUN TWO-MAN LIVE'))[0].artists, ['NEUN', 'MEDA']);
@@ -66,4 +66,16 @@ test('official YouTube feed attaches exact original MV titles and rejects covers
   const videos = p.parseOfficialVideos(xml); assert.equal(videos.length, 1);
   const works = p.attachOfficialVideos([{ id: 'at-dawn', title: 'at dawn', artists: ['CULUA'], videos: [] }, { id: 'peer', title: 'at dawn', artists: ['NEUN'], videos: [] }], videos);
   assert.equal(works[0].videos[0].url, 'https://www.youtube.com/watch?v=cEeiyOp94WI'); assert.equal(works[1].videos.length, 0);
+});
+test('works filter by cohort talent and credit the performing talent, not CULUA by default', () => {
+  const work = (id, artists, title = id) => ({ id, title, artists, sourceUrl: `https://rkmusic.jp/release/${id}/`, releaseDate: null, videos: [] });
+  const works = [work('c', ['CULUA']), work('m', ['MEDA']), work('mn', ['NEUN', 'MEDA'])];
+  assert.deepEqual(worksBy(works, 'all').map(w => w.id), ['c', 'm', 'mn']);
+  assert.deepEqual(worksBy(works, 'MEDA').map(w => w.id), ['m', 'mn']);
+  assert.deepEqual(worksBy(works, 'NEUN').map(w => w.id), ['mn']);
+  assert.equal(mvSongName('CULUA「at dawn」Official Music Video', work('c', ['CULUA'], 'at dawn')), 'at dawn');
+  assert.equal(mvSongName('MEDA「Sing-ularity」Official Music Video', work('m', ['MEDA'], 'Sing-ularity')), 'Sing-ularity');
+  assert.equal(mvSongName('NEUN×MEDA「Duet」Official Music Video', work('mn', ['NEUN', 'MEDA'], 'Duet')), 'Duet');
+  assert.equal(mvSongName('MEDA「Keep CULUA」', work('m', ['MEDA'], 'x')), 'Keep CULUA');
+  assert.equal(mvSongName('Official Music Video', work('c', ['CULUA'], 'Fallback')), 'Fallback');
 });
