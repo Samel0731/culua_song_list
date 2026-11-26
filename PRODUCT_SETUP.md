@@ -114,6 +114,14 @@ CLI restore 額外需要有效 `SUPABASE_OWNER_ACCESS_TOKEN` 及 publishable key
 - `npm run check` 通過（100 項測試）。`tests/content.test.mjs` 新增篩選與 MV 曲名署名的測試。正式 build 以 `npx next start -p 3101` 執行 `node scripts/drive.mjs discography home language player-keeps-playing-across-routes`：桌機 4/4、`--mobile` 3/3 通過，已看過 MEDA 篩選與原唱歌手分頁的截圖。`npm run review:codex` 沒有回報缺陷。
 - 檢查時發現：另一個仍在執行的舊版 `next start` 會把舊程式渲染的頁面寫進共用的 `.next/server/route-cache`，新伺服器因此送出舊頁面且 CSS 404。重新 build 後先停掉舊伺服器或清除該目錄，再進行驗證。未部署。
 
+### 2026-11-26 粉絲觀感調整（PR1）
+
+- 依 Claude 實看正式站與 Codex 兩輪討論，先修「說得比實際多」與第一印象，不改 schema：歌曲頁不再宣稱「完整、自動同步官方資料」，改說明粉絲整理、審核後公開、可能有缺漏；/about 加註早期歌單由粉絲公開試算表整理，不是官方資料；未點名整理者，需 owner 取得同意後補上。
+- 主選單移除「粉絲創作」與 Live House；首頁粉絲創作區塊只在有貼文時顯示。「管理」由頁首移到頁尾「維護者登入」。全部歌曲頁移除常駐的「重新整理清單」，直播歌單頁保留。
+- Live House 設 noindex、移出 sitemap 與 llms.txt，直接網址仍可用，供邀請各藝人粉絲試看後再決定是否恢復曝光。`verify-site.mjs`／`verify-release.mjs` 改為檢查它不在 sitemap 且為 noindex。
+- 統計改用中性次數區間（11 次以上／5–10／2–4／1 次），不再用本命、推し等字眼；「新曲」改稱本站首次紀錄。日文播放模式改為「同じ曲の別配信」「次の曲」。官方新聞說明改為快取約 30 分鐘、有人瀏覽時才更新。
+- 新增 `tests/copy.test.mjs`。在獨立 worktree 執行 `npm run check`（102 項測試、lint、tsc、build、diff check）通過；`next start -p 3100` 後 `drive.mjs home songs-list about live-house fanart` 與 `--mobile home songs-list` 通過並看過截圖；`verify-site.mjs` 通過，sitemap 646 筆。`npm run review:codex` 回報兩項 P2（今年未唱圖例在篩選去年時不成立、「每 30 分鐘」誇大更新）均查證成立並已修正。之後改接在 PR #10（同期作品篩選）之後，PRODUCT_SETUP.md 兩段並存、public/sw.js 由 build 重新產生；重跑 `npm run check`（103 項）、drive.mjs 六項與手機兩項、verify-site 均通過。未部署；日文用語只經 AI 檢查，未經日文粉絲確認。
+
 ### 2026-11-26 Claude／Codex 協作檢查
 
 - Claude Code 與 Codex CLI 0.172 共用 `AGENTS.md`，並跑同一組 `scripts/hooks/`。Codex 的設定在 `.codex/hooks.json`；`lint-edited.mjs` 能從 Codex 的 apply_patch 內容取出檔名。`npm run review:codex` 會用唯讀沙箱請 Codex 審查，報告存到忽略的 `artifacts/review/`。

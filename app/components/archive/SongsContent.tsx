@@ -38,13 +38,8 @@ export default function SongsPage({ initialQuery = "" }: { initialQuery?: string
   const { t, lang } = useLanguage();
   const params = useSearchParams(); const c = experienceCopy[lang];
   const streamView = params.get('view') === 'streams';
-  const { allSongs, loading, playSong, currentSong, refreshSongs } = usePlayer();
+  const { allSongs, loading, playSong, currentSong } = usePlayer();
 
-  const [refreshing, setRefreshing] = useState(false), [refreshStatus, setRefreshStatus] = useState('');
-  async function refreshArchive() {
-    setRefreshing(true); setRefreshStatus('');
-    try { const res = await fetch('/api/archive/streams', { cache: 'no-store', signal: AbortSignal.timeout(20000) }); if (!res.ok) throw new Error(); const archive = await res.json(); refreshSongs(archive.songs); setRefreshStatus(archive.stale ? c.stale : c.refresh); } catch { setRefreshStatus(c.failed); } finally { setRefreshing(false); }
-  }
   const [searchTerm, setSearchTerm] = useState(initialQuery);
   const [sortBy, setSortBy] = useState<'name' | 'count'>('name');
   const [visibleCount, setVisibleCount] = useState(20);
@@ -133,7 +128,6 @@ export default function SongsPage({ initialQuery = "" }: { initialQuery?: string
           <Music className="w-6 h-6 text-purple-400" /> {t.nav_songs}
         </h1>
 
-        <button className="archive-refresh" disabled={refreshing} onClick={refreshArchive}>{refreshing ? c.loading : c.refresh}</button>{refreshStatus && <p role="status">{refreshStatus}</p>}
         <p className="text-xs text-slate-400 leading-relaxed">
            {t.songs_authority_desc_prefix} <span className="text-slate-200 font-bold">{allSongs.length}</span> {t.songs_authority_desc_suffix}
         </p>

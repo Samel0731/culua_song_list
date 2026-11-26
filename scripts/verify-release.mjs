@@ -9,6 +9,7 @@ const read = async path => fetch(new URL(path, base), { signal: AbortSignal.time
 const keys = (value, allowed) => assert.deepEqual(Object.keys(value).sort(), [...allowed].sort());
 const versionKeys = ['artist', 'date', 'streamUrl', 'streamTitle', 'timestamp', 'timestampSeconds', 'songLink'];
 const publicPaths = ['/', '/songs', '/news', '/timeline', '/fanart', '/discography', '/about', '/live-house'];
+const unlistedPaths = ['/live-house'];
 
 for (const path of publicPaths) {
   const response = await read(path);
@@ -67,8 +68,9 @@ assert.equal(sitemapResponse.status, 200);
 const sitemap = load(await sitemapResponse.text(), { xmlMode: true });
 const urls = sitemap('loc').map((_, element) => sitemap(element).text()).get();
 assert.equal(new Set(urls).size, urls.length, 'Duplicate sitemap entries');
+for (const path of unlistedPaths) assert.ok(!urls.includes(canonicalOrigin + path), `Unlisted page in sitemap: ${path}`);
 assert.ok(urls.every(url => (url === canonicalOrigin || url.startsWith(canonicalOrigin + '/')) && !/\/(admin|auth)(\/|$)/.test(new URL(url).pathname)), 'Invalid sitemap location');
-for (const path of publicPaths) assert.ok(urls.includes(canonicalOrigin + (path === '/' ? '' : path)), `Missing sitemap page: ${path}`);
+for (const path of publicPaths.filter(path => !unlistedPaths.includes(path))) assert.ok(urls.includes(canonicalOrigin + (path === '/' ? '' : path)), `Missing sitemap page: ${path}`);
 const songPath = '/songs/' + encodeURIComponent(archive.songs[0].songName);
 assert.ok(urls.includes(canonicalOrigin + songPath), 'Song missing from sitemap');
 const songResponse = await read(`${songPath}?video=${recorded.videoId}&t=30`);

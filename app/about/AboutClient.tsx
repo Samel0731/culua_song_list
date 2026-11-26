@@ -43,6 +43,7 @@ export default function AboutPage() {
               <li dangerouslySetInnerHTML={{ __html: t.about_source_1 }} />
               <li>{t.about_source_2}</li>
               <li>{t.about_source_3}</li>
+              <li>{t.about_source_fans}</li>
             </ul>
             <div className="mt-4 pt-4 border-t border-slate-700/50 flex flex-wrap gap-5">
               {talents.map(talent => <a key={talent.name} href={talent.youtube} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors">{talent.name} · {t.about_source_link} <ExternalLink size={14} /></a>)}

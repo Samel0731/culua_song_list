@@ -24,18 +24,17 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   const hub = hubCopy[lang];
   const links = [
     ['/', t.nav_home], ['/discography', hub.works], ['/songs', hub.archive],
-    ['/timeline', hub.events], ['/fanart', hub.fanart],
-    ['/live-house', 'Live House'],
+    ['/timeline', hub.events],
   ];
   return <div className={`site-shell ${currentSong ? 'has-player' : ''} ${focus ? 'focus-shell' : ''} ${pathname === '/live-house' ? 'live-house-shell' : ''}`}>
     {!focus && <header className="site-header">
       <Link href="/" className="brand" aria-label="CULUA Home">CULUA<span>FAN ARCHIVE</span></Link>
       <nav className="desktop-nav" aria-label="Main navigation">{links.map(([href, label]) => <Link key={href} href={href} aria-current={pathname === href ? 'page' : undefined}>{label}</Link>)}</nav>
-      <div className="header-tools"><Link href="/admin" aria-label={lang==='zh'?'歌單管理':'Manage archive'}>{lang==='zh'?'管理':lang==='ja'?'管理':'Manage'}</Link><select aria-label="Language" value={lang} onChange={e => setLang(e.target.value as typeof lang)}><option value="zh">繁中</option><option value="ja">日本語</option><option value="en">EN</option></select><button className="icon-button menu-toggle" aria-label={open ? copy.closeMenu : copy.menu} aria-expanded={open} aria-controls="mobile-navigation" onClick={() => setMenuPath(open ? null : pathname)}>{open ? <X size={22}/> : <Menu size={22}/>}</button></div>
+      <div className="header-tools"><select aria-label="Language" value={lang} onChange={e => setLang(e.target.value as typeof lang)}><option value="zh">繁中</option><option value="ja">日本語</option><option value="en">EN</option></select><button className="icon-button menu-toggle" aria-label={open ? copy.closeMenu : copy.menu} aria-expanded={open} aria-controls="mobile-navigation" onClick={() => setMenuPath(open ? null : pathname)}>{open ? <X size={22}/> : <Menu size={22}/>}</button></div>
       {open && <nav id="mobile-navigation" className="mobile-nav" aria-label="Main navigation" onKeyDown={e => { if (e.key === 'Escape') setMenuPath(null); }}>{links.map(([href, label]) => <Link key={href} href={href} onClick={() => setMenuPath(null)} aria-current={pathname === href ? 'page' : undefined}>{label}<ArrowUpRight size={17}/></Link>)}</nav>}
     </header>}
     <div id="main-content" tabIndex={-1} className={`route-content ${pathname === '/' ? 'home-route' : ''}`} key={pathname}>{children}</div>
-    {!focus && <footer className="site-footer"><Link href="/" className="footer-brand">CULUA<span>FAN ARCHIVE</span></Link><p>{copy.fan}<br/>CULUA · NEUN · MEDA<br/>© {new Date().getFullYear()} CULUA Fan Archive</p><div><Link href="/news">{hub.news}</Link><Link href="/about">{hub.about}</Link>{talents.map(talent => <a key={talent.name} href={talent.rkMusic} target="_blank" rel="noopener noreferrer">{talent.name} · RK Music ↗</a>)}</div></footer>}
+    {!focus && <footer className="site-footer"><Link href="/" className="footer-brand">CULUA<span>FAN ARCHIVE</span></Link><p>{copy.fan}<br/>CULUA · NEUN · MEDA<br/>© {new Date().getFullYear()} CULUA Fan Archive</p><div><Link href="/news">{hub.news}</Link><Link href="/about">{hub.about}</Link>{talents.map(talent => <a key={talent.name} href={talent.rkMusic} target="_blank" rel="noopener noreferrer">{talent.name} · RK Music ↗</a>)}<Link href="/admin">{copy.maintainerLogin}</Link></div></footer>}
     <RightPanel />
   </div>;
 }
