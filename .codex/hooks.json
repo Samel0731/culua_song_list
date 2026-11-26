@@ -1,0 +1,31 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "apply_patch|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/scripts/hooks/lint-edited.mjs\"",
+            "commandWindows": "node scripts/hooks/lint-edited.mjs",
+            "timeout": 60,
+            "statusMessage": "Linting edited files"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/scripts/hooks/check.mjs\"",
+            "commandWindows": "node scripts/hooks/check.mjs",
+            "timeout": 180,
+            "statusMessage": "Type-checking and architecture tests"
+          }
+        ]
+      }
+    ]
+  }
+}

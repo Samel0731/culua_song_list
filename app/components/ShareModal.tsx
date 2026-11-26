@@ -43,8 +43,7 @@ export default function ShareModal({ isOpen, onClose, song, version }: ShareModa
   }, [isOpen, onClose]);
   if (!isOpen) return null;
 
-  // ✨ 修正重點：QR Code 的連結邏輯
-  // 改為使用「原片連結 (streamUrl)」而非網站首頁
+  // QR Code 指向原片連結 (streamUrl)，而非網站首頁
   let shareUrl = version.streamUrl;
 
   // 附加功能：如果有時間戳記 (timestampSeconds)，自動加到網址後方 (?t=120)
@@ -105,7 +104,6 @@ export default function ShareModal({ isOpen, onClose, song, version }: ShareModa
                 <div className="absolute bottom-0 left-0 -ml-8 -mb-8 w-32 h-32 bg-purple-500/20 rounded-full blur-2xl" />
 
                 <div className="relative z-10 mx-auto w-20 h-20 rounded-full p-1 bg-gradient-to-tr from-blue-400 to-purple-500 mb-4 shadow-lg">
-                   {/* 建議：如果有歌曲專屬封面圖，這裡可以改成顯示歌曲封面，目前維持顯示 CULUA 頭像 */}
                    <Image width={80} height={80} unoptimized
                      src="/icon-512x512.png"
                      alt="CULUA"
@@ -130,7 +128,7 @@ export default function ShareModal({ isOpen, onClose, song, version }: ShareModa
 
                 <div className="relative z-10 bg-white p-2 rounded-lg inline-block shadow-lg mb-2">
                   <QRCodeSVG
-                    value={shareUrl} // ✨ 這裡就會是 YouTube 連結了
+                    value={shareUrl}
                     size={90} //稍微加大一點點方便掃描
                     bgColor="#ffffff"
                     fgColor="#000000"

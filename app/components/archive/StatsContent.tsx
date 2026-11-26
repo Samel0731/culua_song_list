@@ -1,4 +1,3 @@
-// app/stats/page.tsx
 'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
@@ -179,7 +178,6 @@ export default function StatsPage() {
   const currentYear = new Date().getFullYear();
   const lastYear = currentYear - 1;
 
-  // ✅ 確保在掛載完成且數據準備好前顯示 Skeleton
   if (!isMounted || loading || !stats) return <StatsSkeleton />;
 
   return (

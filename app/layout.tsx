@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/context/LanguageContext";
 import ClientLayout from "@/app/components/ClientLayout";
-// ✨ 修改 1: 引入 Server 端抓取函式
 import { fetchSongsServer } from "@/utils/fetchSongsServer";
 import { fetchHubContent } from '@/utils/fetchHubContent';
 
@@ -39,7 +38,6 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Samel", url: "https://culuasonglist.netlify.app" }],
 
-  // ✨ 新增：標準網址 (告訴 Google 這是正版頁面)
   alternates: {
     canonical: '/',
   },
@@ -51,7 +49,6 @@ export const metadata: Metadata = {
     siteName: 'CULUA Fan Archive',
     locale: 'zh_TW',
     type: 'website',
-    // ✨ 新增：社群預覽圖片 (目前先用 Icon，建議之後換成 1200x630 的專屬橫幅)
     images: [
       {
         url: '/opengraph-image', // 確保 public 資料夾有這張圖
@@ -66,7 +63,6 @@ export const metadata: Metadata = {
     card: 'summary_large_image', // 這是大圖卡片模式，非常重要！
     title: "CULUA Fan Archive | Unofficial",
     description: "搜尋 CULUA 唱過的每一首歌。非官方粉絲維護資料庫。",
-    // ✨ 新增：Twitter 專用圖片
     images: ['/opengraph-image'],
   },
 
@@ -90,13 +86,11 @@ export const metadata: Metadata = {
   },
 };
 
-// ✨ 修改 2: 加上 async 關鍵字，使其成為 Async Server Component
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // ✨ 修改 3: 在 Server 端直接抓取資料 (這行會在伺服器執行)
   // 透過 ISR 機制，這份資料會被快取，不需要每次請求都去 Google Sheet 抓
   const [songs, content] = await Promise.all([fetchSongsServer(), fetchHubContent()]);
   const originals = content.works.filter(w => w.artists.includes('CULUA')).flatMap(w => w.videos.map(v => ({ songName: v.title, artist: 'CULUA', versions: [{ date: w.releaseDate || '', streamUrl: v.url, streamTitle: v.title, timestamp: '0:00', timestampSeconds: 0, songLink: w.sourceUrl }] })));
@@ -120,7 +114,6 @@ export default async function RootLayout({
       </head>
       <body className={inter.className}>
         <LanguageProvider>
-          {/* ✨ 修改 4: 把抓到的 songs 傳給 ClientLayout */}
           <a href="#main-content" className="skip-link">Skip to content</a>
           <ClientLayout initialSongs={songs} initialOriginals={originals}>
             {children}

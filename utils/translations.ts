@@ -1,4 +1,3 @@
-// utils/translations.ts
 export type Language = 'zh' | 'ja' | 'en';
 
 export interface Translation {
@@ -93,7 +92,7 @@ export interface Translation {
   share_download: string;
   share_downloading: string;
 
-  // ✨ 數據統計頁面 (Stats Page)
+  // 數據統計頁面 (Stats Page)
   stats_title: string;
   stats_quick_filter_all: string;
   stats_quick_filter_year: string;

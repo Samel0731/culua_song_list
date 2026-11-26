@@ -50,7 +50,7 @@ export default function ArtistsPage() {
       if (entries[0].isIntersecting) {
         setVisibleArtistCount((prev) => Math.min(prev + 30, filteredArtists.length));
       }
-    }, { root: null, rootMargin: '100px', threshold: 0 }); // ✨ 修正：threshold 0
+    }, { root: null, rootMargin: '100px', threshold: 0 });
 
     if (artistLoaderRef.current) observer.observe(artistLoaderRef.current);
     return () => observer.disconnect();
@@ -61,7 +61,7 @@ export default function ArtistsPage() {
       if (entries[0].isIntersecting && selectedArtist) {
         setVisibleSongCount((prev) => Math.min(prev + 20, selectedArtist.songs.length));
       }
-    }, { root: null, rootMargin: '100px', threshold: 0 }); // ✨ 修正：threshold 0
+    }, { root: null, rootMargin: '100px', threshold: 0 });
 
     if (songLoaderRef.current) observer.observe(songLoaderRef.current);
     return () => observer.disconnect();
@@ -92,7 +92,6 @@ export default function ArtistsPage() {
            </div>
         </div>
 
-        {/* ✨ 修正：pb-24 */}
         <div className="flex-1 overflow-y-auto p-2 pb-24 scrollbar-thin scrollbar-thumb-slate-700">
            {loading ? <div className="p-4 text-center text-slate-500">{t.loading}</div> : (
              <div className="space-y-1">
@@ -141,7 +140,6 @@ export default function ArtistsPage() {
              </div>
           </div>
 
-          {/* ✨ 修正：pb-24 */}
           <div className="flex-1 overflow-y-auto p-4 pb-24 scrollbar-thin scrollbar-thumb-slate-700">
             <div className="grid grid-cols-1 gap-2">
                 {displayedSongs.map(song => (

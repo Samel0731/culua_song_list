@@ -102,6 +102,16 @@ CLI restore 額外需要有效 `SUPABASE_OWNER_ACCESS_TOKEN` 及 publishable key
 
 ## 驗證與尚待完成
 
+### 2026-11-26 Claude／Codex 協作檢查
+
+- Claude Code 與 Codex CLI 0.172 共用 `AGENTS.md`，並跑同一組 `scripts/hooks/`。Codex 的設定在 `.codex/hooks.json`；`lint-edited.mjs` 能從 Codex 的 apply_patch 內容取出檔名。`npm run review:codex` 會用唯讀沙箱請 Codex 審查，報告存到忽略的 `artifacts/review/`。
+- `npm test` 98 項、lint、`tsc --noEmit`、`npm run build`、`git diff --check` 都已通過；build 重新產生了 `public/sw.js`／workbox。新的 `tests/hooks.test.mjs` 涵蓋：兩種 hook 輸入格式、兩邊 hook 設定一致，以及 lint hook 實際擋下違規檔。
+- Claude 端實測：寫入含 `localStorage` 的暫存檔時，PostToolUse 回報 `culua/no-direct-storage` 並擋下，暫存檔已刪除。Codex 端實測：`codex exec` 做同樣的修改時沒有出現 hook 回饋，因為專案 hook 要先在 Codex `/hooks` 由使用者信任；這一端尚未驗證成功。
+- 第一次對未提交變更執行 `npm run review:codex`，Codex 回報兩項 P2，經查證都成立（修正見下一項）：`scripts/feature-map.json` 的 navigation／language／home 步驟用 `.desktop-nav`，但它在手機寬度隱藏（`app/globals.css`），所以 `--mobile` 必定失敗；換頁播放檢查只比對曲名，偵測不到 YouTubePlayer 被重新掛載。另以 `--commit ee65e29` 執行一次，結果是無缺陷。
+- 上述兩項 P2 已修正：`scripts/drive.mjs` 新增 `nav` 步驟，桌機點 `.desktop-nav`，手機改從選單開啟；換頁檢查會先標記 `.player-video iframe`，換頁後要求仍是同一元素。另依 Codex 的第三項發現，同源 console error 現在會讓該功能失敗，已知雜訊可在 `allowConsoleErrors` 列出。`npm run build` 後以 `npx next start -p 3100` 執行 `node scripts/drive.mjs`：桌機 16/16、`--mobile` 16/16 通過，截圖和 `report.json` 存在被忽略的 `artifacts/verify/`。iframe 標記檢查沒有用刻意重新掛載的反例驗證過。Claude 另外以同一台 3100 伺服器重跑 `home`、`player-keeps-playing-across-routes`、`language`，桌機與 `--mobile` 都是 3/3 通過；手機截圖顯示經選單換到 `/timeline` 後，播放列仍是「夢追い人」且在播放中。`next dev` 下互動步驟會出現假性失敗（點擊早於 hydration、重新編譯造成 page error），所以以正式 build 為準。
+- 反例實測：在暫存檔加入 `useEffect`、`setTimeout`、`window.localStorage`、`'use client'` 匯入 `supabaseServer`、在 `<YouTubePlayer>` 加 `key`、changelog 註解、無理由的 eslint-disable，各自觸發對應的 `culua/*` 規則；`tests/architecture.test.mjs` 回報 client → `supabaseServer.ts` 的匯入鏈與 `SUPABASE_SERVICE_ROLE_KEY`。暫存檔都已刪除。
+- Codex review 的 P1 已修正：`.codex/hooks.json` 的 PostToolUse matcher 原本是 `Edit|Write`，但 Codex 0.172 改檔案用的是 `apply_patch`（執行檔裡的工具名稱有 `exec_command`、`apply_patch`，沒有 `Edit`／`Write` 的別名），所以 Codex 改檔時 lint hook 不會啟動。現在 matcher 改為 `apply_patch|Edit|Write`。`tests/hooks.test.mjs` 新增一項，確認兩邊的 matcher 都涵蓋各自代理的改檔工具；把 matcher 改回舊值時，這項測試會失敗並指出缺了 `apply_patch`。`npm test` 共 99 項通過，`git diff --check` 通過。上一項提到 Codex 端沒有 hook 回饋，除了尚未在 `/hooks` 信任設定，這個 matcher 也是原因之一；修正後仍需使用者在 Codex `/hooks` 重新信任，再用一次真實 `apply_patch` 驗證，本輪尚未驗證。透過 `exec_command` 執行 shell 指令改檔不會觸發 hook，由 Stop hook 與 `npm run check` 補足。
+
 ### 2026-10-30 角色配色與初期造型校正
 
 - 依後續使用者附圖修正輪廓：MEDA 側髮縮薄、移除兩側尖尾，保留單束高馬尾；CULUA 增加後頸三束短狼尾；NEUN 增加兩側角、蝴蝶結中心與垂帶。以本機三視圖工具檢查白光與舞台色光，截圖為 `.archive-private/live-house-qa/hair-corrections.jpg`；屬 AI 視覺檢查，待真人驗收。

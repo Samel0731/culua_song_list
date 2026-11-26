@@ -41,7 +41,6 @@ interface PlayerProviderProps {
 
 export function PlayerProvider({ children, initialSongs, initialOriginals = [] }: PlayerProviderProps) {
 
-  // ✨ 終極防線：強制檢查 initialSongs 是否為真正的陣列
   const safeInitialSongs = Array.isArray(initialSongs) ? initialSongs : [];
 
   // 1. 初始化資料 (使用安全檢查後的變數)

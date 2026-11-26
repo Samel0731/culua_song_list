@@ -1,6 +1,5 @@
 'use client';
 
-// ✨ 修改 1: 引入 Github icon
 import { Info, Youtube, ExternalLink, ShieldCheck, Database, Github } from 'lucide-react';
 import { stageCopy } from '@/utils/stageCopy';
 import { useLanguage } from '@/context/LanguageContext';
@@ -74,7 +73,6 @@ export default function AboutPage() {
           <div className="bg-slate-800/50 rounded-xl p-5 border border-slate-700 leading-relaxed text-slate-300 text-sm">
             <p>{t.about_disclaimer_content}</p>
             
-            {/* ✨ 修改 2: 加入 GitHub Repository 連結 */}
             <div className="mt-4 pt-4 border-t border-slate-700/50 flex justify-end">
               <a 
                 href="https://github.com/Samel0731/culua_song_list" // ⚠️ 請記得替換這裡的連結
