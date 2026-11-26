@@ -74,7 +74,9 @@ test('unavailability follows the selected talent and timeline type', () => {
   const newsDown = sources({ 'RK Music · News': 'error' });
   assert.equal(unavailable(newsDown, 'timeline', 'all', 'event'), true);
   assert.equal(unavailable(newsDown, 'timeline', 'all', 'release'), false);
-  assert.equal(unavailable(newsDown, 'timeline', 'all', 'all'), false);
+  assert.equal(unavailable(newsDown, 'timeline', 'all', 'all'), true);
+  assert.equal(unavailable(releasesDown, 'timeline', 'NEUN', 'all'), true);
+  assert.equal(unavailable(releasesDown, 'timeline', 'CULUA', 'all'), false);
   assert.equal(unavailable(sources({ 'RK Music · News': 'error', 'RK Music · Releases': 'error' }), 'timeline', 'MEDA', 'all'), true);
   assert.equal(unavailable(releasesDown, 'timeline', 'NEUN', 'release'), true);
 });

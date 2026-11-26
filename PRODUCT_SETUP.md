@@ -122,6 +122,12 @@ CLI restore 額外需要有效 `SUPABASE_OWNER_ACCESS_TOKEN` 及 publishable key
 - 統計改用中性次數區間（11 次以上／5–10／2–4／1 次），不再用本命、推し等字眼；「新曲」改稱本站首次紀錄。日文播放模式改為「同じ曲の別配信」「次の曲」。官方新聞說明改為快取約 30 分鐘、有人瀏覽時才更新。
 - 新增 `tests/copy.test.mjs`。在獨立 worktree 執行 `npm run check`（102 項測試、lint、tsc、build、diff check）通過；`next start -p 3100` 後 `drive.mjs home songs-list about live-house fanart` 與 `--mobile home songs-list` 通過並看過截圖；`verify-site.mjs` 通過，sitemap 646 筆。`npm run review:codex` 回報兩項 P2（今年未唱圖例在篩選去年時不成立、「每 30 分鐘」誇大更新）均查證成立並已修正。之後改接在 PR #10（同期作品篩選）之後，PRODUCT_SETUP.md 兩段並存、public/sw.js 由 build 重新產生；重跑 `npm run check`（103 項）、drive.mjs 六項與手機兩項、verify-site 均通過。未部署；日文用語只經 AI 檢查，未經日文粉絲確認。
 
+### 2026-11-26 同期範圍修正合併
+
+- 先前未提交的同期修正（三人官方連結、來源失敗與空資料分開、原創佇列依作品藝人、範圍說明、MV 標題、統計移除 CULUA 金色標示、刪除未使用的 social-config）提交於 `claude/cohort-scope-fixes`，並與 PR #11 合併：頁尾保留三人 RK Music 連結並加維護者登入，首頁粉絲創作在有貼文時才顯示且保留來源失敗狀態。
+- `npm run review:codex -- --base origin/main` 回報一項 P2：時間軸「全部」在新聞來源失敗、發行來源正常時仍顯示「沒有近期活動」。已查證成立，改為任一相關來源失敗即顯示讀取失敗，並補測試。
+- `npm run check`（107 項）、`drive.mjs` 全部 16 項與手機 home／songs-list／about、`verify-site.mjs`（sitemap 646）均通過，截圖已看過。
+
 ### 2026-11-26 Claude／Codex 協作檢查
 
 - Claude Code 與 Codex CLI 0.172 共用 `AGENTS.md`，並跑同一組 `scripts/hooks/`。Codex 的設定在 `.codex/hooks.json`；`lint-edited.mjs` 能從 Codex 的 apply_patch 內容取出檔名。`npm run review:codex` 會用唯讀沙箱請 Codex 審查，報告存到忽略的 `artifacts/review/`。

@@ -11,7 +11,7 @@ export function mvSongName(videoTitle: string, work: OfficialWork): string {
   return videoTitle.replace(credit, '').replace(/Official Music Video/gi, '').replace(/[「」]/g, '').trim() || work.title;
 }
 
-// True only when every source that could supply the shown section has failed, so a failure is not presented as "nothing exists".
+// True when a source the shown empty list depends on has failed, so a failure is not presented as "nothing exists".
 export function unavailable(sources: SourceState[], section: 'news' | 'events' | 'works' | 'timeline' | 'fanart', talent: string, kind: 'all' | 'event' | 'release'): boolean {
   const failed = (name: string) => sources.find(s => s.name === name)?.status === 'error';
   // TuneCore lists CULUA only, so other talents' releases depend on RK Music alone.
@@ -19,5 +19,5 @@ export function unavailable(sources: SourceState[], section: 'news' | 'events' |
   if (section === 'news' || section === 'events') return failed('RK Music · News');
   if (section === 'fanart') return failed('X · Selection');
   if (section === 'works') return works;
-  return kind === 'event' ? failed('RK Music · News') : kind === 'release' ? works : failed('RK Music · News') && works;
+  return kind === 'event' ? failed('RK Music · News') : kind === 'release' ? works : failed('RK Music · News') || works;
 }
