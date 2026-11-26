@@ -114,7 +114,7 @@ CLI restore 額外需要有效 `SUPABASE_OWNER_ACCESS_TOKEN` 及 publishable key
 - 主選單移除「粉絲創作」與 Live House；首頁粉絲創作區塊只在有貼文時顯示。「管理」由頁首移到頁尾「維護者登入」。全部歌曲頁移除常駐的「重新整理清單」，直播歌單頁保留。
 - Live House 設 noindex、移出 sitemap 與 llms.txt，直接網址仍可用，供邀請各藝人粉絲試看後再決定是否恢復曝光。`verify-site.mjs`／`verify-release.mjs` 改為檢查它不在 sitemap 且為 noindex。
 - 統計改用中性次數區間（11 次以上／5–10／2–4／1 次），不再用本命、推し等字眼；「新曲」改稱本站首次紀錄。日文播放模式改為「同じ曲の別配信」「次の曲」。官方新聞說明改為快取約 30 分鐘、有人瀏覽時才更新。
-- 新增 `tests/copy.test.mjs`。在獨立 worktree 執行 `npm run check`（102 項測試、lint、tsc、build、diff check）通過；`next start -p 3100` 後 `drive.mjs home songs-list about live-house fanart` 與 `--mobile home songs-list` 通過並看過截圖；`verify-site.mjs` 通過，sitemap 646 筆。`npm run review:codex` 回報兩項 P2（今年未唱圖例在篩選去年時不成立、「每 30 分鐘」誇大更新）均查證成立並已修正。未部署；日文用語只經 AI 檢查，未經日文粉絲確認。
+- 新增 `tests/copy.test.mjs`。在獨立 worktree 執行 `npm run check`（102 項測試、lint、tsc、build、diff check）通過；`next start -p 3100` 後 `drive.mjs home songs-list about live-house fanart` 與 `--mobile home songs-list` 通過並看過截圖；`verify-site.mjs` 通過，sitemap 646 筆。`npm run review:codex` 回報兩項 P2（今年未唱圖例在篩選去年時不成立、「每 30 分鐘」誇大更新）均查證成立並已修正。之後改接在 PR #10（同期作品篩選）之後，PRODUCT_SETUP.md 兩段並存、public/sw.js 由 build 重新產生；重跑 `npm run check`（103 項）、drive.mjs 六項與手機兩項、verify-site 均通過。未部署；日文用語只經 AI 檢查，未經日文粉絲確認。
 
 ### 2026-11-26 Claude／Codex 協作檢查
 
