@@ -35,7 +35,7 @@ export default function HubContent({ data, view, today }: { data: Content; view:
       <section className="hub-section coming-up"><Heading title={c.upcomingTitle} label="02 / EVENTS" href="/timeline"/><EventList items={upcoming.slice(0, 3)} empty={c.noUpcoming}/><p className="subtle">{c.zone}</p></section>
     </div>
     <section className="hub-section"><Heading title={c.curated} label="03 / ORIGINAL MUSIC" href="/discography"/><div className="hub-work-grid">{selectWorks(culuaWorks, data.selections).slice(0, 4).map(w => <ReleaseCard key={w.id} work={w}/>)}</div>{!culuaWorks.length && <Empty/>}</section>
-    <section className="hub-section"><Heading title={c.fanart} label="04 / COMMUNITY" href="/fanart"/><FanList data={data} limit={3}/></section>
+    {data.fanPosts.length > 0 && <section className="hub-section"><Heading title={c.fanart} label="04 / COMMUNITY" href="/fanart"/><FanList data={data} limit={3}/></section>}
     <Sources sources={data.sources}/>
   </main>;
   const title = view === 'news' ? c.news : view === 'works' ? c.works : view === 'timeline' ? c.events : c.fanart;

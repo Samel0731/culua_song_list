@@ -42,6 +42,7 @@ export default function AboutPage() {
               <li dangerouslySetInnerHTML={{ __html: t.about_source_1 }} />
               <li>{t.about_source_2}</li>
               <li>{t.about_source_3}</li>
+              <li>{t.about_source_fans}</li>
             </ul>
             <div className="mt-4 pt-4 border-t border-slate-700/50">
               <a 
