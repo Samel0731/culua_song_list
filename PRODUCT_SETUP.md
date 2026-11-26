@@ -102,6 +102,12 @@ CLI restore 額外需要有效 `SUPABASE_OWNER_ACCESS_TOKEN` 及 publishable key
 
 ## 驗證與尚待完成
 
+### 2026-11-26 同期功能盤點第一批
+
+- Claude 與 Codex 盤點全部功能後的第一批修正（不需資料表改版）：刪除沒有任何呼叫端的 `/api/social-config`；官方作品播放佇列改收三人作品並以作品實際藝人署名，下一首只接同一藝人（合作作品含各成員）的作品，不再落入 CULUA 歌回；作品頁 JSON-LD 與 `public/llms.txt` 改為三人；歌回資料庫三個分頁上方標明只收錄 CULUA；統計圖拿掉 CULUA 金色特別標示；共用藝人清單 `utils/talents.ts`（連結取自各自的 RK Music 藝人頁，2026-11-26 查證）用於篩選、粉絲創作空狀態的 X 連結、頁尾與 About 的 RK Music／YouTube 連結；頁尾不再列 CULUA 的 Instagram／TikTok。官方來源讀取失敗時顯示「暫時無法讀取，不代表沒有資料」，依所選藝人與時間軸類型判斷（TuneCore 只涵蓋 CULUA）。About 改寫已過時的「每 30 分鐘掃描歌單資料表」說明。
+- 另修正既有問題：RK Music 發行頁的 MV iframe 標題是通用的「YouTube video player」，播放列因此顯示這個字串；改用發行標題，發行快取鍵改為 `culua-cohort-releases-v3`。
+- `npm run check` 通過（104 項測試；新增 `tests/hub.test.mjs`、播放佇列與 iframe 標題測試）。正式 build 以 `npx next start -p 3102` 執行 `node scripts/drive.mjs`：桌機 16/16、`--mobile` 16/16 通過；`scripts/feature-map.json` 的 songs-list、discography（MEDA 播放後按下一首仍是 MEDA）、about 新增步驟。看過截圖：下一首為「覚醒.exe / MEDA」、粉絲創作空狀態列出三人 X。3100 埠有先前留下的舊 `next start`，因權限未停止，改用其他埠。`npm run review:codex` 回報一項 P2（失敗判斷未依所選藝人／類型），已修正並補測試。未部署。
+
 ### 2026-11-26 同期作品篩選（擴展第一期第 1 步）
 
 - 原創作品頁新增 CULUA／NEUN／MEDA 篩選，預設全部；作品卡顯示演出者，播放署名與無縮圖標籤改用作品的實際藝人，不再寫死 CULUA。非 CULUA 篩選時說明歌回資料庫目前只收錄 CULUA，NEUN／MEDA 歌單尚未收錄。首頁精選仍只取 CULUA。「歌手」分頁改稱「原唱歌手」（三語）。

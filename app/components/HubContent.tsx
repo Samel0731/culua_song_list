@@ -7,10 +7,11 @@ import { useLanguage } from '@/context/LanguageContext';
 import { usePlayer } from '@/context/PlayerContext';
 import { hubCopy } from '@/utils/hubCopy';
 import type { HubContent as Content, NewsItem, OfficialWork, TimelineItem, SourceState } from '@/utils/contentTypes';
-import { mvSongName, selectWorks, worksBy } from '@/utils/contentSelectors';
+import { mvSongName, selectWorks, unavailable, worksBy } from '@/utils/contentSelectors';
 import { videoId } from '@/utils/featuredWorks';
 import FanPostEmbed from './FanPostEmbed';
 import Image from 'next/image';
+import { talents } from '@/utils/talents';
 
 type View = 'home' | 'news' | 'works' | 'timeline' | 'fanart';
 export default function HubContent({ data, view, today }: { data: Content; view: View; today: string }) {
@@ -22,6 +23,7 @@ export default function HubContent({ data, view, today }: { data: Content; view:
   const [sort, setSort] = useState<'date' | 'name'>('date');
   const [artist, setArtist] = useState('all');
   const upcoming = data.timeline.filter(e => e.kind === 'event' && e.date >= today).sort((a, b) => a.date.localeCompare(b.date));
+  const failed = (section: Parameters<typeof unavailable>[1], talent = artist) => unavailable(data.sources, section, talent, kind);
   const culuaWorks = data.works.filter(w => w.artists.includes('CULUA'));
   const works = worksBy(data.works, artist).filter(w => w.title.toLowerCase().includes(query.toLowerCase())).sort((a, b) => sort === 'name' ? a.title.localeCompare(b.title, lang) : (b.releaseDate || '').localeCompare(a.releaseDate || ''));
   const timeline = data.timeline.filter(e => (period === 'upcoming' ? e.date >= today : e.date < today) && (kind === 'all' || e.kind === kind) && (artist === 'all' || e.artists.some(a => a === artist))).sort((a, b) => period === 'upcoming' ? a.date.localeCompare(b.date) : b.date.localeCompare(a.date));
@@ -31,35 +33,35 @@ export default function HubContent({ data, view, today }: { data: Content; view:
       <div className="hub-search-box"><Music2 size={28}/><h2>{c.archive}</h2><form action="/songs" onSubmit={event => { event.preventDefault(); const q = String(new FormData(event.currentTarget).get('q') || ''); router.push(`/songs?q=${encodeURIComponent(q)}`); }}><label className="sr-only" htmlFor="home-search">{c.search}</label><div className="hub-search"><input id="home-search" name="q" placeholder={c.search}/><button aria-label={c.search}><Search size={20}/></button></div></form><Link href="/songs">{c.songs}<ArrowUpRight size={16}/></Link></div>
     </section>
     <div className="hub-overview">
-      <section className="hub-section"><Heading title={c.news} label="01 / NEWS" href="/news"/><NewsList items={data.news.slice(0, 3)}/></section>
-      <section className="hub-section coming-up"><Heading title={c.upcomingTitle} label="02 / EVENTS" href="/timeline"/><EventList items={upcoming.slice(0, 3)} empty={c.noUpcoming}/><p className="subtle">{c.zone}</p></section>
+      <section className="hub-section"><Heading title={c.news} label="01 / NEWS" href="/news"/><NewsList items={data.news.slice(0, 3)} failed={failed('news')}/></section>
+      <section className="hub-section coming-up"><Heading title={c.upcomingTitle} label="02 / EVENTS" href="/timeline"/><EventList items={upcoming.slice(0, 3)} empty={failed('events') ? c.unavailable : c.noUpcoming}/><p className="subtle">{c.zone}</p></section>
     </div>
-    <section className="hub-section"><Heading title={c.curated} label="03 / ORIGINAL MUSIC" href="/discography"/><div className="hub-work-grid">{selectWorks(culuaWorks, data.selections).slice(0, 4).map(w => <ReleaseCard key={w.id} work={w}/>)}</div>{!culuaWorks.length && <Empty/>}</section>
-    <section className="hub-section"><Heading title={c.fanart} label="04 / COMMUNITY" href="/fanart"/><FanList data={data} limit={3}/></section>
+    <section className="hub-section"><Heading title={c.curated} label="03 / ORIGINAL MUSIC" href="/discography"/><div className="hub-work-grid">{selectWorks(culuaWorks, data.selections).slice(0, 4).map(w => <ReleaseCard key={w.id} work={w}/>)}</div>{!culuaWorks.length && <Empty failed={failed('works', 'CULUA')}/>}</section>
+    <section className="hub-section"><Heading title={c.fanart} label="04 / COMMUNITY" href="/fanart"/><FanList data={data} limit={3} artist="all" failed={failed('fanart')}/></section>
     <Sources sources={data.sources}/>
   </main>;
   const title = view === 'news' ? c.news : view === 'works' ? c.works : view === 'timeline' ? c.events : c.fanart;
   const intro = view === 'news' ? c.newsIntro : view === 'works' ? c.worksIntro : view === 'timeline' ? c.eventIntro : c.fanIntro;
   return <main className="hub-page hub-detail"><header className="hub-page-heading"><p className="eyebrow">CULUA / {view.toUpperCase()}</p><h1>{title}</h1><p>{intro}</p></header>
-    {view === 'news' && <><ArtistFilter value={artist} onChange={setArtist}/><NewsList items={data.news.filter(n => artist === 'all' || n.artists.some(a => a === artist))}/></>}
-    {view === 'works' && <><div className="hub-filters"><ArtistFilter value={artist} onChange={setArtist}/><label className="hub-search"><Search size={18}/><input aria-label={c.search} placeholder={c.search} value={query} onChange={e => setQuery(e.target.value)}/></label><select aria-label={c.works} value={sort} onChange={e => setSort(e.target.value as typeof sort)}><option value="date">{c.latest}</option><option value="name">A–Z</option></select></div>{artist !== 'CULUA' && <p className="subtle">{c.setlistScope}</p>}<div className="hub-work-grid">{works.map(w => <ReleaseCard key={w.id} work={w}/>)}</div>{!works.length && <Empty/>}</>}
-    {view === 'timeline' && <><div className="hub-filters"><div className="hub-tabs">{(['upcoming', 'history'] as const).map(p => <button key={p} aria-pressed={period === p} onClick={() => setPeriod(p)}>{c[p]}</button>)}</div><ArtistFilter value={artist} onChange={setArtist}/><select aria-label={c.events} value={kind} onChange={e => setKind(e.target.value as typeof kind)}><option value="all">{c.every}</option><option value="event">{c.event}</option><option value="release">{c.release}</option></select></div><p className="subtle">{c.zone}</p><EventList items={timeline} empty={period === 'upcoming' ? c.noUpcoming : c.empty}/></>}
-    {view === 'fanart' && <><ArtistFilter value={artist} onChange={setArtist}/><FanList data={{ ...data, fanPosts: data.fanPosts.filter(p => artist === 'all' || p.artists.some(a => a === artist)) }}/></>}
+    {view === 'news' && <><ArtistFilter value={artist} onChange={setArtist}/><NewsList items={data.news.filter(n => artist === 'all' || n.artists.some(a => a === artist))} failed={failed('news')}/></>}
+    {view === 'works' && <><div className="hub-filters"><ArtistFilter value={artist} onChange={setArtist}/><label className="hub-search"><Search size={18}/><input aria-label={c.search} placeholder={c.search} value={query} onChange={e => setQuery(e.target.value)}/></label><select aria-label={c.works} value={sort} onChange={e => setSort(e.target.value as typeof sort)}><option value="date">{c.latest}</option><option value="name">A–Z</option></select></div>{artist !== 'CULUA' && <p className="subtle">{c.setlistScope}</p>}<div className="hub-work-grid">{works.map(w => <ReleaseCard key={w.id} work={w}/>)}</div>{!works.length && <Empty failed={failed('works')}/>}</>}
+    {view === 'timeline' && <><div className="hub-filters"><div className="hub-tabs">{(['upcoming', 'history'] as const).map(p => <button key={p} aria-pressed={period === p} onClick={() => setPeriod(p)}>{c[p]}</button>)}</div><ArtistFilter value={artist} onChange={setArtist}/><select aria-label={c.events} value={kind} onChange={e => setKind(e.target.value as typeof kind)}><option value="all">{c.every}</option><option value="event">{c.event}</option><option value="release">{c.release}</option></select></div><p className="subtle">{c.zone}</p><EventList items={timeline} empty={failed('timeline') ? c.unavailable : period === 'upcoming' ? c.noUpcoming : c.empty}/></>}
+    {view === 'fanart' && <><ArtistFilter value={artist} onChange={setArtist}/><FanList data={{ ...data, fanPosts: data.fanPosts.filter(p => artist === 'all' || p.artists.some(a => a === artist)) }} artist={artist} failed={failed('fanart')}/></>}
     <Sources sources={data.sources.filter(s => view === 'news' ? s.name.includes('News') : view === 'works' ? !s.name.includes('News') && !s.name.startsWith('X') : view === 'fanart' ? s.name.startsWith('X') : !s.name.includes('Selection'))}/>
   </main>;
 }
 function ArtistFilter({ value, onChange }: { value: string; onChange: (value: string) => void }) {
   const { lang } = useLanguage(); const c = hubCopy[lang];
-  return <select className="artist-filter" aria-label={c.talent} value={value} onChange={e => onChange(e.target.value)}><option value="all">{c.every}</option><option value="CULUA">CULUA（カルア）</option><option value="NEUN">NEUN（ノイン）</option><option value="MEDA">MEDA（メダ）</option></select>;
+  return <select className="artist-filter" aria-label={c.talent} value={value} onChange={e => onChange(e.target.value)}><option value="all">{c.every}</option>{talents.map(talent => <option key={talent.name} value={talent.name}>{talent.name}（{talent.reading}）</option>)}</select>;
 }
 function Heading({ title, label, href }: { title: string; label: string; href: string }) {
   const { lang } = useLanguage();
   return <div className="hub-heading"><div><p className="eyebrow">{label}</p><h2>{title}</h2></div><Link href={href}>{hubCopy[lang].all}<ArrowUpRight size={16}/></Link></div>;
 }
-function Empty() { const { lang } = useLanguage(); return <p className="hub-empty">{hubCopy[lang].empty}</p>; }
-function NewsList({ items }: { items: NewsItem[] }) {
+function Empty({ failed = false }: { failed?: boolean }) { const { lang } = useLanguage(); return <p className="hub-empty">{failed ? hubCopy[lang].unavailable : hubCopy[lang].empty}</p>; }
+function NewsList({ items, failed }: { items: NewsItem[]; failed: boolean }) {
   const { lang } = useLanguage(); const c = hubCopy[lang];
-  return items.length ? <div className="news-list">{items.map(n => <a key={n.id} className="news-card" href={n.sourceUrl} target="_blank" rel="noopener noreferrer"><div className="card-meta"><time dateTime={n.publishedDate}>{n.publishedDate}</time><span>{n.category} · {n.artists.join(' / ')}</span></div><h3>{n.title}</h3><p>RK Music <ArrowUpRight size={14}/></p></a>)}</div> : <div><Empty/><a className="text-link" href="https://rkmusic.jp/info/" target="_blank" rel="noopener noreferrer">{c.source} ↗</a></div>;
+  return items.length ? <div className="news-list">{items.map(n => <a key={n.id} className="news-card" href={n.sourceUrl} target="_blank" rel="noopener noreferrer"><div className="card-meta"><time dateTime={n.publishedDate}>{n.publishedDate}</time><span>{n.category} · {n.artists.join(' / ')}</span></div><h3>{n.title}</h3><p>RK Music <ArrowUpRight size={14}/></p></a>)}</div> : <div><Empty failed={failed}/><a className="text-link" href="https://rkmusic.jp/info/" target="_blank" rel="noopener noreferrer">{c.source} ↗</a></div>;
 }
 function EventList({ items, empty }: { items: TimelineItem[]; empty: string }) {
   const { lang } = useLanguage(); const c = hubCopy[lang];
@@ -72,9 +74,9 @@ function ReleaseCard({ work }: { work: OfficialWork }) {
   const art = <div className="release-art">{id ? <Image src={`https://i.ytimg.com/vi/${id}/hqdefault.jpg`} alt="" width={480} height={300} sizes="(max-width: 700px) 45vw, 25vw"/> : <div className="release-type-art"><Music2 size={30}/><span>{work.title}</span><small>{credit} / ORIGINAL MUSIC</small></div>}{mv && <span className="release-play"><Play size={22} fill="currentColor"/></span>}</div>;
   return <article className="release-card">{mv ? <button className="release-cover" onClick={() => play(mv)} aria-label={`${c.play}: ${mv.title}`}>{art}</button> : <a className="release-cover" href={work.streamingUrl || work.sourceUrl} target="_blank" rel="noopener noreferrer" aria-label={`${c.streaming}: ${work.title}`}>{art}</a>}<div className="release-body"><time dateTime={work.releaseDate || undefined}>{work.releaseDate || c.undated}</time><p className="release-artist">{credit}</p><h3>{work.title}</h3><div className="release-links"><a href={work.sourceUrl} target="_blank" rel="noopener noreferrer">{c.source} ↗</a>{work.streamingUrl && <a href={work.streamingUrl} target="_blank" rel="noopener noreferrer">{c.streaming} ↗</a>}</div>{work.videos.length > 1 && <details><summary>{c.play} ({work.videos.length})</summary>{work.videos.map(v => <button key={v.url} onClick={() => play(v)}>{v.title}<Play size={12}/></button>)}</details>}</div></article>;
 }
-function FanList({ data, limit }: { data: Content; limit?: number }) {
+function FanList({ data, limit, artist, failed }: { data: Content; limit?: number; artist: string; failed: boolean }) {
   const { lang } = useLanguage(); const c = hubCopy[lang];
-  return data.fanPosts.length ? <div className="fan-grid">{data.fanPosts.slice(0, limit).map(post => <FanPostEmbed key={post.id} post={post}/>)}</div> : <div className="fan-empty"><Sparkles size={28}/><h3>{c.fanEmpty}</h3><p>{c.fanIntro}</p><a href="https://x.com/culua0211" target="_blank" rel="noopener noreferrer">CULUA / X ↗</a></div>;
+  return data.fanPosts.length ? <div className="fan-grid">{data.fanPosts.slice(0, limit).map(post => <FanPostEmbed key={post.id} post={post}/>)}</div> : <div className="fan-empty"><Sparkles size={28}/><h3>{failed ? c.unavailable : c.fanEmpty}</h3><p>{c.fanIntro}</p>{talents.filter(t => artist === 'all' || t.name === artist).map(t => <a key={t.name} href={t.x} target="_blank" rel="noopener noreferrer">{t.name} / X ↗</a>)}</div>;
 }
 function Sources({ sources }: { sources: SourceState[] }) {
   const { lang } = useLanguage(); const c = hubCopy[lang];

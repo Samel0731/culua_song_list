@@ -39,6 +39,13 @@ interface PlayerProviderProps {
   initialOriginals?: GroupedSong[];
 }
 
+// An official work queues the works of its own credited artists, so a NEUN MV is followed by NEUN releases.
+function originalsQueue(originals: GroupedSong[], current: GroupedSong | null) {
+  const credited = current ? current.artist.split(' / ') : [];
+  const related = originals.filter(song => song.artist.split(' / ').some(artist => credited.includes(artist)));
+  return related.length ? related : originals;
+}
+
 export function PlayerProvider({ children, initialSongs, initialOriginals = [] }: PlayerProviderProps) {
 
   const safeInitialSongs = Array.isArray(initialSongs) ? initialSongs : [];
@@ -108,7 +115,7 @@ export function PlayerProvider({ children, initialSongs, initialOriginals = [] }
   }, []);
 
   const originalActive = (currentSong !== null && initialOriginals.includes(currentSong)) || initialOriginals.some(s => s.versions.some(v => v.songLink && v.songLink === currentVersion?.songLink && v.streamUrl === currentVersion?.streamUrl));
-  const queue = originalActive ? initialOriginals : allSongs.length ? allSongs : initialOriginals;
+  const queue = originalActive ? originalsQueue(initialOriginals, currentSong) : allSongs.length ? allSongs : initialOriginals;
   const playRandom = useCallback(() => {
     const choices = queue.filter(song => song !== currentSong);
     const pool = choices.length ? choices : queue;

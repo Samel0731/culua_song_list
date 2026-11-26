@@ -51,7 +51,7 @@ const getReleases = unstable_cache(async () => {
   const works = (await mapLimited(links, async url => parseRelease(await read(url), url))).filter(w => w !== null);
   if (!works.length) throw new Error('No official CULUA releases found');
   return { works, updatedAt: new Date().toISOString() };
-}, ['culua-cohort-releases-v2'], { revalidate: 1800 });
+}, ['culua-cohort-releases-v3'], { revalidate: 1800 });
 const getDistributor = unstable_cache(async () => {
   const list = parseTuneCore(await read(TUNECORE));
   const works = await mapLimited(list, async w => parseLinkCore(await read(`${w.sourceUrl}?lang=ja`), w));

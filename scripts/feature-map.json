@@ -42,6 +42,10 @@
           "expect": "h1"
         },
         {
+          "expect": "p.archive-scope",
+          "text": "CULUA"
+        },
+        {
           "expect": "details.song-directory",
           "state": "attached"
         },
@@ -292,6 +296,23 @@
           "screenshot": "discography-meda"
         },
         {
+          "click": ".release-card button.release-cover"
+        },
+        {
+          "expect": ".player-track small",
+          "text": "MEDA"
+        },
+        {
+          "click": ".player-bar .transport button:nth-child(3)"
+        },
+        {
+          "expect": ".player-track small",
+          "text": "MEDA"
+        },
+        {
+          "screenshot": "discography-meda-next"
+        },
+        {
           "goto": "/songs?tab=artists"
         },
         {
@@ -338,6 +359,18 @@
         },
         {
           "expect": "a[href*='github.com']",
+          "state": "attached"
+        },
+        {
+          "expect": "a[href='https://rkmusic.jp/artist/372/']",
+          "state": "attached"
+        },
+        {
+          "expect": "a[href='https://rkmusic.jp/artist/548/']",
+          "state": "attached"
+        },
+        {
+          "expect": "footer a[href='https://rkmusic.jp/artist/548/']",
           "state": "attached"
         },
         {

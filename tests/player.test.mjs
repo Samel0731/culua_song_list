@@ -177,6 +177,18 @@ test('empty archive can play curated works, invalid songs are ignored', async ()
   await p.call('playNext'); assert.ok(featuredWorks.includes(p.state.currentSong));
 });
 
+test('official works queue within their credited artists', async () => {
+  const work = (name, artist, url) => ({ ...track(name, [{ ...version(0, url), songLink: `https://rkmusic.jp/release/${name}` }]), artist });
+  const culua = work('C1', 'CULUA', 'https://youtu.be/c1'), neun1 = work('N1', 'NEUN', 'https://youtu.be/n1'), neun2 = work('N2', 'NEUN', 'https://youtu.be/n2'), duo = work('D', 'CULUA / MEDA', 'https://youtu.be/d');
+  const p = await provider([track('Cover', [version(30)])], [culua, neun1, neun2, duo]);
+  await p.call('playSong', { ...neun1, songName: 'N1 card' });
+  await p.call('playNext'); assert.equal(p.state.currentSong, neun2);
+  await p.call('playNext'); assert.equal(p.state.currentSong, neun1);
+  await p.call('playSong', culua);
+  await p.call('playNext'); assert.equal(p.state.currentSong, duo);
+  await p.call('playNext'); assert.equal(p.state.currentSong, culua);
+});
+
 test('iframe stays mounted across rerenders; timestamp changes and repeated requests load accurately', async () => {
   const calls = [], instances = [], statuses = [], playing = [];
   class FakePlayer {

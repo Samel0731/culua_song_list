@@ -93,7 +93,7 @@ export default async function RootLayout({
 }>) {
   // 透過 ISR 機制，這份資料會被快取，不需要每次請求都去 Google Sheet 抓
   const [songs, content] = await Promise.all([fetchSongsServer(), fetchHubContent()]);
-  const originals = content.works.filter(w => w.artists.includes('CULUA')).flatMap(w => w.videos.map(v => ({ songName: v.title, artist: 'CULUA', versions: [{ date: w.releaseDate || '', streamUrl: v.url, streamTitle: v.title, timestamp: '0:00', timestampSeconds: 0, songLink: w.sourceUrl }] })));
+  const originals = content.works.flatMap(w => w.videos.map(v => ({ songName: v.title, artist: w.artists.join(' / '), versions: [{ date: w.releaseDate || '', streamUrl: v.url, streamTitle: v.title, timestamp: '0:00', timestampSeconds: 0, songLink: w.sourceUrl }] })));
 
   const jsonLd = {
     "@context": "https://schema.org",
