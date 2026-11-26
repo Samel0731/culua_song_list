@@ -44,9 +44,24 @@ Preserve canonical URLs, shared SEO helpers, JSON-LD escaping, sitemap, robots, 
 
 ## Verification and documentation
 
-For application changes run `npm test`, `npm run lint`, `npx tsc --noEmit`, `npm run build`, `git diff --check`. If child processes are blocked, use `node --test --test-isolation=none tests/*.test.mjs`. Use playback/DOM tests for hydration/player work and PGlite for SQL/permission changes. Read-only live content check: `node scripts/verify-content.mjs`; local site check: `node scripts/verify-site.mjs` (investigate its historical hard-coded sitemap count before treating differences as regressions).
+For application changes run `npm run check` (`npm test`, `npm run lint`, `tsc --noEmit`, `npm run build`, `git diff --check`). If child processes are blocked, use `node --test --test-isolation=none tests/*.test.mjs`. Use playback/DOM tests for hydration/player work and PGlite for SQL/permission changes. Read-only live content check: `node scripts/verify-content.mjs`; local site check: `node scripts/verify-site.mjs` (investigate its historical hard-coded sitemap count before treating differences as regressions).
+
+Rules enforced in code (read the diagnostic; do not restate them in prose): `tests/architecture.test.mjs` — no client bundle reaches `server-only` modules or non-`NEXT_PUBLIC_` env, no secret-like `NEXT_PUBLIC_` names, no public→admin imports, baseline entries still needed. `eslint-rules/` — `no-new-effects`, `no-new-timers` (ratchet via `baseline.json`), `no-player-key`, `no-direct-storage`, `no-server-import-in-client`, `no-changelog-comments`, `disable-needs-reason`.
+
+Runtime check: `npm run build`, `npx next start -p 3100`, then `node scripts/drive.mjs [feature-id…] --base http://localhost:3100` (`--list` for ids, `--mobile` for 375px). Prefer the production server; dev-mode recompiles produce spurious page errors. Proof screenshots and `report.json` go to `artifacts/verify/`; look at the screenshots, not only PASS lines. A failure caused by a wrong selector is fixed in `scripts/feature-map.json` only after confirming the app behaviour in the screenshot.
 
 Record only checks actually performed in PRODUCT_SETUP.md. Dates and prior deployment/OAuth/worker observations are not current guarantees. Local builds do not deploy. Distinguish user-run Chinese testing from AI/automated Japanese/English checks; do not call either proof of novice usability for all audiences. Dependency audit warnings remain; do not claim vulnerability-free dependencies.
+
+## Agent collaboration
+
+Claude Code and Codex share this file. Both run the same hooks (`.claude/settings.json`, `.codex/hooks.json` → `scripts/hooks/`): ESLint on every edited file, `tsc` plus architecture tests before a turn ends. Keep both hook files pointing at the same scripts; Codex must re-trust `.codex/hooks.json` in `/hooks` after it changes.
+
+- Author ≠ reviewer. Before committing, a change written by one agent is reviewed by the other: Claude-authored → `npm run review:codex` (report in `artifacts/review/`); Codex-authored → Claude Code `/code-review`.
+- Review findings are claims, not orders. Confirm each against code or a failing test, fix the real ones, and state which were rejected and why.
+- Done means `npm run check` passes and, for user-visible changes, `npm run verify:ui <feature-ids>` passes with the `scripts/feature-map.json` entry added or updated. Report only commands actually run, with their result.
+- Never pass a check by weakening it: no `--no-verify`, no new disable comments without a reason, no new entries in `eslint-rules/baseline.json` (it may only shrink), no skipped or loosened tests.
+- When a mistake recurs, add a lint rule in `eslint-rules/` or a test in `tests/` instead of more prose here.
+- Another session's uncommitted files are theirs: say so before editing them, and never revert them.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

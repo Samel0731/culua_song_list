@@ -134,7 +134,6 @@ export default function SongsPage({ initialQuery = "" }: { initialQuery?: string
         </h1>
 
         <button className="archive-refresh" disabled={refreshing} onClick={refreshArchive}>{refreshing ? c.loading : c.refresh}</button>{refreshStatus && <p role="status">{refreshStatus}</p>}
-        {/* ✨ 修改：將寫死的中文替換為翻譯變數 */}
         <p className="text-xs text-slate-400 leading-relaxed">
            {t.songs_authority_desc_prefix} <span className="text-slate-200 font-bold">{allSongs.length}</span> {t.songs_authority_desc_suffix}
         </p>

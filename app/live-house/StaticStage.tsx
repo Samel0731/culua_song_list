@@ -43,8 +43,7 @@ export default function StaticStage({ project, track, active, lang }: {
       const appearing = !track || lead || track.guests.includes(person.id);
       return <div key={person.id} className={`lh-character ${lead ? 'is-lead' : ''} ${appearing ? '' : 'is-backstage'}`} style={{ left: `${x}%`, bottom: lead ? '14%' : '22%', color: person.color }} aria-hidden="true">
         <div className="lh-puppet"><div className="lh-head">{person.avatar
-          // Local, user-supplied data URLs cannot use the remote image optimizer.
-          // eslint-disable-next-line @next/next/no-img-element
+          // eslint-disable-next-line @next/next/no-img-element -- local data URL cannot use the remote image optimizer
           ? <img src={person.avatar} alt=""/> : <span>{Array.from(person.name).slice(0, 2).join('')}</span>}</div><div className="lh-body"/><div className="lh-arms"/><div className="lh-legs"/></div>
         <span className="lh-name">{person.name}</span>
       </div>;

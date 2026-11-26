@@ -45,14 +45,12 @@ function setLanguage(newLang: Language) {
   try {
     window.localStorage.setItem(storageKey, newLang);
   } catch {
-    // Language switching remains available when browser storage is blocked.
   }
   window.dispatchEvent(new window.Event(languageChangeEvent));
 }
 
 const getServerLanguage = (): Language => 'zh';
 
-// 修改重點：請使用 "export function" (沒有 default)
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const lang = useSyncExternalStore(subscribeLanguage, getLanguage, getServerLanguage);
 

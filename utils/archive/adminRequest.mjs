@@ -20,8 +20,6 @@ export function rpcFailure(error) {
   return {status,current,message:adminErrorMessage(error.message)};
 }
 
-// A deadline bounds the caller's wait even when a transport ignores AbortSignal.
-// It does not prove a database transaction was cancelled.
 function requestInfo(url,options) {
  let write=Boolean(options.method&&!['GET','HEAD'].includes(options.method.toUpperCase()));
  let requestId;

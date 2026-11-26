@@ -1,0 +1,32 @@
+{
+  "no-new-effects": [
+    "app/admin/Admin.tsx",
+    "app/admin/QualityPanel.tsx",
+    "app/admin/SavedResult.tsx",
+    "app/admin/forms.tsx",
+    "app/admin/ui.tsx",
+    "app/components/FanPostEmbed.tsx",
+    "app/components/RightPanel.tsx",
+    "app/components/ShareModal.tsx",
+    "app/components/YouTubePlayer.tsx",
+    "app/components/archive/ArtistsContent.tsx",
+    "app/components/archive/SongsContent.tsx",
+    "app/components/archive/StatsContent.tsx",
+    "app/components/archive/StreamSetlists.tsx",
+    "app/focus/page.tsx",
+    "app/live-house/LiveHouse.tsx",
+    "app/live-house/Stage.tsx",
+    "context/LanguageContext.tsx",
+    "context/LiveHouseViewContext.tsx"
+  ],
+  "no-new-timers": [
+    "app/components/FanPostEmbed.tsx",
+    "app/components/ShareModal.tsx",
+    "app/components/YouTubePlayer.tsx",
+    "app/focus/page.tsx",
+    "app/live-house/LiveHouse.tsx",
+    "utils/archive/adminRequest.mjs",
+    "utils/archive/youtube.mjs",
+    "utils/liveHouse/scene.ts"
+  ]
+}

@@ -1,0 +1,406 @@
+{
+  "about": "User-facing features and how to verify each in a running app. Used by scripts/drive.mjs. Names are the words a requester may use; steps use Playwright selectors ('nav' clicks a main-navigation link on desktop or through the mobile menu). A feature may list allowConsoleErrors regexes for known third-party noise. tag/expectTagged prove an element was kept rather than remounted. Add or update an entry whenever a user-visible feature changes.",
+  "features": [
+    {
+      "id": "home",
+      "names": {
+        "zh": "首頁",
+        "ja": "ホーム",
+        "en": "home page"
+      },
+      "steps": [
+        {
+          "goto": "/"
+        },
+        {
+          "expect": "header.site-header"
+        },
+        {
+          "expect": "header a.brand[href='/']"
+        },
+        {
+          "expect": "link[rel=canonical]",
+          "state": "attached"
+        },
+        {
+          "screenshot": "home"
+        }
+      ]
+    },
+    {
+      "id": "songs-list",
+      "names": {
+        "zh": "歌單 / 歌曲列表",
+        "ja": "歌った曲一覧",
+        "en": "song list"
+      },
+      "steps": [
+        {
+          "goto": "/songs"
+        },
+        {
+          "expect": "h1"
+        },
+        {
+          "expect": "details.song-directory",
+          "state": "attached"
+        },
+        {
+          "screenshot": "songs-list"
+        }
+      ]
+    },
+    {
+      "id": "song-detail",
+      "names": {
+        "zh": "歌曲頁",
+        "ja": "曲ページ",
+        "en": "song detail page (Japanese URL)"
+      },
+      "steps": [
+        {
+          "goto": "/songs/夢追い人"
+        },
+        {
+          "expect": "main.song-detail h1",
+          "text": "夢追い人"
+        },
+        {
+          "expect": ".song-version-grid > *",
+          "min": 1
+        },
+        {
+          "screenshot": "song-detail"
+        }
+      ]
+    },
+    {
+      "id": "player",
+      "names": {
+        "zh": "播放器 / 底部播放列",
+        "ja": "プレイヤー",
+        "en": "player bar"
+      },
+      "steps": [
+        {
+          "goto": "/songs/夢追い人"
+        },
+        {
+          "click": ".song-detail-actions button.stage-button.primary"
+        },
+        {
+          "expect": "aside.stage-player .player-bar"
+        },
+        {
+          "expect": ".player-track strong",
+          "text": "夢追い人"
+        },
+        {
+          "expect": ".player-bar .transport button",
+          "min": 3
+        },
+        {
+          "expect": "a.player-original",
+          "state": "attached"
+        },
+        {
+          "screenshot": "player"
+        }
+      ]
+    },
+    {
+      "id": "player-mode",
+      "names": {
+        "zh": "隨機 / 循環播放",
+        "ja": "シャッフル / リピート",
+        "en": "shuffle / repeat toggle"
+      },
+      "steps": [
+        {
+          "goto": "/songs/夢追い人"
+        },
+        {
+          "click": ".song-detail-actions button.stage-button.primary"
+        },
+        {
+          "rememberAttr": ".player-bar .mode-button",
+          "attr": "aria-label",
+          "as": "mode"
+        },
+        {
+          "click": ".player-bar .mode-button"
+        },
+        {
+          "expectAttrChanged": ".player-bar .mode-button",
+          "attr": "aria-label",
+          "from": "mode"
+        },
+        {
+          "screenshot": "player-mode"
+        }
+      ]
+    },
+    {
+      "id": "player-keeps-playing-across-routes",
+      "names": {
+        "zh": "換頁後播放器不中斷",
+        "ja": "ページ移動中も再生継続",
+        "en": "player survives navigation"
+      },
+      "steps": [
+        {
+          "goto": "/songs/夢追い人"
+        },
+        {
+          "click": ".song-detail-actions button.stage-button.primary"
+        },
+        {
+          "expect": ".player-track strong",
+          "text": "夢追い人"
+        },
+        {
+          "expect": ".player-video iframe",
+          "state": "attached"
+        },
+        {
+          "tag": ".player-video iframe",
+          "as": "player-iframe"
+        },
+        {
+          "nav": "/timeline"
+        },
+        {
+          "expectUrl": "/timeline"
+        },
+        {
+          "expect": ".player-track strong",
+          "text": "夢追い人"
+        },
+        {
+          "expectTagged": ".player-video iframe",
+          "as": "player-iframe"
+        },
+        {
+          "screenshot": "player-navigation"
+        }
+      ]
+    },
+    {
+      "id": "language",
+      "names": {
+        "zh": "語言切換",
+        "ja": "言語切り替え",
+        "en": "language switch"
+      },
+      "steps": [
+        {
+          "goto": "/"
+        },
+        {
+          "select": "header select[aria-label='Language']",
+          "value": "ja"
+        },
+        {
+          "expect": "html[lang='ja']",
+          "state": "attached"
+        },
+        {
+          "nav": "/timeline"
+        },
+        {
+          "expect": "html[lang='ja']",
+          "state": "attached"
+        },
+        {
+          "select": "header select[aria-label='Language']",
+          "value": "en"
+        },
+        {
+          "expect": "html[lang='en']",
+          "state": "attached"
+        },
+        {
+          "screenshot": "language"
+        }
+      ]
+    },
+    {
+      "id": "news",
+      "names": {
+        "zh": "最新消息",
+        "ja": "ニュース",
+        "en": "news"
+      },
+      "steps": [
+        {
+          "goto": "/news"
+        },
+        {
+          "expect": "main"
+        },
+        {
+          "screenshot": "news"
+        }
+      ]
+    },
+    {
+      "id": "timeline",
+      "names": {
+        "zh": "時間軸",
+        "ja": "タイムライン",
+        "en": "timeline"
+      },
+      "steps": [
+        {
+          "goto": "/timeline"
+        },
+        {
+          "expect": "main"
+        },
+        {
+          "screenshot": "timeline"
+        }
+      ]
+    },
+    {
+      "id": "discography",
+      "names": {
+        "zh": "作品",
+        "ja": "ディスコグラフィ",
+        "en": "discography"
+      },
+      "steps": [
+        {
+          "goto": "/discography"
+        },
+        {
+          "expect": "main"
+        },
+        {
+          "screenshot": "discography"
+        }
+      ]
+    },
+    {
+      "id": "fanart",
+      "names": {
+        "zh": "粉絲創作",
+        "ja": "ファンアート",
+        "en": "fan art"
+      },
+      "steps": [
+        {
+          "goto": "/fanart"
+        },
+        {
+          "expect": "main"
+        },
+        {
+          "screenshot": "fanart"
+        }
+      ]
+    },
+    {
+      "id": "about",
+      "names": {
+        "zh": "關於本站 / 免責聲明",
+        "ja": "このサイトについて",
+        "en": "about / disclaimer"
+      },
+      "steps": [
+        {
+          "goto": "/about"
+        },
+        {
+          "expect": "h1"
+        },
+        {
+          "expect": "a[href*='github.com']",
+          "state": "attached"
+        },
+        {
+          "screenshot": "about"
+        }
+      ]
+    },
+    {
+      "id": "live-house",
+      "names": {
+        "zh": "Live House",
+        "ja": "ライブハウス",
+        "en": "live house stage"
+      },
+      "steps": [
+        {
+          "goto": "/live-house"
+        },
+        {
+          "expect": ".lh-header h1"
+        },
+        {
+          "screenshot": "live-house"
+        }
+      ]
+    },
+    {
+      "id": "focus",
+      "names": {
+        "zh": "專注模式",
+        "ja": "集中モード",
+        "en": "focus mode"
+      },
+      "steps": [
+        {
+          "goto": "/focus"
+        },
+        {
+          "expect": "body"
+        },
+        {
+          "screenshot": "focus"
+        }
+      ]
+    },
+    {
+      "id": "legacy-redirects",
+      "names": {
+        "zh": "舊網址轉址",
+        "ja": "旧URLのリダイレクト",
+        "en": "legacy URL redirects"
+      },
+      "steps": [
+        {
+          "goto": "/artists"
+        },
+        {
+          "expectUrl": "/songs"
+        },
+        {
+          "goto": "/stats"
+        },
+        {
+          "expectUrl": "/songs"
+        }
+      ]
+    },
+    {
+      "id": "admin-demo",
+      "names": {
+        "zh": "管理介面示範",
+        "ja": "管理画面デモ",
+        "en": "admin demo (no real data)"
+      },
+      "steps": [
+        {
+          "goto": "/admin/demo"
+        },
+        {
+          "expect": "h1"
+        },
+        {
+          "screenshot": "admin-demo"
+        }
+      ]
+    }
+  ]
+}

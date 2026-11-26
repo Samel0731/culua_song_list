@@ -68,8 +68,6 @@ export default function Admin({ authenticated, allowed, demo = false, configured
     const fresh = demo ? structuredClone(sample.current!) : await readResponse(await boundedFetch(`/api/admin${(targetVideo || video) ? `?video=${targetVideo || video}` : ''}`, { cache: 'no-store' }));
     if (current === sequence.current) setData((previous: Dashboard | null) => {
       if (!previous) return fresh;
-      // Deleted server records do not erase an open dirty draft. Writes still
-      // use its original identity/version and are rejected by the server.
       for (const table of ['candidates', 'performances', 'songs', 'streams'] as const) {
         const rows = fresh[table] as { id?: string; video_id?: string }[];
         for (const row of previous[table]) {
@@ -143,7 +141,6 @@ export default function Admin({ authenticated, allowed, demo = false, configured
     setResult(record);
     if (name === 'song_save' && savedValues.id) setTargetSong(String(savedValues.id));
     if (savedValues.video_id) setVideo(String(savedValues.video_id));
-    // Merge the receipt before reloading so a failed refresh cannot lose the new record.
     if (Object.keys(raw).length) setData(previous => {
       if (!previous) return previous;
       const table = name === 'stream_save' ? 'streams' : name === 'song_save' ? 'songs' : name === 'performance_save' ? 'performances' : 'candidates';
@@ -160,7 +157,6 @@ export default function Admin({ authenticated, allowed, demo = false, configured
     let completed = false;
     try {
       await work(); completed = true; if (wrote.current) finishWrite(receipt.current); setPending(null); setMessage('操作完成');
-      // Clear only the submitted draft. Refresh failures retain entered values.
       if (!wrote.current && submitted.current) { const form = submitted.current; const next = saved + 1; form.dataset.saved = String(next); form.dataset.dirty = 'false'; dirty(form.dataset.record || form.dataset.draftId || '', false); setSaved(next); }
       await load(lastWrite.current?.video_id ? String(lastWrite.current.video_id) : undefined);
       return true;

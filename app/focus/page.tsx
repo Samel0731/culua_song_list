@@ -1,6 +1,5 @@
 'use client';
 
-// ✨ 修正：加入 useRef
 import { useState, useEffect, useCallback, useRef } from 'react'; 
 import { useLanguage } from '@/context/LanguageContext';
 import { usePlayer } from '@/context/PlayerContext';
@@ -77,7 +76,7 @@ export default function FocusPage() {
     if (allSongs.length > 0 && !currentSong) {
       playRandomSong();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- start one random song when the list first arrives, not whenever the player changes
   }, [allSongs.length]);
 
   return (
