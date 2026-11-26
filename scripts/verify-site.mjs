@@ -6,7 +6,7 @@ for (const path of [...mainPaths, '/songs/' + encodeURIComponent('夢追い人')
  const r = await fetch(base + path); const $ = load(await r.text());
  const data = { path, status:r.status, canonical:$('link[rel=canonical]').attr('href'), title:$('title').text() };
  if (r.status !== 200 || !data.canonical) throw new Error(JSON.stringify(data));
- if (mainPaths.includes(path)) expectedUrls.add(data.canonical);
+ if (path === '/live-house') { if (!/noindex/.test($('meta[name=robots]').attr('content') || '')) throw new Error('Live House must be noindex'); } else if (mainPaths.includes(path)) expectedUrls.add(data.canonical);
  if (path === '/songs') $('.song-directory a').each((_, element) => expectedUrls.add(new URL($(element).attr('href'), data.canonical).href));
  console.log(data);
 }

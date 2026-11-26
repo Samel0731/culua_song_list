@@ -23,6 +23,22 @@
           "state": "attached"
         },
         {
+          "expect": "header a[href='/admin']",
+          "state": "detached"
+        },
+        {
+          "expect": "footer.site-footer a[href='/admin']",
+          "state": "attached"
+        },
+        {
+          "expect": "header a[href='/live-house']",
+          "state": "detached"
+        },
+        {
+          "expect": "header a[href='/fanart']",
+          "state": "detached"
+        },
+        {
           "screenshot": "home"
         }
       ]
@@ -44,6 +60,13 @@
         {
           "expect": "details.song-directory",
           "state": "attached"
+        },
+        {
+          "expect": "button.archive-refresh",
+          "state": "detached"
+        },
+        {
+          "expect": "text=可能仍有缺漏"
         },
         {
           "screenshot": "songs-list"
@@ -341,6 +364,9 @@
           "state": "attached"
         },
         {
+          "expect": "text=不是官方資料"
+        },
+        {
           "screenshot": "about"
         }
       ]
@@ -358,6 +384,10 @@
         },
         {
           "expect": ".lh-header h1"
+        },
+        {
+          "expect": "meta[name=robots][content*=noindex]",
+          "state": "attached"
         },
         {
           "screenshot": "live-house"
