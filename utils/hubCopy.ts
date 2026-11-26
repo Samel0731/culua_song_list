@@ -3,13 +3,13 @@ const zh = {
   tagline: '跟上每一段歌聲，收藏每一個相遇。', intro: '官方消息、原創音樂與粉絲創作，在這裡相遇。',
   search: '搜尋歌曲、歌手', all: '查看全部', source: '前往官方來源', newsIntro: 'CULUA、NEUN、MEDA 相關公告，直接連結官方原文。',
   worksIntro: '從官方發行資料同步，收錄原創發行與官方 MV。', eventIntro: '演唱會、官方活動與音樂發行，沿著時間慢慢收藏。',
-  fanIntro: '精選 X 原帖，保留創作者署名與作品出處。', empty: '目前沒有可顯示的資料，請前往來源查看。',
+  fanIntro: '精選 X 原帖，保留創作者署名與作品出處。', unavailable: '官方來源暫時無法讀取，這不代表沒有資料。請稍後再試或前往來源查看。', empty: '目前沒有可顯示的資料，請前往來源查看。',
   upcoming: '即將到來', history: '歷史紀錄', event: '活動', release: '音樂發行', every: '全部',
   noUpcoming: '目前沒有已確認的近期活動。', undated: '發行日期待確認', play: '播放 MV', streaming: '串流平台',
   curated: '精選原創', latest: '最新發行', upcomingTitle: '近期活動', fanEmpty: '精選粉絲作品準備中。',
   openPost: '在 X 查看原帖', embedLoading: '載入原帖中…', embedError: '原帖暫時無法嵌入，請前往 X 查看。',
   status: '資料來源', updated: '最後成功同步', ready: '已同步', stale: '快取資料，等待更新', error: '暫時無法同步', unconfigured: '尚未設定精選',
-  songs: '歌曲搜尋', artists: '原唱歌手', talent: '藝人', setlistScope: '原創作品收錄 CULUA、NEUN、MEDA 的官方發行；歌回資料庫目前只收錄 CULUA 的演唱，NEUN、MEDA 的歌單尚未收錄。', stats: '演唱統計', originalLanguage: '官方內容保留原文',
+  songs: '歌曲搜尋', artists: '原唱歌手', talent: '藝人', setlistScope: '原創作品收錄 CULUA、NEUN、MEDA 的官方發行；歌回資料庫目前只收錄 CULUA 的演唱，NEUN、MEDA 的歌單尚未收錄。', archiveScope: '歌回資料庫目前只收錄 CULUA 的直播演唱；NEUN、MEDA 的歌單尚未收錄，統計也只計算 CULUA。', stats: '演唱統計', originalLanguage: '官方內容保留原文',
   zone: '活動時間依官方公布（日本時間 JST）', about: '關於與來源', unofficial: '非官方粉絲站',
 };
 type Copy = typeof zh;
@@ -18,13 +18,13 @@ const ja: Copy = {
   tagline: '歌声の続きを、出会いの記憶を。', intro: '公式情報、オリジナル音楽、ファンの作品をひとつに。',
   search: '曲名・アーティストを検索', all: 'すべて見る', source: '公式サイトへ', newsIntro: 'CULUA・NEUN・MEDA 関連のお知らせ。公式記事へリンクします。',
   worksIntro: '公式リリース情報から更新するオリジナル作品と MV。', eventIntro: 'ライブ、公式イベント、音楽リリースの記録。',
-  fanIntro: '作者と出典を大切に、X の投稿をピックアップ。', empty: '表示できる情報がありません。公式サイトをご確認ください。',
+  fanIntro: '作者と出典を大切に、X の投稿をピックアップ。', unavailable: '公式情報を一時的に取得できません。情報がないという意味ではありません。時間をおくか、公式サイトをご確認ください。', empty: '表示できる情報がありません。公式サイトをご確認ください。',
   upcoming: '開催予定', history: 'これまで', event: 'イベント', release: 'リリース', every: 'すべて',
   noUpcoming: '現在、確認済みの開催予定はありません。', undated: '発売日確認中', play: 'MV を再生', streaming: '配信サービス',
   curated: 'ピックアップ', latest: '最新リリース', upcomingTitle: '近日のイベント', fanEmpty: 'ファン作品の選定を準備中です。',
   openPost: 'X で投稿を見る', embedLoading: '投稿を読み込み中…', embedError: '投稿を表示できません。X でご確認ください。',
   status: '情報源', updated: '最終同期', ready: '同期済み', stale: 'キャッシュ・更新待ち', error: '同期できません', unconfigured: '選定未設定',
-  songs: '曲を探す', artists: '原曲アーティスト', talent: 'タレント', setlistScope: 'オリジナル作品は CULUA・NEUN・MEDA の公式リリースを掲載しています。歌枠アーカイブは現在 CULUA の歌唱のみで、NEUN・MEDA のセトリはまだ収録していません。', stats: '歌唱統計', originalLanguage: '公式情報は原文で表示',
+  songs: '曲を探す', artists: '原曲アーティスト', talent: 'タレント', setlistScope: 'オリジナル作品は CULUA・NEUN・MEDA の公式リリースを掲載しています。歌枠アーカイブは現在 CULUA の歌唱のみで、NEUN・MEDA のセトリはまだ収録していません。', archiveScope: '歌枠アーカイブは現在 CULUA の配信での歌唱のみを収録しています。NEUN・MEDA のセトリは未収録で、統計も CULUA のみが対象です。', stats: '歌唱統計', originalLanguage: '公式情報は原文で表示',
   zone: 'イベント時刻は公式発表の日本時間（JST）', about: 'このサイト・情報源', unofficial: '非公式ファンサイト',
 };
 const en: Copy = {
@@ -32,13 +32,13 @@ const en: Copy = {
   tagline: 'Follow the voice. Keep the memories.', intro: 'Official updates, original music, and creations from the community.',
   search: 'Search songs or artists', all: 'View all', source: 'Official source', newsIntro: 'CULUA, NEUN, and MEDA announcements, linked to the original official articles.',
   worksIntro: 'Original releases and music videos synced from official release sources.', eventIntro: 'Concerts, official events, and music releases through time.',
-  fanIntro: 'Selected X posts with their original creator credits and sources.', empty: 'No information available. Visit the original source.',
+  fanIntro: 'Selected X posts with their original creator credits and sources.', unavailable: 'The official source could not be read right now. This does not mean nothing exists; try again later or visit the source.', empty: 'No information available. Visit the original source.',
   upcoming: 'Upcoming', history: 'History', event: 'Events', release: 'Releases', every: 'All',
   noUpcoming: 'No confirmed upcoming events at the moment.', undated: 'Release date unconfirmed', play: 'Play MV', streaming: 'Streaming services',
   curated: 'Selected originals', latest: 'Latest releases', upcomingTitle: 'Coming up', fanEmpty: 'Selected fan creations are on their way.',
   openPost: 'View original on X', embedLoading: 'Loading original post…', embedError: 'This post could not be embedded. View it on X.',
   status: 'Sources', updated: 'Last successful sync', ready: 'Synced', stale: 'Cached, awaiting refresh', error: 'Sync unavailable', unconfigured: 'Selection not configured',
-  songs: 'Song search', artists: 'Original artists', talent: 'Talent', setlistScope: 'Original music lists official releases by CULUA, NEUN and MEDA. The song archive currently covers CULUA performances only; NEUN and MEDA setlists are not collected yet.', stats: 'Statistics', originalLanguage: 'Official content shown in its original language',
+  songs: 'Song search', artists: 'Original artists', talent: 'Talent', setlistScope: 'Original music lists official releases by CULUA, NEUN and MEDA. The song archive currently covers CULUA performances only; NEUN and MEDA setlists are not collected yet.', archiveScope: 'The song archive currently covers CULUA stream performances only. NEUN and MEDA setlists are not collected yet, and statistics count CULUA only.', stats: 'Statistics', originalLanguage: 'Official content shown in its original language',
   zone: 'Event times follow official announcements (Japan Standard Time)', about: 'About & sources', unofficial: 'Unofficial fan site',
 };
 export const hubCopy = { zh, ja, en };

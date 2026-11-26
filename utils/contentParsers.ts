@@ -57,7 +57,9 @@ export function parseRelease(html: string, sourceUrl: string): OfficialWork | nu
   const videos = article.find('iframe').toArray().flatMap(el => {
     const url = safeUrl($(el).attr('src') || '', ['www.youtube.com', 'youtube.com', 'www.youtube-nocookie.com']);
     const id = url && new URL(url).pathname.match(/^\/embed\/([\w-]{11})/)?.[1];
-    return id ? [{ title: clean($(el).attr('title') || title), url: `https://www.youtube.com/watch?v=${id}` }] : [];
+    const frame = clean($(el).attr('title') || '');
+    // Embeds often carry YouTube's generic player label rather than the song title.
+    return id ? [{ title: frame && !/^YouTube video player$/i.test(frame) ? frame : title, url: `https://www.youtube.com/watch?v=${id}` }] : [];
   });
   return { id: sourceUrl, title, sourceUrl, releaseDate, streamingUrl, videos, artists };
 }

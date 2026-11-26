@@ -365,6 +365,7 @@ button:disabled { cursor: default; opacity: .5; }
 .hub-tabs button, .hub-tabs a { display: block; padding: 12px 18px; border: 1px solid #493555; border-radius: 8px; color: #b7abc9; font-size: 13px; }
 .hub-tabs button[aria-pressed=true], .hub-tabs a[aria-current=page] { color: #f0e3ff; background: #4f3069; border-color: #9770bc; }
 .archive-tabs { padding: 12px 3% 24px; }
+.archive-scope { margin: -16px 0 8px; padding: 0 3%; }
 .archive-hub > .artist-page { height: max(400px, calc(100dvh - 220px - var(--player-reserved))); }
 .fan-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; align-items: start; }
 .fan-post { padding: 14px; border: 1px solid #392b43; border-radius: 12px; background: #18131f; overflow: hidden; }
@@ -376,6 +377,7 @@ button:disabled { cursor: default; opacity: .5; }
 .fan-empty h3 { font-size: 18px; }
 .fan-empty p { color: #b7abc9; font-size: 13px; margin: 12px 0 20px; }
 .fan-empty a { color: #d4b7fa; font-size: 12px; }
+.fan-empty a + a { margin-left: 14px; }
 .hub-sources { margin-top: 35px; border-top: 1px solid #392b43; padding: 20px 0; color: #a995bb; font-size: 11px; }
 .hub-sources summary { cursor: pointer; }
 .hub-sources ul { margin-top: 20px; display: grid; gap: 15px; }

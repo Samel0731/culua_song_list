@@ -102,6 +102,12 @@ CLI restore 額外需要有效 `SUPABASE_OWNER_ACCESS_TOKEN` 及 publishable key
 
 ## 驗證與尚待完成
 
+### 2026-11-26 同期功能盤點第一批
+
+- Claude 與 Codex 盤點全部功能後的第一批修正（不需資料表改版）：刪除沒有任何呼叫端的 `/api/social-config`；官方作品播放佇列改收三人作品並以作品實際藝人署名，下一首只接同一藝人（合作作品含各成員）的作品，不再落入 CULUA 歌回；作品頁 JSON-LD 與 `public/llms.txt` 改為三人；歌回資料庫三個分頁上方標明只收錄 CULUA；統計圖拿掉 CULUA 金色特別標示；共用藝人清單 `utils/talents.ts`（連結取自各自的 RK Music 藝人頁，2026-11-26 查證）用於篩選、粉絲創作空狀態的 X 連結、頁尾與 About 的 RK Music／YouTube 連結；頁尾不再列 CULUA 的 Instagram／TikTok。官方來源讀取失敗時顯示「暫時無法讀取，不代表沒有資料」，依所選藝人與時間軸類型判斷（TuneCore 只涵蓋 CULUA）。About 改寫已過時的「每 30 分鐘掃描歌單資料表」說明。
+- 另修正既有問題：RK Music 發行頁的 MV iframe 標題是通用的「YouTube video player」，播放列因此顯示這個字串；改用發行標題，發行快取鍵改為 `culua-cohort-releases-v3`。
+- `npm run check` 通過（104 項測試；新增 `tests/hub.test.mjs`、播放佇列與 iframe 標題測試）。正式 build 以 `npx next start -p 3102` 執行 `node scripts/drive.mjs`：桌機 16/16、`--mobile` 16/16 通過；`scripts/feature-map.json` 的 songs-list、discography（MEDA 播放後按下一首仍是 MEDA）、about 新增步驟。看過截圖：下一首為「覚醒.exe / MEDA」、粉絲創作空狀態列出三人 X。3100 埠有先前留下的舊 `next start`，因權限未停止，改用其他埠。`npm run review:codex` 回報一項 P2（失敗判斷未依所選藝人／類型），已修正並補測試。未部署。
+
 ### 2026-11-26 同期作品篩選（擴展第一期第 1 步）
 
 - 原創作品頁新增 CULUA／NEUN／MEDA 篩選，預設全部；作品卡顯示演出者，播放署名與無縮圖標籤改用作品的實際藝人，不再寫死 CULUA。非 CULUA 篩選時說明歌回資料庫目前只收錄 CULUA，NEUN／MEDA 歌單尚未收錄。首頁精選仍只取 CULUA。「歌手」分頁改稱「原唱歌手」（三語）。
@@ -115,6 +121,12 @@ CLI restore 額外需要有效 `SUPABASE_OWNER_ACCESS_TOKEN` 及 publishable key
 - Live House 設 noindex、移出 sitemap 與 llms.txt，直接網址仍可用，供邀請各藝人粉絲試看後再決定是否恢復曝光。`verify-site.mjs`／`verify-release.mjs` 改為檢查它不在 sitemap 且為 noindex。
 - 統計改用中性次數區間（11 次以上／5–10／2–4／1 次），不再用本命、推し等字眼；「新曲」改稱本站首次紀錄。日文播放模式改為「同じ曲の別配信」「次の曲」。官方新聞說明改為快取約 30 分鐘、有人瀏覽時才更新。
 - 新增 `tests/copy.test.mjs`。在獨立 worktree 執行 `npm run check`（102 項測試、lint、tsc、build、diff check）通過；`next start -p 3100` 後 `drive.mjs home songs-list about live-house fanart` 與 `--mobile home songs-list` 通過並看過截圖；`verify-site.mjs` 通過，sitemap 646 筆。`npm run review:codex` 回報兩項 P2（今年未唱圖例在篩選去年時不成立、「每 30 分鐘」誇大更新）均查證成立並已修正。之後改接在 PR #10（同期作品篩選）之後，PRODUCT_SETUP.md 兩段並存、public/sw.js 由 build 重新產生；重跑 `npm run check`（103 項）、drive.mjs 六項與手機兩項、verify-site 均通過。未部署；日文用語只經 AI 檢查，未經日文粉絲確認。
+
+### 2026-11-26 同期範圍修正合併
+
+- 先前未提交的同期修正（三人官方連結、來源失敗與空資料分開、原創佇列依作品藝人、範圍說明、MV 標題、統計移除 CULUA 金色標示、刪除未使用的 social-config）提交於 `claude/cohort-scope-fixes`，並與 PR #11 合併：頁尾保留三人 RK Music 連結並加維護者登入，首頁粉絲創作在有貼文時才顯示且保留來源失敗狀態。
+- `npm run review:codex -- --base origin/main` 回報一項 P2：時間軸「全部」在新聞來源失敗、發行來源正常時仍顯示「沒有近期活動」。已查證成立，改為任一相關來源失敗即顯示讀取失敗，並補測試。
+- `npm run check`（107 項）、`drive.mjs` 全部 16 項與手機 home／songs-list／about、`verify-site.mjs`（sitemap 646）均通過，截圖已看過。
 
 ### 2026-11-26 Claude／Codex 協作檢查
 

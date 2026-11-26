@@ -307,9 +307,7 @@ export default function StatsPage() {
                     <XAxis type="number" hide allowDecimals={false} />
                     <YAxis dataKey="artist" type="category" stroke="#94a3b8" fontSize={12} width={140} interval={0} />
                     <Tooltip content={<CustomTooltip t={t} />} cursor={{ fill: '#334155', opacity: 0.4 }} />
-                    <Bar dataKey="count" radius={[0, 4, 4, 0]} barSize={16}>
-                      {stats.topArtistsChartData.map((entry, index) => (<Cell key={index} fill={entry.artist === "CULUA" ? "#fbbf24" : "#a78bfa"} />))}
-                    </Bar>
+                    <Bar dataKey="count" radius={[0, 4, 4, 0]} barSize={16} fill="#a78bfa" />
                   </BarChart>
                 </ResponsiveContainer>
               )}

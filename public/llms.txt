@@ -2,8 +2,8 @@
 
 > An unofficial fan site for CULUA (カルア), with a searchable performance archive and official-source updates for CULUA, NEUN (ノイン), and MEDA (メダ).
 
-- [Song archive](https://culuasonglist.netlify.app/songs): Fan-maintained song records, timestamped official YouTube playback, artist categories, and statistics.
-- [Original music](https://culuasonglist.netlify.app/discography): CULUA releases and MV links synced from RK Music, TuneCore, and the official YouTube channel feed.
+- [Song archive](https://culuasonglist.netlify.app/songs): Fan-maintained records of CULUA performances (NEUN and MEDA setlists are not collected yet), timestamped official YouTube playback, artist categories, and statistics.
+- [Original music](https://culuasonglist.netlify.app/discography): Official releases by CULUA, NEUN, and MEDA synced from RK Music, with CULUA's TuneCore catalogue and official YouTube channel feed.
 - [News](https://culuasonglist.netlify.app/news): Source-linked official cohort announcements.
 - [Timeline](https://culuasonglist.netlify.app/timeline): Cohort concerts, official events, and release dates.
 - [Fan creations](https://culuasonglist.netlify.app/fanart): Curated X posts credited through original embeds.

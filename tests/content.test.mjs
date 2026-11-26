@@ -35,6 +35,8 @@ test('release parsing retains cohort artists, official MV and streaming source',
   assert.equal(release.releaseDate, '2025-06-09'); assert.deepEqual(release.artists, ['NEUN']);
   assert.equal(release.videos[0].url, 'https://www.youtube.com/watch?v=Hx1KAdapT1M');
   assert.equal(p.parseRelease(html.replace('NEUN</p>', 'HACHI</p>'), 'https://rkmusic.jp/release/1/'), null);
+  const generic = p.parseRelease(html.replace('title="NEUN MV"', 'title="YouTube video player"'), 'https://rkmusic.jp/release/1/');
+  assert.equal(generic.videos[0].title, release.title);
 });
 test('distributor duplicates merge and do not fabricate a release date or MV', () => {
   const works = p.parseTuneCore('<h1>CULUA</h1><main><a href="https://linkco.re/abc?lang=ja">2026-08-31at dawnシングル • 1曲</a><a href="https://linkco.re/abc?lang=ja">at dawn2026年</a><a href="https://linkco.re/def">KALMIA2025年</a></main>');

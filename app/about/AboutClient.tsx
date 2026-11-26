@@ -3,6 +3,7 @@
 import { Info, Youtube, ExternalLink, ShieldCheck, Database, Github } from 'lucide-react';
 import { stageCopy } from '@/utils/stageCopy';
 import { useLanguage } from '@/context/LanguageContext';
+import { talents } from '@/utils/talents';
 
 export default function AboutPage() {
   const { t, lang } = useLanguage();
@@ -44,15 +45,8 @@ export default function AboutPage() {
               <li>{t.about_source_3}</li>
               <li>{t.about_source_fans}</li>
             </ul>
-            <div className="mt-4 pt-4 border-t border-slate-700/50">
-              <a 
-                href="https://www.youtube.com/@CULUAvsinger" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors"
-              >
-                {t.about_source_link} <ExternalLink size={14} />
-              </a>
+            <div className="mt-4 pt-4 border-t border-slate-700/50 flex flex-wrap gap-5">
+              {talents.map(talent => <a key={talent.name} href={talent.youtube} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors">{talent.name} · {t.about_source_link} <ExternalLink size={14} /></a>)}
             </div>
           </div>
         </section>
@@ -61,7 +55,7 @@ export default function AboutPage() {
           <h2 className="text-xl font-bold text-white">{stageCopy[lang].source}</h2>
           <div className="bg-slate-800/50 rounded-xl p-5 border border-slate-700 space-y-3 text-sm text-slate-300">
             <p>{lang === 'zh' ? '主視覺使用本站設計的品牌文字與霧光背景，未重用官方角色立繪。作品圖片為 YouTube 影片縮圖，影音以官方嵌入播放器呈現。' : lang === 'ja' ? 'メインビジュアルは当サイト独自の文字と光のデザインです。公式立ち絵は転載していません。楽曲の画像はYouTube動画のサムネイル、再生は公式埋め込みプレーヤーを使用しています。' : 'The hero uses original typography and lighting, without reproducing official character artwork. Music images are YouTube thumbnails; playback uses the official embedded player.'}</p>
-            <div className="flex flex-wrap gap-5"><a href="https://rkmusic.jp/artist/284/" target="_blank" rel="noopener noreferrer" className="text-purple-300">RK Music / CULUA ↗</a><a href="https://rkmusic.jp/release/610/" target="_blank" rel="noopener noreferrer" className="text-purple-300">KALMIA / MV ↗</a><a href="https://rkmusic.jp/guideline/" target="_blank" rel="noopener noreferrer" className="text-purple-300">{lang === 'zh' ? '二次創作規範' : lang === 'ja' ? '二次創作ガイドライン' : 'Fan creation guidelines'} ↗</a></div>
+            <div className="flex flex-wrap gap-5">{talents.map(talent => <a key={talent.name} href={talent.rkMusic} target="_blank" rel="noopener noreferrer" className="text-purple-300">RK Music / {talent.name} ↗</a>)}<a href="https://rkmusic.jp/release/610/" target="_blank" rel="noopener noreferrer" className="text-purple-300">KALMIA / MV ↗</a><a href="https://rkmusic.jp/guideline/" target="_blank" rel="noopener noreferrer" className="text-purple-300">{lang === 'zh' ? '二次創作規範' : lang === 'ja' ? '二次創作ガイドライン' : 'Fan creation guidelines'} ↗</a></div>
           </div>
         </section>
 

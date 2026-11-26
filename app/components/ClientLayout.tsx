@@ -10,6 +10,7 @@ import { GroupedSong } from '@/utils/dataProcessor';
 import { stageCopy } from '@/utils/stageCopy';
 import RightPanel from './RightPanel';
 import { hubCopy } from '@/utils/hubCopy';
+import { talents } from '@/utils/talents';
 import { LiveHouseViewProvider } from '@/context/LiveHouseViewContext';
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
@@ -33,7 +34,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       {open && <nav id="mobile-navigation" className="mobile-nav" aria-label="Main navigation" onKeyDown={e => { if (e.key === 'Escape') setMenuPath(null); }}>{links.map(([href, label]) => <Link key={href} href={href} onClick={() => setMenuPath(null)} aria-current={pathname === href ? 'page' : undefined}>{label}<ArrowUpRight size={17}/></Link>)}</nav>}
     </header>}
     <div id="main-content" tabIndex={-1} className={`route-content ${pathname === '/' ? 'home-route' : ''}`} key={pathname}>{children}</div>
-    {!focus && <footer className="site-footer"><Link href="/" className="footer-brand">CULUA<span>FAN ARCHIVE</span></Link><p>{copy.fan}<br/>CULUA · NEUN · MEDA<br/>© {new Date().getFullYear()} CULUA Fan Archive</p><div><Link href="/news">{hub.news}</Link><Link href="/about">{hub.about}</Link><a href="https://www.youtube.com/@CULUAvsinger" target="_blank" rel="noopener noreferrer">YouTube ↗</a><a href="https://x.com/culua0211" target="_blank" rel="noopener noreferrer">X ↗</a><a href="https://www.instagram.com/culua0211" target="_blank" rel="noopener noreferrer">Instagram ↗</a><a href="https://www.tiktok.com/@culuavsinger" target="_blank" rel="noopener noreferrer">TikTok ↗</a><a href="https://rkmusic.jp/artist/284/" target="_blank" rel="noopener noreferrer">RK Music <ArrowUpRight size={14}/></a><Link href="/admin">{copy.maintainerLogin}</Link></div></footer>}
+    {!focus && <footer className="site-footer"><Link href="/" className="footer-brand">CULUA<span>FAN ARCHIVE</span></Link><p>{copy.fan}<br/>CULUA · NEUN · MEDA<br/>© {new Date().getFullYear()} CULUA Fan Archive</p><div><Link href="/news">{hub.news}</Link><Link href="/about">{hub.about}</Link>{talents.map(talent => <a key={talent.name} href={talent.rkMusic} target="_blank" rel="noopener noreferrer">{talent.name} · RK Music ↗</a>)}<Link href="/admin">{copy.maintainerLogin}</Link></div></footer>}
     <RightPanel />
   </div>;
 }
