@@ -350,6 +350,7 @@ button:disabled { cursor: default; opacity: .5; }
 .release-play { position: absolute; inset: auto 15px 15px auto; background: #1b102dcc; padding: 12px; border-radius: 50%; color: #eee0ff; }
 .release-body { padding: 18px; }
 .release-body > time { font-size: 11px; color: #aa93be; }
+.release-artist { margin: 6px 0 0; font-size: 11px; letter-spacing: .08em; color: #cba9ef; }
 .release-body h3 { font-size: 16px; margin: 8px 0 15px; line-height: 1.5; overflow-wrap: anywhere; }
 .release-links { display: flex; gap: 10px; flex-wrap: wrap; font-size: 11px; color: #cba9ef; }
 .release-body details { margin-top: 15px; color: #cba9ef; font-size: 12px; }

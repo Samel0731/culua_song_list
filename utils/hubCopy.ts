@@ -9,7 +9,7 @@ const zh = {
   curated: '精選原創', latest: '最新發行', upcomingTitle: '近期活動', fanEmpty: '精選粉絲作品準備中。',
   openPost: '在 X 查看原帖', embedLoading: '載入原帖中…', embedError: '原帖暫時無法嵌入，請前往 X 查看。',
   status: '資料來源', updated: '最後成功同步', ready: '已同步', stale: '快取資料，等待更新', error: '暫時無法同步', unconfigured: '尚未設定精選',
-  songs: '歌曲搜尋', artists: '歌手分類', stats: '演唱統計', originalLanguage: '官方內容保留原文',
+  songs: '歌曲搜尋', artists: '原唱歌手', talent: '藝人', setlistScope: '原創作品收錄 CULUA、NEUN、MEDA 的官方發行；歌回資料庫目前只收錄 CULUA 的演唱，NEUN、MEDA 的歌單尚未收錄。', stats: '演唱統計', originalLanguage: '官方內容保留原文',
   zone: '活動時間依官方公布（日本時間 JST）', about: '關於與來源', unofficial: '非官方粉絲站',
 };
 type Copy = typeof zh;
@@ -24,7 +24,7 @@ const ja: Copy = {
   curated: 'ピックアップ', latest: '最新リリース', upcomingTitle: '近日のイベント', fanEmpty: 'ファン作品の選定を準備中です。',
   openPost: 'X で投稿を見る', embedLoading: '投稿を読み込み中…', embedError: '投稿を表示できません。X でご確認ください。',
   status: '情報源', updated: '最終同期', ready: '同期済み', stale: 'キャッシュ・更新待ち', error: '同期できません', unconfigured: '選定未設定',
-  songs: '曲を探す', artists: 'アーティスト', stats: '歌唱統計', originalLanguage: '公式情報は原文で表示',
+  songs: '曲を探す', artists: '原曲アーティスト', talent: 'タレント', setlistScope: 'オリジナル作品は CULUA・NEUN・MEDA の公式リリースを掲載しています。歌枠アーカイブは現在 CULUA の歌唱のみで、NEUN・MEDA のセトリはまだ収録していません。', stats: '歌唱統計', originalLanguage: '公式情報は原文で表示',
   zone: 'イベント時刻は公式発表の日本時間（JST）', about: 'このサイト・情報源', unofficial: '非公式ファンサイト',
 };
 const en: Copy = {
@@ -38,7 +38,7 @@ const en: Copy = {
   curated: 'Selected originals', latest: 'Latest releases', upcomingTitle: 'Coming up', fanEmpty: 'Selected fan creations are on their way.',
   openPost: 'View original on X', embedLoading: 'Loading original post…', embedError: 'This post could not be embedded. View it on X.',
   status: 'Sources', updated: 'Last successful sync', ready: 'Synced', stale: 'Cached, awaiting refresh', error: 'Sync unavailable', unconfigured: 'Selection not configured',
-  songs: 'Song search', artists: 'Artists', stats: 'Statistics', originalLanguage: 'Official content shown in its original language',
+  songs: 'Song search', artists: 'Original artists', talent: 'Talent', setlistScope: 'Original music lists official releases by CULUA, NEUN and MEDA. The song archive currently covers CULUA performances only; NEUN and MEDA setlists are not collected yet.', stats: 'Statistics', originalLanguage: 'Official content shown in its original language',
   zone: 'Event times follow official announcements (Japan Standard Time)', about: 'About & sources', unofficial: 'Unofficial fan site',
 };
 export const hubCopy = { zh, ja, en };

@@ -277,6 +277,28 @@
           "expect": "main"
         },
         {
+          "select": "main select.artist-filter",
+          "value": "MEDA"
+        },
+        {
+          "expect": "main.hub-detail > p.subtle",
+          "text": "NEUN"
+        },
+        {
+          "expect": ".release-card .release-artist",
+          "text": "MEDA"
+        },
+        {
+          "screenshot": "discography-meda"
+        },
+        {
+          "goto": "/songs?tab=artists"
+        },
+        {
+          "expect": ".archive-tabs a[aria-current='page']",
+          "text": "原唱歌手"
+        },
+        {
           "screenshot": "discography"
         }
       ]
